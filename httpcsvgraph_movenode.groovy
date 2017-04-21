@@ -100,10 +100,11 @@ public class HttpCsvGraphMoveNode {
 			
 			System.err.println("[DEBUG] 7.5: " + iToMove);
 			if (removed > 0) {
-				System.err.println("[DEBUG] 8: " + iToMove);
-				lines.add("\""+newParent+"\",\"" +iToMove+ "\"");
-				System.err.println("[DEBUG] 9: " + iToMove);
-				FileUtils.writeLines(Paths.get(filepath).toFile(), lines, true);
+				System.err.println("[DEBUG] 8: removed " + removed);
+				String s = "\""+newParent+"\",\"" +iToMove+ "\"";
+				lines.add(s);
+				System.err.println("[DEBUG] 9: " + s);
+				FileUtils.writeLines(Paths.get(filepath).toFile(), lines, false);
 				System.err.println("[DEBUG] Successfully removed from file: " + iToMove);
 				JSONObject jsonObject = new JSONObject();
 				return Response.ok().header("Access-Control-Allow-Origin", "*")

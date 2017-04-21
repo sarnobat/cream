@@ -44,18 +44,18 @@ public class HttpGrep {
 			List<String> lines = FileUtils.readLines(new File(filepath),
 					Charset.defaultCharset());
 
-			JSONArray jsonArray = new JSONArray();
+			String s = "";
 			for (String line : lines) {
 				if (line.contains(iValue)) {
-					jsonArray.put(line);
+					s += line + "\n";
 				}
 			}
 
 			System.err.println("[DEBUG] Success: " + iValue);
 
 			return Response.ok().header("Access-Control-Allow-Origin", "*")
-					.type("application/json")
-					.entity(jsonArray.toString()).build();
+					.type("text/plain")
+					.entity(s).build();
 
 			// return Response.serverError()
 			// .header("Access-Control-Allow-Origin", "*")
