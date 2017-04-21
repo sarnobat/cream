@@ -82,12 +82,14 @@ public class HttpCsvGraphMoveNode {
 				System.err.println("[DEBUG] 5: " + iToMove);
 				throw new RuntimeException("Developer Error 1");
 			}
+			int removed = 0;
 			try {
 				for (String line : ImmutableList.copyOf(lines)) {
 					//System.err.println("[DEBUG] 5.5: " + line);
 					if (line.endsWith("\"" + iToMove + "\"")) {
 						System.err.println("[DEBUG] 6: " + iToMove);
 						lines.remove(line);
+						++removed;
 						System.err.println("[DEBUG] 6.5: " + iToMove);
 					}
 				}
@@ -97,9 +99,9 @@ public class HttpCsvGraphMoveNode {
 //			System.err.println("[DEBUG] 6.75: " + iToMove);		
 			
 			System.err.println("[DEBUG] 7.5: " + iToMove);
-			if (lines.remove(iToMove)) {
+			if (removed > 0) {
 				System.err.println("[DEBUG] 8: " + iToMove);
-				lines.add(newParent);
+				lines.add("\""+newParent+"\",\"" +iToMove+ "\"");
 				System.err.println("[DEBUG] 9: " + iToMove);
 				FileUtils.writeLines(Paths.get(filepath).toFile(), lines, true);
 				System.err.println("[DEBUG] Successfully removed from file: " + iToMove);
@@ -108,7 +110,7 @@ public class HttpCsvGraphMoveNode {
 						.type("application/json")
 						.entity(jsonObject.toString()).build();
 			} else {
-				System.err.println("[DEBUG] 10: " + iToMove);
+				System.err.println("[DEBUG] 10: Nothing got removed");
 				JSONObject jsonObject = new JSONObject();
 				return Response.serverError()
 						.header("Access-Control-Allow-Origin", "*")
