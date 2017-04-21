@@ -1,11 +1,8 @@
-import org.json.JSONObject;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
-import java.nio.file.Paths;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -18,14 +15,20 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 
-import org.apache.commons.cli.*;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.FileUtils;
 import org.glassfish.jersey.jdkhttp.JdkHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
+import org.json.JSONArray;
 import org.json.JSONException;
 
 /**  */
-public class HttpCatRemove {
+public class HttpGrep {
 
 	@javax.ws.rs.Path("")
 	public static class MyResource { // Must be public
@@ -36,24 +39,28 @@ public class HttpCatRemove {
 		public Response grep(@QueryParam("value") String iValue)
 				throws JSONException, IOException {
 
-			System.err.println("[DEBUG] begin: " + iValue)
+			System.err.println("[DEBUG] begin: " + iValue);
 
 			List<String> lines = FileUtils.readLines(new File(filepath),
 					Charset.defaultCharset());
 
-			if (lines.remove(iValue)) {
-
-				System.err.println("[DEBUG] Success: " + iValue);
-
-				return Response.ok().header("Access-Control-Allow-Origin", "*")
-						.type("application/json")
-						.entity(new JSONObject().toString()).build();
-			} else {
-				return Response.serverError()
-						.header("Access-Control-Allow-Origin", "*")
-						.type("application/json")
-						.entity(new JSONObject().toString()).build();
+			JSONArray jsonArray = new JSONArray();
+			for (String line : lines) {
+				if (line.contains(iValue)) {
+					jsonArray.put(line);
+				}
 			}
+
+			System.err.println("[DEBUG] Success: " + iValue);
+
+			return Response.ok().header("Access-Control-Allow-Origin", "*")
+					.type("application/json")
+					.entity(jsonArray.toString()).build();
+
+			// return Response.serverError()
+			// .header("Access-Control-Allow-Origin", "*")
+			// .type("application/json")
+			// .entity(new JSONObject().toString()).build();
 		}
 	}
 
@@ -69,7 +76,8 @@ public class HttpCatRemove {
 		_parseOptions: {
 
 			Options options = new Options().addOption("h", "help", false,
-					"show help.").addOption("f", "file", true, "use FILE to write incoming data to");
+					"show help.").addOption("f", "file", true,
+					"use FILE to write incoming data to");
 
 			// This doesn't work with java 7
 			// "hasarg" is needed when the option takes a value
