@@ -57,7 +57,7 @@ public class HttpCsvGraphMoveNode {
 
 			System.err.println("[DEBUG] 2: " + iSiblings);
 			JSONObject allNodes = new JSONObject(iSiblings);
-			System.err.println("[DEBUG] 3: " + iToMove);
+			System.err.println("[DEBUG] 3: " + iSiblings);
 			String newParent = null;
 			for (String aNode : allNodes.keySet()) {
 				if (aNode.equals(iToMove)) {
@@ -67,7 +67,16 @@ public class HttpCsvGraphMoveNode {
 					break;
 				}
 			}
-//			System.err.println("[DEBUG] 4: " + iToMove);
+			if (newParent == null) {
+				System.err.println("[DEBUG] 7: " + iToMove);
+				JSONObject jsonObject = new JSONObject();
+				jsonObject.put("error", "Found no new parent");
+				return Response.serverError()
+						.header("Access-Control-Allow-Origin", "*")
+						.type("application/json")
+						.entity(jsonObject.toString()).build();
+			}
+			System.err.println("[DEBUG] 4: " + iToMove);
 						
 			if (iToMove.endsWith("\"")) {
 				System.err.println("[DEBUG] 5: " + iToMove);
@@ -86,15 +95,7 @@ public class HttpCsvGraphMoveNode {
 				e.printStackTrace();
 			}
 //			System.err.println("[DEBUG] 6.75: " + iToMove);		
-			if (newParent == null) {
-				System.err.println("[DEBUG] 7: " + iToMove);
-				JSONObject jsonObject = new JSONObject();
-				jsonObject.put("error", "Found no new parent");
-				return Response.serverError()
-						.header("Access-Control-Allow-Origin", "*")
-						.type("application/json")
-						.entity(jsonObject.toString()).build();
-			}
+			
 			System.err.println("[DEBUG] 7.5: " + iToMove);
 			if (lines.remove(iToMove)) {
 				System.err.println("[DEBUG] 8: " + iToMove);
