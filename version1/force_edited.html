@@ -1,0 +1,206 @@
+<style>
+
+
+.link {
+  stroke: #777;
+  stroke-opacity: 0.3;
+  stroke-width: 1.0px;
+}
+
+.node circle {
+  fill: #ccc;
+  stroke: #000;
+  stroke-width: 0px;
+}
+
+.node text {
+  display: none;
+  font: 10px sans-serif;
+}
+
+.node:hover circle {
+  fill: #000;
+}
+
+.node:hover text {
+  display: inline;
+}
+
+.cell {
+  fill: none;
+  pointer-events: all;
+}
+
+</style>
+<body>
+<!-- <script src="http://d3js.org/d3.v3.min.js"></script> -->
+<script src="d3.v3.min.js"></script>
+<script>
+
+
+var dragged = false;
+var nodeBeingDragged = null;
+
+var width = 1200,
+    height = 1200;
+
+var svg = d3.select("body").append("svg")
+    .attr("width", width)
+    .attr("height", height);
+
+var force = d3.layout.force()
+    .size([width, height]);
+
+//d3.csv("out.csv", function(error, links2) {
+
+	var links = getData();
+//  if (error) throw error;
+
+  var nodesByName = {};
+
+  // Create nodes for each unique source and target.
+  links.forEach(function(link) {
+    link.source = nodeByName(link.source);
+    link.target = nodeByName(link.target);
+  });
+
+  // Extract the array of nodes from the map by name.
+  var nodes = d3.values(nodesByName);
+
+  // Create the link lines.
+  var link = svg.selectAll(".link")
+      .data(links)
+    .enter().append("line")
+      .attr("class", "link");
+
+  // Create the node circles.
+  var node = svg.selectAll(".node")
+      .data(nodes)
+    .enter().append("g")
+      .attr("class", "node")
+      .call(force.drag);
+
+  var circle = node.append("circle")
+      .attr("r", 4.5);
+
+	var label = node.append("text")
+		.attr("dy", ".35em")
+		.text(function(d) { return d.name; });
+
+	var drag = force.drag()
+		.on("drag", drag)
+		.on("dragend", dragend)
+		.on("dragstart", dragstart);
+
+
+	function drag(d) {
+		console.debug('drag');
+		dragged = true;
+	}
+
+	function dragend(d) {
+		console.debug('dragend');
+		dragged = false;
+		force.start();
+	}
+
+	function dragstart() {
+		console.debug('dragstart');
+// 		dragged = true;
+// 		force.start();
+
+		nodes.forEach(function (node) {
+		  node.fixed = true;
+		})
+	}
+
+
+  // Start the force layout.
+  force
+      .nodes(nodes)
+      .links(links)
+      .charge(charge)
+      .on("tick", tick)
+      .start();
+
+	function charge(node) {
+		// if (dragged) {
+// 			console.debug("Charge disabled");
+// 			return -10;
+// 		} else {
+// 			console.debug("Charge enabled");
+// 			return -10;
+// 		}
+		return -10;
+	}
+
+  function tick() {
+// 	if(dragged) {
+// 		return;
+// 	}
+
+    link.attr("x1", function(d) { return d.source.x; })
+        .attr("y1", function(d) { return d.source.y; })
+        .attr("x2", function(d) { return d.target.x; })
+        .attr("y2", function(d) { return d.target.y; });
+
+    circle
+		.attr("cx", function(d) { 
+			return d.x; 
+		})
+        .attr("cy", function(d) { 
+			return d.y; 
+		});
+
+    label
+        .attr("x", function(d) { return d.x + 8; })
+        .attr("y", function(d) { return d.y; });
+  }
+
+  function nodeByName(name) {
+    return nodesByName[name] || (nodesByName[name] = {name: name});
+  }
+//});
+
+function getData() {
+return  [
+  { source : "/home/sarnobat/other/favorites/brst/How_to_increase_show_popularity2.jpg", target : "/home/sarnobat/other/favorites/brst/d9sogg6bcayi.jpg" },
+  { source : "/home/sarnobat/other/favorites/brst/tumblr_mug8kjFLhT1sq5q9qo1_1280.jpg", target : "/home/sarnobat/other/favorites/brst/l1.jpg" },
+  { source : "/home/sarnobat/other/favorites/brst/pr136039img1sma.jpg", target : "/home/sarnobat/other/favorites/brst/Teen-Mom-Farrah-Abraham-Bikini-6-373x560.jpg" },
+  { source : "/home/sarnobat/other/favorites/brst/uk-front2.jpg", target : "/home/sarnobat/other/favorites/brst/celebrity Aisleyne Horgan Wallace nipple slip.jpg" },
+  { source : "/home/sarnobat/other/favorites/brst/bannedblackcelebs_com_12.jpg", target : "/home/sarnobat/other/favorites/brst/l1.jpg" },
+  { source : "/home/sarnobat/other/favorites/brst/How_to_increase_show_popularity1.jpg", target : "/home/sarnobat/other/favorites/brst/31.jpg" },
+  { source : "/home/sarnobat/other/favorites/brst/tumblr_n22wnlVo091sum370o1_1280.jpg", target : "/home/sarnobat/other/favorites/brst/hollie.pick5.jpg" },
+  { source : "/home/sarnobat/other/favorites/brst/bc130138cdf8fc76c9d738599d76d9d0.jpg", target : "/home/sarnobat/other/favorites/brst/2.jpg" },
+  { source : "/home/sarnobat/other/favorites/brst/tumblr_med720xNbE1rhvs1bo3_1280.jpg", target : "/home/sarnobat/other/favorites/brst/celebrity Aisleyne Horgan Wallace nipple slip.jpg" },
+  { source : "/home/sarnobat/other/favorites/brst/101.jpg", target : "/home/sarnobat/other/favorites/brst/Lil Kim On stage nipple pop out of the famous singer.jpg" },
+  { source : "/home/sarnobat/other/favorites/brst/Bipasha-Basu-3-495x500.jpg", target : "/home/sarnobat/other/favorites/brst/tumblr_nhctn26xb81swrmguo1_500.jpg" },
+  { source : "/home/sarnobat/other/favorites/brst/wpid-article-1322670636785-0efb390d00000578-601066_466x871.jpg", target : "/home/sarnobat/other/favorites/brst/tumblr_nhctn26xb81swrmguo1_500.jpg" },
+  { source : "/home/sarnobat/other/favorites/brst/lil_kim_g.jpg", target : "/home/sarnobat/other/favorites/brst/aruna-shields-maxim-india-bollyupdatescom-06.jpg" },
+  { source : "/home/sarnobat/other/favorites/brst/1jlo002.jpg", target : "/home/sarnobat/other/favorites/brst/halle-berry-boob-slip-01.jpg" },
+  { source : "/home/sarnobat/other/favorites/brst/double-nipslip.jpg", target : "/home/sarnobat/other/favorites/brst/Reshma Bombaywala Shocking Expose on Beach.jpg" },
+  { source : "/home/sarnobat/other/favorites/brst/bc130138cdf8fc76c9d738599d76d9d0.jpg", target : "/home/sarnobat/other/favorites/brst/image35.png" },
+  { source : "/home/sarnobat/other/favorites/brst/tumblr_n92t503DQ41rzyuswo1_500.jpg", target : "/home/sarnobat/other/favorites/brst/taniacognotto05.jpg" },
+  { source : "/home/sarnobat/other/favorites/brst/tumblr_med720xNbE1rhvs1bo3_1280.jpg", target : "/home/sarnobat/other/favorites/brst/1.jpg" },
+  { source : "/home/sarnobat/other/favorites/brst/CSth_iFUsAA5XTh.jpg", target : "/home/sarnobat/other/favorites/brst/tumblr_n22t77Krxx1sum370o1_1280.jpg" },
+  { source : "/home/sarnobat/other/favorites/brst/untitled.jpg", target : "/home/sarnobat/other/favorites/brst/mariahcareynudecelebs720.jpg" },
+  { source : "/home/sarnobat/other/favorites/brst/CSth_iFUsAA5XTh.jpg", target : "/home/sarnobat/other/favorites/brst/untitled.jpg" },
+  { source : "/home/sarnobat/other/favorites/tennis/on978.jpg", target : "/home/sarnobat/other/favorites/tennis/on982.jpg" },
+  { source : "/home/sarnobat/other/favorites/tennis/4_Daniela_Hantuchova_dha017.jpg", target : "/home/sarnobat/other/favorites/tennis/3_Daniela_Hantuchova_dha002.jpg" },
+  { source : "/home/sarnobat/other/favorites/tennis/5_Jelena_Dokic_jda038.jpg", target : "/home/sarnobat/other/favorites/tennis/on972.jpg" },
+  { source : "/home/sarnobat/other/favorites/brst/flashing-a-boob.jpg", target : "/home/sarnobat/other/favorites/brst/tumblr_mqx3mcMIdk1scynnho1_1280.jpg" },
+  { source : "/home/sarnobat/other/favorites/brst/Celebrity Nude - Sarah Michelle Gellar Bent Over Nipple Slip.jpg", target : "/home/sarnobat/other/favorites/brst/karen_dreams_897_007.jpg" },
+  { source : "/home/sarnobat/other/favorites/brst/victoria61.JPG", target : "/home/sarnobat/other/favorites/brst/tumblr_mqbft0Gr881snh96ko1_500.jpg" },
+  { source : "/home/sarnobat/other/favorites/brst/fhm4.jpg", target : "/home/sarnobat/other/favorites/brst/Kelly Brook Wears a Hot and Very Skanky Through Ghetto Prom Dress www.GutterUncensored.com kelly_brook_see_through_cleavage_016.jpg" },
+  { source : "/home/sarnobat/other/favorites/brst/740e76b4616b3310f73a45fd24fc9c2b.jpg", target : "/home/sarnobat/other/favorites/brst/031.jpg" },
+  { source : "/home/sarnobat/other/favorites/brst/2 - Conflict 1.jpg", target : "/home/sarnobat/other/favorites/brst/18043384_141.jpg" },
+  { source : "/home/sarnobat/other/favorites/brst/2373-Adorable-sugar-babe-with-arabian-style-jewelry-naked-in-the-rain.jpg", target : "/home/sarnobat/other/favorites/brst/CHyZ3c_WwAAfLJq.jpg" },
+  { source : "/home/sarnobat/other/favorites/brst/F_200708_August23Bi_352642a.jpg", target : "/home/sarnobat/other/favorites/brst/8233661171_01fabb27cd.jpg" },
+  { source : "/home/sarnobat/other/favorites/brst/DSCF3801.jpg", target : "/home/sarnobat/other/favorites/brst/1mjyu3oh9apm.jpg" },
+  { source : "/home/sarnobat/other/favorites/brst/11.jpg", target : "/home/sarnobat/other/favorites/brst/cma-SarahMichelleGellar@AccessHollywood1.jpg" },
+  { source : "/home/sarnobat/other/favorites/brst/college-boobs.jpg", target : "/home/sarnobat/other/favorites/brst/nude-brazilian-dancers-ooops-hot-brazil-carnival-2010.jpg" },
+  { source : "/home/sarnobat/other/favorites/brst/bc130138cdf8fc76c9d738599d76d9d0.jpg", target : "/home/sarnobat/other/favorites/brst/untitled.jpg" },
+  { source : "/home/sarnobat/other/favorites/brst/Paris Hilton topless.jpg", target : "/home/sarnobat/other/favorites/brst/7 (2).jpg" },
+];
+}
+</script>
