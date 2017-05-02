@@ -382,7 +382,13 @@ url = "http://netgear.rohidekar.com:44452" + d.id ;
 					var links = [];
 					for (var i in allChildren) {
 						var entry = allChildren[i];
-						$("#sort").append("<img src='" + CONTENT_URL+ entry  + "' width=200><button onclick='demote(\""+encodeURIComponent(entry)+"\",\""+encodeURIComponent(JSON.stringify(otherChildren))+"\")'>Move down</button><br>");
+						var url;
+						if (entry.startsWith('http')) {
+							url = entry;
+						} else {
+							url = CONTENT_URL + entry;
+						}
+						$("#sort").append("<img src='" + url  + "' width=200><button onclick='demote(\""+encodeURIComponent(entry)+"\",\""+encodeURIComponent(JSON.stringify(otherChildren))+"\")'>Move down</button><br>");
 					}
 
 				})
