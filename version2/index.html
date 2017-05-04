@@ -7,7 +7,7 @@
   
         <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
-<script src="jsLouvain.js" type="text/JavaScript"></script>
+<script src="http://netgear.rohidekar.com/cream/jsLouvain.js" type="text/JavaScript"></script>
 </head>
 <style>
   svg {
@@ -37,10 +37,10 @@ $(document).on('keyup keydown', function(e){
         }
 });
 
-d3.text("http://netgear.rohidekar.com/d3_drag_drop_nodes/nodes.txt", function(error, nodes) {
+d3.text(window.location.href  + "nodes.txt", function(error, nodes) {
 	var n = d3.csv.parseRows(nodes).map(function(n1) { return n1[0];});
 
-	d3.text("http://netgear.rohidekar.com/d3_drag_drop_nodes/heap.txt?t=" + Math.random(), function(error, data1) {
+	d3.text(window.location.href  + "heap.txt?t=" + Math.random(), function(error, data1) {
 		var data = d3.csv.parse("src,dest\n" + data1);  //now you have the header
 
 		var links = [];
