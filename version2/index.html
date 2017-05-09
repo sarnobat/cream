@@ -87,6 +87,16 @@ function createNetwork(edgelist, nodelist) {
 		nodeHash[obj.id] = obj;
 	});
 		
+	edgelist.forEach(function(edge) {
+
+		edges.push({
+			id : nodeHash[edge.source].id + "-" + nodeHash[edge.target].id,
+			source : nodeHash[edge.source],
+			target : nodeHash[edge.target],
+		});
+
+	});	
+
 	var nodes3 = [];
 	// Populate the node and edge list from the CSV file
 	// The edge list will have IDs added.
@@ -113,13 +123,10 @@ function createNetwork(edgelist, nodelist) {
 //			nodes3.push(nodeHash[edge.target]);
 		}
 
-		edges.push({
-			id : nodeHash[edge.source].id + "-" + nodeHash[edge.target].id,
-			source : nodeHash[edge.source],
-			target : nodeHash[edge.target],
-		});
-
 	});
+	
+
+
 	
 	// TODO: nodes0.addAll(node3);
 	Array.prototype.push.apply(nodes0, nodes3)
