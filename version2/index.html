@@ -87,6 +87,7 @@ function createNetwork(edgelist, nodelist) {
 		nodeHash[obj.id] = obj;
 	});
 		
+	var nodes3 = [];
 	// Populate the node and edge list from the CSV file
 	// The edge list will have IDs added.
 	edgelist
@@ -100,7 +101,7 @@ function createNetwork(edgelist, nodelist) {
 				label : edge.source,
 				weight : 0,
 			};
-			nodes0.push(nodeHash[edge.source]);
+//			nodes3.push(nodeHash[edge.source]);
 		}
 
 		if (!nodeHash[edge.target]) {
@@ -109,7 +110,7 @@ function createNetwork(edgelist, nodelist) {
 				label : edge.target,
 				weight : 0
 			};
-			nodes0.push(nodeHash[edge.target]);
+//			nodes3.push(nodeHash[edge.target]);
 		}
 
 		edges.push({
@@ -119,6 +120,10 @@ function createNetwork(edgelist, nodelist) {
 		});
 
 	});
+	
+	// TODO: nodes0.addAll(node3);
+	Array.prototype.push.apply(nodes0, nodes3)
+	
 //	console.debug("size after adding edges: " + + nodes0.length);
 
 	// Add weights - number of outgoing edges
