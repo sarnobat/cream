@@ -123,7 +123,7 @@ function createNetwork(iEdges, iNodes) {
 	// Edges
 	//------------------------------------------------------------------------------------
 			
-	var oEdges = iEdges.forEach(function(edge) {
+	var oEdges = iEdges.map(function(edge) {
 		return {
 				id : allNodesById[edge.source].id + "-" + allNodesById[edge.target].id,
 				source : allNodesById[edge.source],
