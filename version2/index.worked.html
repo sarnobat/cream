@@ -158,10 +158,6 @@ function createNetwork(edgelist, nodelist) {
 
 	});
 
-	edges.forEach(function(edge) {
-		parents[edge.target.id] = edge.source.id;
-	});
-
 	nodes.forEach(function(n2) {
 		outgoingEdgeCounts[n2.id] = 0;
 		incomingEdgeCounts[n2.id] = 0;
