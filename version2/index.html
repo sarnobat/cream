@@ -72,44 +72,30 @@ function createNetwork(iEdges, iNodes) {
 	// Nodes
 	//------------------------------------------------------------------------------------
 
-	var oNodes = [];
+	var oNodes1 = [];
 
 	// This returns null so no chaining possible here
 	iNodes.forEach(function(node) {
-		oNodes.push({
+		oNodes1.push({
 			id : node,
 			label : node,
 		});
 	});
 		
-	var allNodesById = buildNodesMap(oNodes);
+	var allNodesById = buildNodesMap(oNodes1);
 
-/*	var allNodesById = {};
 
-	oNodes.forEach(function (obj) {
-		allNodesById[obj.id] = obj;
-	});
-*/
-	var nodes3 = [];
 	// Populate the node and edge list from the CSV file
 	// The edge list will have IDs added.
 	
-	nodes3 = createNodesFromEdges(iEdges, allNodesById);
+	var nodes3 = createNodesFromEdges(iEdges, allNodesById);
 	
+	// TODO: Do this after the full list of nodes has been built
 	var allNodesById2 = buildNodesMap(nodes3);
-	/*
-	var allNodesById2 = {};
-	nodes3.forEach(function(node) {	
-		allNodesById2[edge.source] = newNode;
-	}); 
-	nodes3.forEach(function(node) {
-		allNodesById2[edge.target] = newNode;
-	});
-	*/
 	var allNodesById3 = Object.assign({}, allNodesById, allNodesById2);
 		
-	// I'm not sure this does anything
-	Array.prototype.push.apply(oNodes, nodes3)
+	// Use concat - that doesn't mutate the input and returns the output
+	var oNodes = oNodes1.concat(nodes3)
 	
 	//------------------------------------------------------------------------------------
 	// Edges
