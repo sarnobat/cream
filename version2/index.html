@@ -37,6 +37,11 @@ $(document).on('keyup keydown', function(e){
         }
 });
 
+
+//----------------------------------------------------------------------------------------
+// Data acquisition
+//----------------------------------------------------------------------------------------
+
 d3.text(window.location.href  + "nodes.txt", function(error, nodes) {
 	var n = d3.csv.parseRows(nodes).map(function(n1) { return n1[0];});
 
@@ -74,7 +79,7 @@ function createNetwork(edgelist, nodelist) {
 			label : node,
 		};
 		
-//		nodeHash[node] = obj;
+		nodeHash[node] = obj;
 		return obj;
 	});
 	var nodes2 = [];
@@ -91,7 +96,7 @@ function createNetwork(edgelist, nodelist) {
 	});
 	
 	
-	var nodes0 = nodes2;
+	var nodes0 = nodes1;
 	
 	if (true) {
 		//debugger;
@@ -164,6 +169,10 @@ function createNetwork(edgelist, nodelist) {
 	console.debug("size of edges after adding edges: " + + edges.length);
 	createForceNetwork(nodes0, edges);
 }
+
+//----------------------------------------------------------------------------------------
+// SVG manipulation
+//----------------------------------------------------------------------------------------
 
 function recharge() {
 	force.start();
