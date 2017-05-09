@@ -64,6 +64,13 @@ var hoveredLineId;
 function createNetwork(edgelist, nodelist) {
 
 
+	var nodes1 = nodelist.map(function(node) {
+		
+		return {
+			id : node,
+			label : node,
+		};
+	});
 	var nodes = [];
 	var edges = [];
 	
@@ -81,8 +88,6 @@ function createNetwork(edgelist, nodelist) {
 		nodes.push(obj);
 		nodeHash[node] = obj;
 	});
-	
-	
 	
 	if (true) {
 		debugger;
