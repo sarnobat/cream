@@ -57,10 +57,6 @@ d3.text(window.location.href  + "nodes.txt", function(error, nodes) {
 	});
 });
 
-function recharge() {
-	force.start();
-}
-
 var nodeHash = {};
 var outgoingEdgeCounts = {};
 var incomingEdgeCounts = {};
@@ -166,6 +162,10 @@ function createNetwork(edgelist, nodelist) {
 	});
 
 	createForceNetwork(nodes, edges);
+}
+
+function recharge() {
+	force.start();
 }
 
 var forbiddenCreation = false;
