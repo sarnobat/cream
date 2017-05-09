@@ -111,7 +111,7 @@ function createNetwork(edgelist, nodelist) {
 				label : edge.source,
 				weight : 0,
 			};
-//			nodes3.push(nodeHash[edge.source]);
+			nodes3.push(nodeHash[edge.source]);
 		}
 
 		if (!nodeHash[edge.target]) {
@@ -120,7 +120,7 @@ function createNetwork(edgelist, nodelist) {
 				label : edge.target,
 				weight : 0
 			};
-//			nodes3.push(nodeHash[edge.target]);
+			nodes3.push(nodeHash[edge.target]);
 		}
 
 	});
