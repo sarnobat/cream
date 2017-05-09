@@ -159,15 +159,6 @@ function createNetwork(edgelist, nodelist) {
 	});
 
 	edges.forEach(function(edge) {
-
-		outgoingEdgeCounts[edge.source.id] = 0;
-		incomingEdgeCounts[edge.source.id] = 0;
-		
-		outgoingEdgeCounts[edge.target.id] = 0;
-		incomingEdgeCounts[edge.target.id] = 0;
-	});
-
-	edges.forEach(function(edge) {
 		parents[edge.target.id] = edge.source.id;
 	});
 
