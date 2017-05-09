@@ -64,7 +64,7 @@ var hoveredLineId;
 function createNetwork(edgelist, nodelist) {
 
 
-	var nodes1 = nodelist.map(function(node) {
+	var nodes1 = nodelist.slice(0, 40).map(function(node) {
 		
 		return {
 			id : node,
