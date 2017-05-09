@@ -67,9 +67,12 @@ var hoveredLineId;
 function createNetwork(iEdges, iNodes) {
 
 	var limit = 40;
-	var oNodes = [];
-	var oEdges = [];
 	
+	//------------------------------------------------------------------------------------
+	// Nodes
+	//------------------------------------------------------------------------------------
+
+	var oNodes = [];
 
 	// This returns null so no chaining possible here
 	iNodes.forEach(function(node) {
@@ -79,10 +82,10 @@ function createNetwork(iEdges, iNodes) {
 		});
 	});
 		
-	var nodeHash = {};
+	var allNodesById = {};
 
 	oNodes.forEach(function (obj) {
-		nodeHash[obj.id] = obj;
+		allNodesById[obj.id] = obj;
 	});
 
 	var nodes3 = [];
@@ -93,22 +96,22 @@ function createNetwork(iEdges, iNodes) {
 		.forEach(function(edge) {
 
 		//console.debug(edge.source + " -- " + edge.target ); 
-		if (!nodeHash[edge.source]) {
-			nodeHash[edge.source] = {
+		if (!allNodesById[edge.source]) {
+			allNodesById[edge.source] = {
 				id : edge.source,
 				label : edge.source,
 				weight : 0,
 			};
-			nodes3.push(nodeHash[edge.source]);
+			nodes3.push(allNodesById[edge.source]);
 		}
 
-		if (!nodeHash[edge.target]) {
-			nodeHash[edge.target] = {
+		if (!allNodesById[edge.target]) {
+			allNodesById[edge.target] = {
 				id : edge.target,
 				label : edge.target,
 				weight : 0
 			};
-			nodes3.push(nodeHash[edge.target]);
+			nodes3.push(allNodesById[edge.target]);
 		}
 
 	});
@@ -116,16 +119,18 @@ function createNetwork(iEdges, iNodes) {
 	// I'm not sure this does anything
 	Array.prototype.push.apply(oNodes, nodes3)
 	
-	//
+	//------------------------------------------------------------------------------------
 	// Edges
-	//
+	//------------------------------------------------------------------------------------
 			
+	var oEdges = [];
+
 	iEdges.forEach(function(edge) {
 
 		oEdges.push({
-			id : nodeHash[edge.source].id + "-" + nodeHash[edge.target].id,
-			source : nodeHash[edge.source],
-			target : nodeHash[edge.target],
+			id : allNodesById[edge.source].id + "-" + allNodesById[edge.target].id,
+			source : allNodesById[edge.source],
+			target : allNodesById[edge.target],
 		});
 
 	});	
@@ -141,9 +146,7 @@ function createNetwork(iEdges, iNodes) {
 		incomingEdgeCounts[edge.target.id] = 0;
 	});
 
-	oEdges.forEach(function(edge) {
-		parents[edge.target.id] = edge.source.id;
-	});
+	parents = getParents(oEdges);
 
 	oNodes.forEach(function(n2) {
 		outgoingEdgeCounts[n2.id] = 0;
@@ -162,6 +165,15 @@ function createNetwork(iEdges, iNodes) {
 
 	createForceNetwork(oNodes, oEdges);
 }
+
+function getParents(iEdges) {
+	var parents = {};
+	iEdges.forEach(function(edge) {
+		parents[edge.target.id] = edge.source.id;
+	});
+	return parents;
+}
+
 
 //----------------------------------------------------------------------------------------
 // SVG manipulation
