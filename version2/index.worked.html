@@ -105,6 +105,7 @@ function createNetwork(edgelist, nodelist) {
 			
 	var oEdges = getEdges(iEdges, allNodesById);	
 /*
+	
 	// Add weights - number of outgoing edges
 	// Don't try to put them inside the node data. D3 maintains its own,
 	// and it's undirected so you don't get what you want.
@@ -184,9 +185,6 @@ function createNetwork(edgelist, nodelist) {
 		outgoingEdgeCounts[edge.source.id]++;
 		incomingEdgeCounts[edge.target.id]++;
 		
-		
-		
-		
 //		console.debug(outgoingEdgeCounts[edge.source.id]);
 		if (incomingEdgeCounts['/home/sarnobat/other/favorites/brst/osv3zwhqcsmy.jpg'] > 0) {
 			//console.debug(edge);
@@ -201,7 +199,6 @@ function createNetwork(edgelist, nodelist) {
 			//console.debug(edge.target.id);
 			debugger;
 		}
-		
 	});
 
 	createForceNetwork(nodes, edges);
