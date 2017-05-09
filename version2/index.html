@@ -1,13 +1,12 @@
-
 <html>
 <head>
-  <title>Edge creation</title>
-<link rel="shortcut icon" href="http://netgear.rohidekar.com/static/icons/skin/ball/ball_009.png" type="image/x-icon" />
-<meta charset="utf-8" />
-  
-        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
-<script src="http://netgear.rohidekar.com/cream/jsLouvain.js" type="text/JavaScript"></script>
+	<title>Edge creation</title>
+	<link rel="shortcut icon" href="http://netgear.rohidekar.com/static/icons/skin/ball/ball_009.png" type="image/x-icon" />
+	<meta charset="utf-8" />
+
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
+	<script src="http://netgear.rohidekar.com/cream/jsLouvain.js" type="text/JavaScript"></script>
 </head>
 <style>
   svg {
@@ -24,7 +23,7 @@
 
 <script>
 var CONTENT_URL = "http://netgear.rohidekar.com:44452";
-// Need to change this in 2 places
+// Need to change this in the CSS too
 var height = 900;
 var force;
 var shifted = false;
@@ -38,7 +37,6 @@ $(document).on('keyup keydown', function(e){
         }
 });
 
-
 //----------------------------------------------------------------------------------------
 // Data acquisition
 //----------------------------------------------------------------------------------------
@@ -47,14 +45,17 @@ d3.text(window.location.href  + "nodes.txt", function(error, nodes) {
 	d3.text(window.location.href  + "heap.txt", function(error, data1) {
 
 		// add a header so we can parse the data
-		createNetwork(d3.csv.parse("src,dest\n" + data1).map(function(heapEntry) {
+		createNetwork(
+			d3.csv.parse("src,dest\n" + data1).map(function(heapEntry) {
 				return {
 					id : heapEntry.src + "-" + heapEntry.dest,
 					source: heapEntry.src,
 					target: heapEntry.dest
 				};
 			}),
-			d3.csv.parseRows(nodes).map(function(node) { return node[0];}));
+			d3.csv.parseRows(nodes).map(function(node) {
+				return node[0];
+			}));
 	});
 });
 
@@ -65,8 +66,6 @@ var hoveredLineId;
 
 // TODO: Rename to createNodes()
 function createNetwork(iEdges, iNodes) {
-
-	var limit = 40;
 	
 	//------------------------------------------------------------------------------------
 	// Nodes
@@ -135,6 +134,8 @@ function buildNodesMap(iNodes) {
 	});
 	return allNodesById;
 }
+
+// TODO: rewrite this
 function createNodesFromEdges(iEdges, oNodes1) {
  	var allNodesById = buildNodesMap(oNodes1);
 	var nodes3 = [];
@@ -375,13 +376,12 @@ function createForceNetwork(nodes, edges) {
 
 	function mouseover(d) {
 		var url = d.id;		
-if (d.id.startsWith('http')) {
+		if (d.id.startsWith('http')) {
 		} else {
-url = "http://netgear.rohidekar.com:44452" + d.id ;		
-}	
+			url = "http://netgear.rohidekar.com:44452" + d.id ;		
+		}	
 		document.getElementById('preview').innerHTML = "<img height=300 src='" + url + "'>";
 		document.getElementById('previewtext').innerHTML = d.id;
-		//document.getElementById('previewbig').innerHTML = "<img height=200 src='" + url + "'>";
 	}	
 
 	function mouseout(d) {
@@ -394,16 +394,12 @@ url = "http://netgear.rohidekar.com:44452" + d.id ;
 
 		var jqxhr = $.ajax(url)
 				.done(function(response) {
-//					console.debug(response);
-					//alert(response);
 					$("#sort").text("");
-// 					debugger;
 					var data = d3.csv.parse("parent,child\n" + response);  //now you have the header
 
 					var allNodes = {};
 					for (var i = 0; i < data.length; i++) {
 						var entries = data[i];
-//						allNodes[entries.parent] = entries.parent;
 						allNodes[entries.child] = entries.child;
 					}
 					
@@ -426,7 +422,7 @@ url = "http://netgear.rohidekar.com:44452" + d.id ;
 							allChildren[entries] = entries;
 						}
 					}
-//debugger;
+					
 					var links = [];
 					for (var i in allChildren) {
 						var entry = allChildren[i];
@@ -441,10 +437,9 @@ url = "http://netgear.rohidekar.com:44452" + d.id ;
 
 				})
 				.fail(function() {
-								alert( "error" );
+					alert( "error" );
 				})
 				.always(function() {
-								//alert( "complete" );
 				});
 	}
 
@@ -452,13 +447,10 @@ url = "http://netgear.rohidekar.com:44452" + d.id ;
 	
 		var toBeRemoved = [];
 		for (var key in parents) {
-	//		console.debug(key);
 			var idToRemove;
 			if (parents[key] === d.id) {
-				//console.debug("child to be detached: " + key);
 				toBeRemoved.push("\""+d.id + "\",\""+ key+ "\"");
 			} else if (key === d.id) {
-				//console.debug("2" + parents[key]);
 				toBeRemoved.push("\"" + parents[key]  + "\",\""+  d.id+ "\"");
 			} else {
 			}
@@ -476,15 +468,13 @@ url = "http://netgear.rohidekar.com:44452" + d.id ;
 							.filter(function(edge){
 								return edge.id.startsWith(d.id + "-") || edge.id.endsWith("-" + d.id) ;
 							})
-							.remove();
-					
+							.remove();					
 
 					})
 					.fail(function() {
-									alert( "error" );
+						alert( "error" );
 					})
 					.always(function() {
-									//alert( "complete" );
 					});
 		}
 	}
@@ -521,27 +511,15 @@ url = "http://netgear.rohidekar.com:44452" + d.id ;
 
 		var node = d3
 			.selectAll("circle")
-  .style("r", function(d) {
-                              if (incomingEdgeCounts[d.id] == 1 && outgoingEdgeCounts[d.id] == 0) { 
-                                return "12px"; 
-                              } else if (incomingEdgeCounts[d.id] == 0 ) {
-                                return "8px";
-                              } else {
-                                return "6px";
-                              }
-                        });
-/*			.style("stroke", function(d) {
-				if (outgoingEdgeCounts[d.id] == 0) {
-				return "orange";
+			.style("r", function(d) {
+				if (incomingEdgeCounts[d.id] == 1 && outgoingEdgeCounts[d.id] == 0) { 
+					return "12px"; 
+				} else if (incomingEdgeCounts[d.id] == 0 ) {
+					return "8px";
 				} else {
-					return "black";
+					return "6px";
 				}
-			})
-                        .style("stroke-width", function(d) {
-				return "1px";
-			})
-*/
-;
+			});
 
 		// Show the green highlight if we are overlapping
 		if (foundOverlap == true) {
@@ -569,16 +547,15 @@ url = "http://netgear.rohidekar.com:44452" + d.id ;
 		d3.selectAll("circle.background").style("opacity", 0);
 		
 		d3.selectAll("circle")
-  .style("r", function(d) {
-                              if (incomingEdgeCounts[d.id] == 0 && outgoingEdgeCounts[d.id] == 1) { 
-                                return "12px"; 
-                              } else if (incomingEdgeCounts[d.id] == 0 ) {
-                                return "8px";
-                              } else {
-                                return "6px";
-                              }
-                        });
-//			.style("stroke", function(d) { if (incomingEdgeCounts[d.id] > 0) { return "white" ;} else {  return "black"; } } );
+			.style("r", function(d) {
+				if (incomingEdgeCounts[d.id] == 0 && outgoingEdgeCounts[d.id] == 1) { 
+					return "12px"; 
+				} else if (incomingEdgeCounts[d.id] == 0 ) {
+					return "8px";
+				} else {
+					return "6px";
+				}
+			});
 
 		nodes.forEach(function(otherNode) {
 			otherNode.fixed = false;
@@ -609,9 +586,7 @@ url = "http://netgear.rohidekar.com:44452" + d.id ;
 
 				var jqxhr = $.ajax(url)
 					.done(function() {
-							//alert( "success" );
-						var newEdge = {
-				
+						var newEdge = {				
 							id : src.id + "-" + dest.id,
 							source : src.id,
 							target : dest.id
@@ -622,7 +597,6 @@ url = "http://netgear.rohidekar.com:44452" + d.id ;
 							alert( "error" );
 					})
 					.always(function() {
-							//alert( "complete" );
 					});							
 			}
 		});
@@ -685,18 +659,14 @@ url = "http://netgear.rohidekar.com:44452" + d.id ;
 function demote(toDemote, all) {
 
 	var url = "http://netgear.rohidekar.com:44478?value=" + toDemote + "&otherChildren=" + all;
-//	debugger;
 
 	var jqxhr = $.ajax(url)
 		.done(function() {
-				//alert( "success" );
-
 		})
 		.fail(function() {
-				alert( "error" );
+			alert( "error" );
 		})
 		.always(function() {
-				//alert( "complete" );
 		});	
 }
 
@@ -704,46 +674,42 @@ function demote(toDemote, all) {
 <div id="viz">
 
 	<table>
-	<tr>
-
-	<td>
-	<div style="overflow : scroll; height : 500px; border : 1px dotted blue">
-		<svg class="main">
-	</div>
-	</svg>
-	</td>
-	<td>
-	<table>
-		<tr><td id="preview"></td></tr>
-		<tr><td id="previewtext"></td></tr>
-<!-- 		<tr><td id="previewbig"></td></tr> -->
-		<tr></tr>
-	</table>
-	</td>
-	</tr>
+		<tr>
+			<td>
+				<div style="overflow : scroll; height : 500px; border : 1px dotted blue">
+					<svg class="main">
+				</div>
+				</svg>
+			</td>
+			<td>
+				<table>
+					<tr><td id="preview"></td></tr>
+					<tr><td id="previewtext"></td></tr>
+					<tr></tr>
+				</table>
+			</td>
+		</tr>
 	</table>
 
-<br>
-<button onclick="recharge()" >Recharge</button>
-<br>
-<span id="higher"></span>
-<span id="lower"></span>
-
-
-
+	<br>
+	<button onclick="recharge()" >Recharge</button>
+	<br>
+	<span id="higher"></span>
+	<span id="lower"></span>
 </div>
 <br>
 <span id="highertext"></span>
 <span id="lowertext"></span>
 <span id="sort"></span>
 
-</body>
+
 <h3>TODO</h3>
 * subtraction to find head nodes is better done in javascript rather than in bash, because rerunning the server side script (diff/comm) each time a change is made will be cumbersome<br>
 <h3>Hints</h3>
 Drag the lesser one to the better one<br>
 Lighter grey means we can't drag it (but we can drag something else onto it).<br>
 
+</body>
 <footer>
 
 </footer>
