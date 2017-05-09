@@ -103,7 +103,7 @@ function createNetwork(iEdges, iNodes) {
 				label : edge.source,
 				weight : 0,
 			};
-			allNodesById[edge.source] = newNode;
+// 			allNodesById[edge.source] = newNode;
 			nodes3.push(newNode);
 		}
 
@@ -114,11 +114,20 @@ function createNetwork(iEdges, iNodes) {
 				label : edge.target,
 				weight : 0
 			};
-			allNodesById[edge.target] = newNode;
+// 			allNodesById[edge.target] = newNode;
 			nodes3.push(newNode);
 		}
 
 	});
+	
+	nodes3.forEach(function(node) {	
+		allNodesById[edge.source] = newNode;
+	}); 
+	nodes3.forEach(function(node) {
+		allNodesById[edge.target] = newNode;
+	}); 
+	
+	
 		
 	// I'm not sure this does anything
 	Array.prototype.push.apply(oNodes, nodes3)
@@ -133,7 +142,6 @@ function createNetwork(iEdges, iNodes) {
 	// Don't try to put them inside the node data. D3 maintains its own,
 	// and it's undirected so you don't get what you want.
 	incomingEdgeCounts = getIncomingEdgeCounts(oEdges);
-
 	outgoingEdgeCounts = getOutgoingEdgeCounts(oEdges);
 
 	parents = getParents(oEdges);
