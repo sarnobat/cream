@@ -82,20 +82,22 @@ function createNetwork(iEdges, iNodes) {
 		});
 	});
 		
-	var allNodesById = buildNodesMap(oNodes1);
+	var allNodesById1 = buildNodesMap(oNodes1);
 
 
 	// Populate the node and edge list from the CSV file
 	// The edge list will have IDs added.
 	
-	var nodes3 = createNodesFromEdges(iEdges, allNodesById);
+	var nodes3 = createNodesFromEdges(iEdges, allNodesById1);
 	
 	// TODO: Do this after the full list of nodes has been built
 	var allNodesById2 = buildNodesMap(nodes3);
-	var allNodesById3 = Object.assign({}, allNodesById, allNodesById2);
+	var allNodesById3 = Object.assign({}, allNodesById1, allNodesById2);
 		
 	// Use concat - that doesn't mutate the input and returns the output
 	var oNodes = oNodes1.concat(nodes3)
+	
+	var allNodesById = buildNodesMap(oNodes);
 	
 	//------------------------------------------------------------------------------------
 	// Edges
