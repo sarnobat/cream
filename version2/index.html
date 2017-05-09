@@ -85,7 +85,7 @@ function createNetwork(edgelist, nodelist) {
 	});
 	
 	
-	var nodes = nodes2;
+	var nodes0 = nodes2;
 	
 	if (true) {
 		//debugger;
@@ -100,7 +100,7 @@ function createNetwork(edgelist, nodelist) {
 				label : edge.source,
 				weight : 0,
 			};
-			nodes.push(nodeHash[edge.source]);
+			nodes0.push(nodeHash[edge.source]);
 		}
 
 		if (!nodeHash[edge.target]) {
@@ -109,7 +109,7 @@ function createNetwork(edgelist, nodelist) {
 				label : edge.target,
 				weight : 0
 			};
-			nodes.push(nodeHash[edge.target]);
+			nodes0.push(nodeHash[edge.target]);
 		}
 
 		edges.push({
@@ -135,7 +135,7 @@ function createNetwork(edgelist, nodelist) {
 		parents[edge.target.id] = edge.source.id;
 	});
 
-	nodes.forEach(function(n2) {
+	nodes0.forEach(function(n2) {
 		outgoingEdgeCounts[n2.id] = 0;
 		incomingEdgeCounts[n2.id] = 0;
 	});
@@ -150,7 +150,7 @@ function createNetwork(edgelist, nodelist) {
 		}
 	});
 
-	createForceNetwork(nodes, edges);
+	createForceNetwork(nodes0, edges);
 }
 
 function recharge() {
