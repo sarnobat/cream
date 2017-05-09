@@ -73,14 +73,12 @@ function createNetwork(edgelist, nodelist) {
 	var edges = [];
 	
 
-	var b = nodelist
-	.forEach(function(node) {
-
-		var obj = {
+	// This returns null so no chaining possible here
+	nodelist.forEach(function(node) {
+		nodes0.push({
 			id : node,
 			label : node,
-		};
-		nodes0.push(obj);
+		});
 	});
 	
 	nodes0.forEach(function (obj) {
@@ -89,8 +87,10 @@ function createNetwork(edgelist, nodelist) {
 		
 	// Populate the node and edge list from the CSV file
 	// The edge list will have IDs added.
-	edgelist.sort(function (e1,e2) { return e1.source < e2.source ||  e1.source == e2.source && e2.target < e2.target} )
-	.forEach(function(edge) {
+	edgelist
+		.sort(function (e1,e2) { return e1.source < e2.source ||  e1.source == e2.source && e2.target < e2.target} )
+		.forEach(function(edge) {
+
 		console.debug(edge.source + " -- " + edge.target ); 
 		if (!nodeHash[edge.source]) {
 			nodeHash[edge.source] = {
