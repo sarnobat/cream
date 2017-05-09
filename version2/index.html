@@ -67,13 +67,13 @@ var hoveredLineId;
 function createNetwork(iEdges, iNodes) {
 
 	var limit = 40;
-	var nodes0 = [];
-	var edges = [];
+	var oNodes = [];
+	var oEdges = [];
 	
 
 	// This returns null so no chaining possible here
 	iNodes.forEach(function(node) {
-		nodes0.push({
+		oNodes.push({
 			id : node,
 			label : node,
 		});
@@ -81,19 +81,9 @@ function createNetwork(iEdges, iNodes) {
 		
 	var nodeHash = {};
 
-	nodes0.forEach(function (obj) {
+	oNodes.forEach(function (obj) {
 		nodeHash[obj.id] = obj;
 	});
-		
-	iEdges.forEach(function(edge) {
-
-		edges.push({
-			id : nodeHash[edge.source].id + "-" + nodeHash[edge.target].id,
-			source : nodeHash[edge.source],
-			target : nodeHash[edge.target],
-		});
-
-	});	
 
 	var nodes3 = [];
 	// Populate the node and edge list from the CSV file
@@ -124,11 +114,25 @@ function createNetwork(iEdges, iNodes) {
 	});
 		
 	// I'm not sure this does anything
-	Array.prototype.push.apply(nodes0, nodes3)
+	Array.prototype.push.apply(oNodes, nodes3)
+	
+	//
+	// Edges
+	//
+			
+	iEdges.forEach(function(edge) {
+
+		oEdges.push({
+			id : nodeHash[edge.source].id + "-" + nodeHash[edge.target].id,
+			source : nodeHash[edge.source],
+			target : nodeHash[edge.target],
+		});
+
+	});	
 	
 	// Add weights - number of outgoing edges
 	// Don't try to put them inside the node data. D3 maintains its own, and it's undirected so you don't get what you want.
-	edges.forEach(function(edge) {
+	oEdges.forEach(function(edge) {
 
 		outgoingEdgeCounts[edge.source.id] = 0;
 		incomingEdgeCounts[edge.source.id] = 0;
@@ -137,17 +141,17 @@ function createNetwork(iEdges, iNodes) {
 		incomingEdgeCounts[edge.target.id] = 0;
 	});
 
-	edges.forEach(function(edge) {
+	oEdges.forEach(function(edge) {
 		parents[edge.target.id] = edge.source.id;
 	});
 
-	nodes0.forEach(function(n2) {
+	oNodes.forEach(function(n2) {
 		outgoingEdgeCounts[n2.id] = 0;
 		incomingEdgeCounts[n2.id] = 0;
 	});
 	
 	// Add outgoingEdgeCounts - number of outgoing edges
-	edges.forEach(function(edge) {
+	oEdges.forEach(function(edge) {
 		outgoingEdgeCounts[edge.source.id]++;
 		incomingEdgeCounts[edge.target.id]++;
 		
@@ -156,7 +160,7 @@ function createNetwork(iEdges, iNodes) {
 		}
 	});
 
-	createForceNetwork(nodes0, edges);
+	createForceNetwork(oNodes, oEdges);
 }
 
 //----------------------------------------------------------------------------------------
