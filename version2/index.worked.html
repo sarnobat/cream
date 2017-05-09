@@ -129,7 +129,7 @@ function createNetwork(edgelist, nodelist) {
 	});
 	// Populate the node and edge list from the CSV file
 	// The edge list will have IDs added.
-	iEdges.forEach(function(edge) {
+	edgelist.forEach(function(edge) {
 
 		if (!nodeHash[edge.source]) {
 			nodeHash[edge.source] = {
