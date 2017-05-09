@@ -71,7 +71,7 @@ function createNetwork(edgelist, nodelist) {
 			label : node,
 		};
 	});
-	var nodes = [];
+	var nodes2 = [];
 	var edges = [];
 	
 	var i = 0;
@@ -85,7 +85,7 @@ function createNetwork(edgelist, nodelist) {
 			id : node,
 			label : node,
 		};
-		nodes.push(obj);
+		nodes2.push(obj);
 		nodeHash[node] = obj;
 	});
 	
@@ -93,6 +93,7 @@ function createNetwork(edgelist, nodelist) {
 		debugger;
 	}
 	
+	var nodes = nodes2;
 	// Populate the node and edge list from the CSV file
 	// The edge list will have IDs added.
 	edgelist.forEach(function(edge) {
