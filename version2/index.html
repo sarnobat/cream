@@ -69,7 +69,7 @@ var hoveredLineId;
 function createNetwork(edgelist, nodelist) {
 
 	var limit = 40;
-	var nodes2 = [];
+	var nodes0 = [];
 	var edges = [];
 	
 
@@ -80,18 +80,13 @@ function createNetwork(edgelist, nodelist) {
 			id : node,
 			label : node,
 		};
-		nodes2.push(obj);
+		nodes0.push(obj);
 	});
 	
-	nodes2.forEach(function (obj) {
+	nodes0.forEach(function (obj) {
 		nodeHash[obj.id] = obj;
 	});
-	
-	var nodes0 = nodes2;
-	
-	if (true) {
-		//debugger;
-	}
+		
 	// Populate the node and edge list from the CSV file
 	// The edge list will have IDs added.
 	edgelist.sort(function (e1,e2) { return e1.source < e2.source ||  e1.source == e2.source && e2.target < e2.target} )
