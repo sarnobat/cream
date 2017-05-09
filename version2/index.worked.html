@@ -1,17 +1,17 @@
 
 <html>
 <head>
-  <title>Edge creation</title>
-<link rel="shortcut icon" href="http://netgear.rohidekar.com/static/icons/skin/ball/ball_009.png" type="image/x-icon" />
-<meta charset="utf-8" />
-  
-        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
-<script src="http://netgear.rohidekar.com/cream/jsLouvain.js" type="text/JavaScript"></script>
+	<title>Edge creation</title>
+	<link rel="shortcut icon" href="http://netgear.rohidekar.com/static/icons/skin/ball/ball_009.png" type="image/x-icon" />
+	<meta charset="utf-8" />
+
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
+	<script src="http://netgear.rohidekar.com/cream/jsLouvain.js" type="text/JavaScript"></script>
 </head>
 <style>
   svg {
-    height: 1000px;
+    height: 900px;
     width: 800px;
     border: 1px solid red;
   }
@@ -24,7 +24,8 @@
 
 <script>
 var CONTENT_URL = "http://netgear.rohidekar.com:44452";
-var height = 1000;
+// Need to change this in the CSS too
+var height = 900;
 var force;
 var shifted = false;
 
@@ -168,11 +169,131 @@ function createNetwork(edgelist, nodelist) {
 	createForceNetwork(nodes, edges);
 }
 
-var forbiddenCreation = false;
+function getNodesWithNoParent(iEdges, iNodes) {
+	var children = 	Object.keys(iEdges).map(function(k){return iEdges[k].target});
+	var allNodes = children.concat(iNodes);
+	// PERFORMANCE. We need a faster check for membership than indexof
+	var heads = allNodes.filter(function(x) { return children.indexOf(x) < 0 });
+//	console.debug(heads);
+	return uniq(heads);
+}
 
+function uniq(a) {
+    var seen = {};
+    return a.filter(function(item) {
+        return seen.hasOwnProperty(item) ? false : (seen[item] = true);
+    });
+}
+
+function buildNodes(iNodes) {
+	var oNodes1 = [];
+
+	// This returns null so no chaining possible here
+	iNodes.forEach(function(node) {
+		oNodes1.push({
+			id : node,
+			label : node,
+		});
+	});
+	return oNodes1;
+}
+
+function buildNodesMap(iNodes) {
+	var allNodesById = {};
+
+	iNodes.forEach(function (obj) {
+		allNodesById[obj.id] = obj;
+	});
+	return allNodesById;
+}
+
+// TODO: rewrite this
+function createNodesFromEdges(iEdges, oNodes1) {
+ 	var allNodesById = buildNodesMap(oNodes1);
+	var nodes3 = [];
+	iEdges
+		.sort(function (e1,e2) { return e1.source < e2.source ||  e1.source == e2.source && e2.target < e2.target} )
+		.forEach(function(edge) {
+
+			//console.debug(edge.source + " -- " + edge.target ); 
+			if (!allNodesById[edge.source]) {
+				var newNode =
+				 {
+					id : edge.source,
+					label : edge.source,
+					weight : 0,
+				};
+	// 			allNodesById[edge.source] = newNode;
+				nodes3.push(newNode);
+			}
+
+			if (!allNodesById[edge.target]) {
+
+				var newNode = {
+					id : edge.target,
+					label : edge.target,
+					weight : 0
+				};
+	// 			allNodesById[edge.target] = newNode;
+				nodes3.push(newNode);
+			}
+
+		});
+	return nodes3;
+}
+
+function getEdges(iEdges, allNodesById) {
+	return iEdges.map(function(edge) {
+		return {
+				id : allNodesById[edge.source].id + "-" + allNodesById[edge.target].id,
+				source : allNodesById[edge.source],
+				target : allNodesById[edge.target],
+			};
+	});
+}
+
+function getOutgoingEdgeCounts(iEdges) {
+	iEdges.forEach(function(edge) {
+		outgoingEdgeCounts[edge.source.id] = 0;
+		outgoingEdgeCounts[edge.target.id] = 0;
+	});
+	return outgoingEdgeCounts;
+}
+
+function getIncomingEdgeCounts(iEdges) {
+	var incomingEdgeCounts = {};
+	if (iEdges == null) {
+		debugger;
+	}
+	iEdges.forEach(function(edge) {
+		incomingEdgeCounts[edge.source.id] = 0;
+		incomingEdgeCounts[edge.target.id] = 0;
+	});
+	return incomingEdgeCounts;
+}
+
+function getParents(iEdges) {
+	var parents = {};
+	iEdges.forEach(function(edge) {
+		parents[edge.target.id] = edge.source.id;
+	});
+	return parents;
+}
+
+//----------------------------------------------------------------------------------------
+// SVG manipulation
+//----------------------------------------------------------------------------------------
+
+function recharge() {
+	force.start();
+}
+
+var forbiddenCreation = false;
+var allEdges;
 // Transform the node and link data into svg elements
 function createForceNetwork(nodes, edges) {
 
+	allEdges = edges;
 	force = d3.layout.force()
 		.nodes(nodes)
 		.links(edges)
@@ -238,37 +359,29 @@ function createForceNetwork(nodes, edges) {
 			.style("fill", function(d) { 
 				if (outgoingEdgeCounts[d.id] == 0 && incomingEdgeCounts[d.id] == 0) { return "green"; } 
 				else if (outgoingEdgeCounts[d.id] > 3 && incomingEdgeCounts[d.id] == 0){ return "blue"; }
-                                else if (outgoingEdgeCounts[d.id] > 3 && incomingEdgeCounts[d.id] > 0) { return "red";}
-                                else if (outgoingEdgeCounts[d.id] == 3 && incomingEdgeCounts[d.id] > 0) { return "orange";}
+				else if (outgoingEdgeCounts[d.id] > 3 && incomingEdgeCounts[d.id] > 0) { return "red";}
+				else if (outgoingEdgeCounts[d.id] == 3 && incomingEdgeCounts[d.id] > 0) { return "orange";}
 				else if (outgoingEdgeCounts[d.id] == 2 && incomingEdgeCounts[d.id] > 0) { return "yellow";}
-				else if (incomingEdgeCounts[d.id] == 1) { return "#eeeeee"; 
-				} 
+				else if (incomingEdgeCounts[d.id] == 1) { return "#eeeeee"; } 
 				else if (incomingEdgeCounts[d.id] > 1) { return "red"; } 
-				else { return "#888888";
-				}} )
+				else { return "#888888"; }
+			})
 			.style("stroke", function(d) { if (incomingEdgeCounts[d.id] > 0) { return "green" ;} else {  return "black"; } } )
 			.style("stroke-width", function(d) {
-			        if (outgoingEdgeCounts[d.id] == 0 && incomingEdgeCounts[d.id] == 0) { return "0px"; } 
-                                else if (outgoingEdgeCounts[d.id] > 3 && incomingEdgeCounts[d.id] == 0){ return "0px"; }
-                                else if (outgoingEdgeCounts[d.id] > 3 && incomingEdgeCounts[d.id] > 0) { return "0px";}
-                                else if (outgoingEdgeCounts[d.id] == 3 && incomingEdgeCounts[d.id] > 0) { return "0px";}
-                                else if (outgoingEdgeCounts[d.id] == 2 && incomingEdgeCounts[d.id] > 0) { return "0px";}
-				else if (outgoingEdgeCounts[d.id] == 0 && incomingEdgeCounts[d.id] == 1) { return "3px"; 
-                                } 
-                                else if (incomingEdgeCounts[d.id] == 1) { return "2px"; 
-                                } 
-                                else if (incomingEdgeCounts[d.id] > 1) { return "0px"; } 
-                                else { return "0px";
-                                }
+				if (outgoingEdgeCounts[d.id] == 0 && incomingEdgeCounts[d.id] == 0) { return "0px"; } 
+				else if (outgoingEdgeCounts[d.id] > 3 && incomingEdgeCounts[d.id] == 0){ return "0px"; }
+				else if (outgoingEdgeCounts[d.id] > 3 && incomingEdgeCounts[d.id] > 0) { return "0px";}
+				else if (outgoingEdgeCounts[d.id] == 3 && incomingEdgeCounts[d.id] > 0) { return "0px";}
+				else if (outgoingEdgeCounts[d.id] == 2 && incomingEdgeCounts[d.id] > 0) { return "0px";}
+				else if (outgoingEdgeCounts[d.id] == 0 && incomingEdgeCounts[d.id] == 1) { return "3px"; } 
+				else if (incomingEdgeCounts[d.id] == 1) { return "2px"; } 
+				else if (incomingEdgeCounts[d.id] > 1) { return "0px"; } 
+				else { return "0px"; }
 			})
 			.style("r", function(d) {
-                              if (incomingEdgeCounts[d.id] == 0 && outgoingEdgeCounts[d.id] == 1) { 
-				return "12px"; 
-                              } else if (incomingEdgeCounts[d.id] == 0 ) {
-                                return "8px";
-                              } else {
-				return "6px";
-			      }
+				if (incomingEdgeCounts[d.id] == 0 && outgoingEdgeCounts[d.id] == 1) {  return "12px";  } 
+				else if (incomingEdgeCounts[d.id] == 0 ) { return "8px"; } 
+				else { return "6px"; }
 			});
 
 		nodeEnter.append("text")
@@ -327,13 +440,12 @@ function createForceNetwork(nodes, edges) {
 
 	function mouseover(d) {
 		var url = d.id;		
-if (d.id.startsWith('http')) {
+		if (d.id.startsWith('http')) {
 		} else {
-url = "http://netgear.rohidekar.com:44452" + d.id ;		
-}	
+			url = "http://netgear.rohidekar.com:44452" + d.id ;		
+		}	
 		document.getElementById('preview').innerHTML = "<img height=300 src='" + url + "'>";
 		document.getElementById('previewtext').innerHTML = d.id;
-		//document.getElementById('previewbig').innerHTML = "<img height=200 src='" + url + "'>";
 	}	
 
 	function mouseout(d) {
@@ -346,16 +458,12 @@ url = "http://netgear.rohidekar.com:44452" + d.id ;
 
 		var jqxhr = $.ajax(url)
 				.done(function(response) {
-//					console.debug(response);
-					//alert(response);
 					$("#sort").text("");
-// 					debugger;
 					var data = d3.csv.parse("parent,child\n" + response);  //now you have the header
 
 					var allNodes = {};
 					for (var i = 0; i < data.length; i++) {
 						var entries = data[i];
-//						allNodes[entries.parent] = entries.parent;
 						allNodes[entries.child] = entries.child;
 					}
 					
@@ -378,7 +486,7 @@ url = "http://netgear.rohidekar.com:44452" + d.id ;
 							allChildren[entries] = entries;
 						}
 					}
-//debugger;
+					
 					var links = [];
 					for (var i in allChildren) {
 						var entry = allChildren[i];
@@ -393,10 +501,9 @@ url = "http://netgear.rohidekar.com:44452" + d.id ;
 
 				})
 				.fail(function() {
-								alert( "error" );
+					alert( "error" );
 				})
 				.always(function() {
-								//alert( "complete" );
 				});
 	}
 
@@ -404,13 +511,10 @@ url = "http://netgear.rohidekar.com:44452" + d.id ;
 	
 		var toBeRemoved = [];
 		for (var key in parents) {
-	//		console.debug(key);
 			var idToRemove;
 			if (parents[key] === d.id) {
-				//console.debug("child to be detached: " + key);
 				toBeRemoved.push("\""+d.id + "\",\""+ key+ "\"");
 			} else if (key === d.id) {
-				//console.debug("2" + parents[key]);
 				toBeRemoved.push("\"" + parents[key]  + "\",\""+  d.id+ "\"");
 			} else {
 			}
@@ -428,15 +532,13 @@ url = "http://netgear.rohidekar.com:44452" + d.id ;
 							.filter(function(edge){
 								return edge.id.startsWith(d.id + "-") || edge.id.endsWith("-" + d.id) ;
 							})
-							.remove();
-					
+							.remove();					
 
 					})
 					.fail(function() {
-									alert( "error" );
+						alert( "error" );
 					})
 					.always(function() {
-									//alert( "complete" );
 					});
 		}
 	}
@@ -473,27 +575,15 @@ url = "http://netgear.rohidekar.com:44452" + d.id ;
 
 		var node = d3
 			.selectAll("circle")
-  .style("r", function(d) {
-                              if (incomingEdgeCounts[d.id] == 1 && outgoingEdgeCounts[d.id] == 0) { 
-                                return "12px"; 
-                              } else if (incomingEdgeCounts[d.id] == 0 ) {
-                                return "8px";
-                              } else {
-                                return "6px";
-                              }
-                        });
-/*			.style("stroke", function(d) {
-				if (outgoingEdgeCounts[d.id] == 0) {
-				return "orange";
+			.style("r", function(d) {
+				if (incomingEdgeCounts[d.id] == 1 && outgoingEdgeCounts[d.id] == 0) { 
+					return "12px"; 
+				} else if (incomingEdgeCounts[d.id] == 0 ) {
+					return "8px";
 				} else {
-					return "black";
+					return "6px";
 				}
-			})
-                        .style("stroke-width", function(d) {
-				return "1px";
-			})
-*/
-;
+			});
 
 		// Show the green highlight if we are overlapping
 		if (foundOverlap == true) {
@@ -521,16 +611,15 @@ url = "http://netgear.rohidekar.com:44452" + d.id ;
 		d3.selectAll("circle.background").style("opacity", 0);
 		
 		d3.selectAll("circle")
-  .style("r", function(d) {
-                              if (incomingEdgeCounts[d.id] == 0 && outgoingEdgeCounts[d.id] == 1) { 
-                                return "12px"; 
-                              } else if (incomingEdgeCounts[d.id] == 0 ) {
-                                return "8px";
-                              } else {
-                                return "6px";
-                              }
-                        });
-//			.style("stroke", function(d) { if (incomingEdgeCounts[d.id] > 0) { return "white" ;} else {  return "black"; } } );
+			.style("r", function(d) {
+				if (incomingEdgeCounts[d.id] == 0 && outgoingEdgeCounts[d.id] == 1) { 
+					return "12px"; 
+				} else if (incomingEdgeCounts[d.id] == 0 ) {
+					return "8px";
+				} else {
+					return "6px";
+				}
+			});
 
 		nodes.forEach(function(otherNode) {
 			otherNode.fixed = false;
@@ -561,9 +650,7 @@ url = "http://netgear.rohidekar.com:44452" + d.id ;
 
 				var jqxhr = $.ajax(url)
 					.done(function() {
-							//alert( "success" );
-						var newEdge = {
-				
+						var newEdge = {				
 							id : src.id + "-" + dest.id,
 							source : src.id,
 							target : dest.id
@@ -574,7 +661,6 @@ url = "http://netgear.rohidekar.com:44452" + d.id ;
 							alert( "error" );
 					})
 					.always(function() {
-							//alert( "complete" );
 					});							
 			}
 		});
@@ -637,62 +723,76 @@ url = "http://netgear.rohidekar.com:44452" + d.id ;
 function demote(toDemote, all) {
 
 	var url = "http://netgear.rohidekar.com:44478?value=" + toDemote + "&otherChildren=" + all;
-//	debugger;
 
 	var jqxhr = $.ajax(url)
 		.done(function() {
-				//alert( "success" );
+		})
+		.fail(function() {
+			alert( "error" );
+		})
+		.always(function() {
+		});	
+}
 
+function makeRelationship(parent, child) {
+
+	var saveToFile = '"'+ parent +'","'+ child +'"';
+	var url = "http://netgear.rohidekar.com:44475?value=" + encodeURIComponent(saveToFile);
+
+	var jqxhr = $.ajax(url)
+		.done(function() {
+			var newEdge = {				
+				id : parent + "-" + child,
+				source : parent,
+				target : child
+			};
+			allEdges.push(newEdge);
 		})
 		.fail(function() {
 				alert( "error" );
 		})
 		.always(function() {
-				//alert( "complete" );
 		});	
 }
 
 </script>
-<h3>TODO</h3>
-* subtraction to find head nodes is better done in javascript rather than in bash, because rerunning the server side script (diff/comm) each time a change is made will be cumbersome<br>
-<h3>Hints</h3>
-Drag the lesser one to the better one<br>
-Lighter grey means we can't drag it (but we can drag something else onto it).<br>
 <div id="viz">
 
 	<table>
-	<tr>
-
-	<td>
-	<div style="overflow : scroll; height : 500px; border : 1px dotted blue">
-		<svg class="main">
-	</div>
-	</svg>
-	</td>
-	<td>
-	<table>
-		<tr><td id="preview"></td></tr>
-		<tr><td id="previewtext"></td></tr>
-<!-- 		<tr><td id="previewbig"></td></tr> -->
-		<tr></tr>
-	</table>
-	</td>
-	</tr>
+		<tr>
+			<td>
+				<div style="overflow : scroll; height : 500px; border : 1px dotted blue">
+					<svg class="main">
+				</div>
+				</svg>
+			</td>
+			<td>
+				<table>
+					<tr><td id="preview"></td></tr>
+					<tr><td id="previewtext"></td></tr>
+					<tr></tr>
+				</table>
+			</td>
+		</tr>
 	</table>
 
-<br>
-<button onclick="recharge()" >Recharge</button>
-<br>
-<span id="higher"></span>
-<span id="lower"></span>
-
-
-
+	<br>
+	<button onclick="recharge()" >Recharge</button>
+	<br>
+	<span id="higher"></span>
+	<span id="lower"></span>
 </div>
 <br>
 <span id="highertext"></span>
 <span id="lowertext"></span>
 <span id="sort"></span>
+<div id="pairs"></div>
+
+<h3>TODO</h3>
+* subtraction to find head nodes is better done in javascript rather than in bash, because rerunning the server side script (diff/comm) each time a change is made will be cumbersome<br>
+<h3>Hints</h3>
+Drag the lesser one to the better one<br>
+Lighter grey means we can't drag it (but we can drag something else onto it).<br>
 
 </body>
 <footer>
