@@ -81,14 +81,12 @@ function createNetwork(iEdges, iNodes) {
 			label : node,
 		});
 	});
-		
-// 	var allNodesById1 = buildNodesMap(oNodes1);
 
 
 	// Populate the node and edge list from the CSV file
 	// The edge list will have IDs added.
 	
-	var nodes3 = createNodesFromEdges(iEdges, allNodesById1);
+	var nodes3 = createNodesFromEdges(iEdges, oNodes1);
 	
 	// TODO: Do this after the full list of nodes has been built
 // 	var allNodesById2 = buildNodesMap(nodes3);
@@ -103,7 +101,7 @@ function createNetwork(iEdges, iNodes) {
 	// Edges
 	//------------------------------------------------------------------------------------
 			
-	var oEdges = getEdges(iEdges, allNodesById3);	
+	var oEdges = getEdges(iEdges, allNodesById);	
 	
 	// Add weights - number of outgoing edges
 	// Don't try to put them inside the node data. D3 maintains its own,
@@ -140,7 +138,8 @@ function buildNodesMap(iNodes) {
 	});
 	return allNodesById;
 }
-function createNodesFromEdges(iEdges, allNodesById) {
+function createNodesFromEdges(iEdges, oNodes1) {
+ 	var allNodesById = buildNodesMap(oNodes1);
 	var nodes3 = [];
 	iEdges
 		.sort(function (e1,e2) { return e1.source < e2.source ||  e1.source == e2.source && e2.target < e2.target} )
