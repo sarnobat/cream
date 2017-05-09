@@ -66,10 +66,16 @@ function createNetwork(edgelist, nodelist) {
 	var limit = 1;
 	var nodes1 = nodelist.sort(function(n1,n2) {n2 > n1;} ).slice(0, limit).map(function(node) {
 		
-		return {
+		if (node == null) {
+			debugger;
+		}
+		var obj =  {
 			id : node,
 			label : node,
 		};
+		
+		nodeHash[node] = obj;
+		return obj;
 	});
 	var nodes2 = [];
 	var edges = [];
@@ -92,8 +98,11 @@ function createNetwork(edgelist, nodelist) {
 	}
 	// Populate the node and edge list from the CSV file
 	// The edge list will have IDs added.
-	edgelist.forEach(function(edge) {
-
+	console.debug("size before adding edges: " + + nodes0.length);
+	edgelist.sort(function (e1,e2) { return e1.source < e2.source ||  e1.source == e2.source && e2.target < e2.target} )
+	.slice(0, 100)
+	.forEach(function(edge) {
+		console.debug(edge.source + " -- " + edge.target ); 
 		if (!nodeHash[edge.source]) {
 			nodeHash[edge.source] = {
 				id : edge.source,
@@ -119,6 +128,7 @@ function createNetwork(edgelist, nodelist) {
 		});
 
 	});
+//	console.debug("size after adding edges: " + + nodes0.length);
 
 	// Add weights - number of outgoing edges
 	// Don't try to put them inside the node data. D3 maintains its own, and it's undirected so you don't get what you want.
@@ -150,6 +160,8 @@ function createNetwork(edgelist, nodelist) {
 		}
 	});
 
+	console.debug("size of nodes after adding edges: " + + nodes0.length);
+	console.debug("size of edges after adding edges: " + + edges.length);
 	createForceNetwork(nodes0, edges);
 }
 
