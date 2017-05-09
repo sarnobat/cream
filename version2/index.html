@@ -43,17 +43,17 @@ d3.text(window.location.href  + "nodes.txt", function(error, nodes) {
 	d3.text(window.location.href  + "heap.txt?t=" + Math.random(), function(error, data1) {
 		var data = d3.csv.parse("src,dest\n" + data1);  //now you have the header
 
-		var links = [];
-		for (var i = 0; i < data.length; i++) {
-			var entries = data[i];
-
-			links.push({
-				id : entries.src+"-"+entries.dest,
+		var links2 = data.map(function(entries) {
+			return {
+				id : entries.src + "-" + entries.dest,
 				source: entries.src,
 				target: entries.dest
-			});
+			};
+		});
+		if (true) {
+			//debugger;
 		}
-		createNetwork(links, n);
+		createNetwork(links2, n);
 	});
 });
 
