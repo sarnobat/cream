@@ -63,7 +63,7 @@ var hoveredLineId;
 // TODO: Rename to createNodes()
 function createNetwork(edgelist, nodelist) {
 
-	var limit = 1000;
+	var limit = 40;
 	var nodes1 = nodelist.sort(function(n1,n2) {n2 > n1;} ).slice(0, limit).map(function(node) {
 		
 		if (node == null) {
@@ -74,13 +74,13 @@ function createNetwork(edgelist, nodelist) {
 			label : node,
 		};
 		
-		nodeHash[node] = obj;
+//		nodeHash[node] = obj;
 		return obj;
 	});
 	var nodes2 = [];
 	var edges = [];
 	
-	nodelist.sort(function(n1,n2) {n2 > n1;} ).slice(0, limit).forEach(function(node) {
+	nodelist.sort(function(n1,n2) {n2 > n1;} ).forEach(function(node) {
 
 		var obj = {
 			id : node,
@@ -91,7 +91,7 @@ function createNetwork(edgelist, nodelist) {
 	});
 	
 	
-	var nodes0 = nodes1;
+	var nodes0 = nodes2;
 	
 	if (true) {
 		//debugger;
