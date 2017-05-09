@@ -44,19 +44,19 @@ $(document).on('keyup keydown', function(e){
 //----------------------------------------------------------------------------------------
 
 d3.text(window.location.href  + "nodes.txt", function(error, nodes) {
-	var n = d3.csv.parseRows(nodes).map(function(n1) { return n1[0];});
+
 
 	d3.text(window.location.href  + "heap.txt?t=" + Math.random(), function(error, data1) {
-		var data = d3.csv.parse("src,dest\n" + data1);  //now you have the header
 
-		var links2 = data.map(function(entries) {
-			return {
-				id : entries.src + "-" + entries.dest,
-				source: entries.src,
-				target: entries.dest
-			};
-		});
-		createNetwork(links2, n);
+		// add a header so we can parse the data
+		createNetwork(d3.csv.parse("src,dest\n" + data1).map(function(entries) {
+				return {
+					id : entries.src + "-" + entries.dest,
+					source: entries.src,
+					target: entries.dest
+				};
+			}),
+			d3.csv.parseRows(nodes).map(function(n1) { return n1[0];}));
 	});
 });
 
