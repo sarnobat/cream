@@ -50,9 +50,6 @@ d3.text(window.location.href  + "nodes.txt", function(error, nodes) {
 				target: entries.dest
 			};
 		});
-		if (true) {
-			//debugger;
-		}
 		createNetwork(links2, n);
 	});
 });
@@ -84,6 +81,12 @@ function createNetwork(edgelist, nodelist) {
 		nodes.push(obj);
 		nodeHash[node] = obj;
 	});
+	
+	
+	
+	if (true) {
+		debugger;
+	}
 	
 	// Populate the node and edge list from the CSV file
 	// The edge list will have IDs added.
@@ -137,14 +140,12 @@ function createNetwork(edgelist, nodelist) {
 	
 	// Add outgoingEdgeCounts - number of outgoing edges
 	edges.forEach(function(edge) {
-
 		outgoingEdgeCounts[edge.source.id]++;
 		incomingEdgeCounts[edge.target.id]++;
 		
 		if (incomingEdgeCounts[edge.target.id] > 1) {
 			debugger;
 		}
-		
 	});
 
 	createForceNetwork(nodes, edges);
