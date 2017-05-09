@@ -97,21 +97,25 @@ function createNetwork(iEdges, iNodes) {
 
 		//console.debug(edge.source + " -- " + edge.target ); 
 		if (!allNodesById[edge.source]) {
-			allNodesById[edge.source] = {
+			var newNode =
+			 {
 				id : edge.source,
 				label : edge.source,
 				weight : 0,
 			};
-			nodes3.push(allNodesById[edge.source]);
+			allNodesById[edge.source] = newNode;
+			nodes3.push(newNode);
 		}
 
 		if (!allNodesById[edge.target]) {
-			allNodesById[edge.target] = {
+
+			var newNode = {
 				id : edge.target,
 				label : edge.target,
 				weight : 0
 			};
-			nodes3.push(allNodesById[edge.target]);
+			allNodesById[edge.target] = newNode;
+			nodes3.push(newNode);
 		}
 
 	});
@@ -123,38 +127,14 @@ function createNetwork(iEdges, iNodes) {
 	// Edges
 	//------------------------------------------------------------------------------------
 			
-	var oEdges = iEdges.map(function(edge) {
-		return {
-				id : allNodesById[edge.source].id + "-" + allNodesById[edge.target].id,
-				source : allNodesById[edge.source],
-				target : allNodesById[edge.target],
-			};
-	});
-
-// 	iEdges.forEach(function(edge) {
-// 
-// 		oEdges.push({
-// 			id : allNodesById[edge.source].id + "-" + allNodesById[edge.target].id,
-// 			source : allNodesById[edge.source],
-// 			target : allNodesById[edge.target],
-// 		});
-// 
-// 	});	
+	var oEdges = getEdges(iEdges, allNodesById);	
 	
 	// Add weights - number of outgoing edges
 	// Don't try to put them inside the node data. D3 maintains its own,
 	// and it's undirected so you don't get what you want.
-	oEdges.forEach(function(edge) {
+	incomingEdgeCounts = getIncomingEdgeCounts(oEdges);
 
-		incomingEdgeCounts[edge.source.id] = 0;
-		incomingEdgeCounts[edge.target.id] = 0;
-	});
-
-	oEdges.forEach(function(edge) {
-
-		outgoingEdgeCounts[edge.source.id] = 0;
-		outgoingEdgeCounts[edge.target.id] = 0;
-	});
+	outgoingEdgeCounts = getOutgoingEdgeCounts(oEdges);
 
 	parents = getParents(oEdges);
 
@@ -174,6 +154,36 @@ function createNetwork(iEdges, iNodes) {
 	});
 
 	createForceNetwork(oNodes, oEdges);
+}
+
+function getEdges(iEdges, allNodesById) {
+	return iEdges.map(function(edge) {
+		return {
+				id : allNodesById[edge.source].id + "-" + allNodesById[edge.target].id,
+				source : allNodesById[edge.source],
+				target : allNodesById[edge.target],
+			};
+	});
+}
+
+function getOutgoingEdgeCounts(iEdges) {
+	iEdges.forEach(function(edge) {
+		outgoingEdgeCounts[edge.source.id] = 0;
+		outgoingEdgeCounts[edge.target.id] = 0;
+	});
+	return outgoingEdgeCounts;
+}
+
+function getIncomingEdgeCounts(iEdges) {
+	var incomingEdgeCounts = {};
+	if (iEdges == null) {
+		debugger;
+	}
+	iEdges.forEach(function(edge) {
+		incomingEdgeCounts[edge.source.id] = 0;
+		incomingEdgeCounts[edge.target.id] = 0;
+	});
+	return incomingEdgeCounts;
 }
 
 function getParents(iEdges) {
