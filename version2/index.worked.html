@@ -58,7 +58,6 @@ d3.text( "http://netgear.rohidekar.com/heap/nodes.txt", function(error, nodes) {
 	});
 });
 
-var nodeHash = {};
 var outgoingEdgeCounts = {};
 var incomingEdgeCounts = {};
 var parents = {};
@@ -110,6 +109,7 @@ function createNetwork(edgelist, nodelist) {
 			debugger;
 		}
 	});
+	var nodeHash = {};
 	var nodes = [];
 	var edges = [];
 
