@@ -74,7 +74,7 @@ function createNetwork(edgelist, nodelist) {
 	var nodes2 = [];
 	var edges = [];
 	
-	nodelist.slice(0, 40).forEach(function(node) {
+	nodelist.sort(function(n1,n2) {n2 > n1;} ).slice(0, 40).forEach(function(node) {
 
 		var obj = {
 			id : node,
