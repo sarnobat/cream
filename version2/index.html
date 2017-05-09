@@ -124,15 +124,10 @@ function createNetwork(edgelist, nodelist) {
 		}
 
 	});
-	
-
-
-	
-	// TODO: nodes0.addAll(node3);
+		
+	// I'm not sure this does anything
 	Array.prototype.push.apply(nodes0, nodes3)
 	
-//	console.debug("size after adding edges: " + + nodes0.length);
-
 	// Add weights - number of outgoing edges
 	// Don't try to put them inside the node data. D3 maintains its own, and it's undirected so you don't get what you want.
 	edges.forEach(function(edge) {
