@@ -136,7 +136,6 @@ function createNetwork(edgelist, nodelist) {
 			nodeHash[edge.source] = {
 				id : edge.source,
 				label : edge.source,
-				weight : 0,
 			};
 			nodes.push(nodeHash[edge.source]);
 		}
@@ -145,7 +144,6 @@ function createNetwork(edgelist, nodelist) {
 			nodeHash[edge.target] = {
 				id : edge.target,
 				label : edge.target,
-				weight : 0
 			};
 			nodes.push(nodeHash[edge.target]);
 		}
