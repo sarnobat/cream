@@ -63,6 +63,7 @@ var outgoingEdgeCounts = {};
 var incomingEdgeCounts = {};
 var parents = {};
 var hoveredLineId;
+var limit = 20;
 
 // TODO: Rename to createNodes()
 function createNetwork(iEdges, iNodes) {
@@ -71,13 +72,11 @@ function createNetwork(iEdges, iNodes) {
 	// Nodes
 	//------------------------------------------------------------------------------------
 
-	var oNodes1 = buildNodes(iNodes);
+	var oNodes1 = buildNodes(iNodes).splice(0, 1);
 	
-	// Populate the node and edge list from the CSV file
-	// The edge list will have IDs added.
 	var nodes3 = createNodesFromEdges(iEdges, oNodes1);
 
-	var oNodes = oNodes1.concat(nodes3)
+	var oNodes = oNodes1.concat(nodes3);
 	
 	var allNodesById = buildNodesMap(oNodes);
 	
@@ -129,9 +128,10 @@ function createNetwork(iEdges, iNodes) {
 	}
 	var heads = heads1;//Object.assign({},getNodesWithNoParent(oEdges, oNodes), { "http://images.amazon.com/images/P/1593275854.01.LZZZZZZZ.jpg": "http://images.amazon.com/images/P/013937681X.01.LZZZZZZZ.jpg"});
 	// console.debug(heads);	
+	var acc = [];
 	var pairsHtml = Object.keys(heads).map(function(key, index) {
-		return "<span><img src='"+key +"' height=100><img src='"+ heads[key] +"' height=100><br><button onclick='makeRelationship(\""+key+"\",\""+heads[key]+"\");this.parentNode.parentNode.parentNode.removeChild(this.parentNode.parentNode)'>left higher</button><button onclick='makeRelationship(\""+heads[key]+"\",\""+key+"\");this.parentNode.parentNode.parentNode.removeChild(this.parentNode.parentNode)'>right higher</button></span>";
-	}).reduce(function (acc, pair) { return acc + "<br>" + pair;});
+		return "<span><img src='"+key +"' height=150><img src='"+ heads[key] +"' height=150><br><button onclick='makeRelationship(\""+key+"\",\""+heads[key]+"\");this.parentNode.parentNode.parentNode.removeChild(this.parentNode.parentNode)'>left higher</button><button onclick='makeRelationship(\""+heads[key]+"\",\""+key+"\");this.parentNode.parentNode.parentNode.removeChild(this.parentNode.parentNode)'>right higher</button></span>";
+	}).reduce(function (acc, pair) { return acc + "<br>" + pair;}, []);
 //	console.debug(pairsHtml);
 	$("#pairs").html(pairsHtml);
 
@@ -140,9 +140,17 @@ function createNetwork(iEdges, iNodes) {
 function getNodesWithNoParent(iEdges, iNodes) {
 	var children = 	Object.keys(iEdges).map(function(k){return iEdges[k].target});
 	var allNodes = children.concat(iNodes);
+	// PERFORMANCE. We need a faster check for membership than indexof
 	var heads = allNodes.filter(function(x) { return children.indexOf(x) < 0 });
 //	console.debug(heads);
-	return heads;
+	return uniq(heads);
+}
+
+function uniq(a) {
+    var seen = {};
+    return a.filter(function(item) {
+        return seen.hasOwnProperty(item) ? false : (seen[item] = true);
+    });
 }
 
 function buildNodes(iNodes) {
@@ -320,37 +328,29 @@ function createForceNetwork(nodes, edges) {
 			.style("fill", function(d) { 
 				if (outgoingEdgeCounts[d.id] == 0 && incomingEdgeCounts[d.id] == 0) { return "green"; } 
 				else if (outgoingEdgeCounts[d.id] > 3 && incomingEdgeCounts[d.id] == 0){ return "blue"; }
-                                else if (outgoingEdgeCounts[d.id] > 3 && incomingEdgeCounts[d.id] > 0) { return "red";}
-                                else if (outgoingEdgeCounts[d.id] == 3 && incomingEdgeCounts[d.id] > 0) { return "orange";}
+				else if (outgoingEdgeCounts[d.id] > 3 && incomingEdgeCounts[d.id] > 0) { return "red";}
+				else if (outgoingEdgeCounts[d.id] == 3 && incomingEdgeCounts[d.id] > 0) { return "orange";}
 				else if (outgoingEdgeCounts[d.id] == 2 && incomingEdgeCounts[d.id] > 0) { return "yellow";}
-				else if (incomingEdgeCounts[d.id] == 1) { return "#eeeeee"; 
-				} 
+				else if (incomingEdgeCounts[d.id] == 1) { return "#eeeeee"; } 
 				else if (incomingEdgeCounts[d.id] > 1) { return "red"; } 
-				else { return "#888888";
-				}} )
+				else { return "#888888"; }
+			})
 			.style("stroke", function(d) { if (incomingEdgeCounts[d.id] > 0) { return "green" ;} else {  return "black"; } } )
 			.style("stroke-width", function(d) {
-			        if (outgoingEdgeCounts[d.id] == 0 && incomingEdgeCounts[d.id] == 0) { return "0px"; } 
-                                else if (outgoingEdgeCounts[d.id] > 3 && incomingEdgeCounts[d.id] == 0){ return "0px"; }
-                                else if (outgoingEdgeCounts[d.id] > 3 && incomingEdgeCounts[d.id] > 0) { return "0px";}
-                                else if (outgoingEdgeCounts[d.id] == 3 && incomingEdgeCounts[d.id] > 0) { return "0px";}
-                                else if (outgoingEdgeCounts[d.id] == 2 && incomingEdgeCounts[d.id] > 0) { return "0px";}
-				else if (outgoingEdgeCounts[d.id] == 0 && incomingEdgeCounts[d.id] == 1) { return "3px"; 
-                                } 
-                                else if (incomingEdgeCounts[d.id] == 1) { return "2px"; 
-                                } 
-                                else if (incomingEdgeCounts[d.id] > 1) { return "0px"; } 
-                                else { return "0px";
-                                }
+				if (outgoingEdgeCounts[d.id] == 0 && incomingEdgeCounts[d.id] == 0) { return "0px"; } 
+				else if (outgoingEdgeCounts[d.id] > 3 && incomingEdgeCounts[d.id] == 0){ return "0px"; }
+				else if (outgoingEdgeCounts[d.id] > 3 && incomingEdgeCounts[d.id] > 0) { return "0px";}
+				else if (outgoingEdgeCounts[d.id] == 3 && incomingEdgeCounts[d.id] > 0) { return "0px";}
+				else if (outgoingEdgeCounts[d.id] == 2 && incomingEdgeCounts[d.id] > 0) { return "0px";}
+				else if (outgoingEdgeCounts[d.id] == 0 && incomingEdgeCounts[d.id] == 1) { return "3px"; } 
+				else if (incomingEdgeCounts[d.id] == 1) { return "2px"; } 
+				else if (incomingEdgeCounts[d.id] > 1) { return "0px"; } 
+				else { return "0px"; }
 			})
 			.style("r", function(d) {
-                              if (incomingEdgeCounts[d.id] == 0 && outgoingEdgeCounts[d.id] == 1) { 
-				return "12px"; 
-                              } else if (incomingEdgeCounts[d.id] == 0 ) {
-                                return "8px";
-                              } else {
-				return "6px";
-			      }
+				if (incomingEdgeCounts[d.id] == 0 && outgoingEdgeCounts[d.id] == 1) {  return "12px";  } 
+				else if (incomingEdgeCounts[d.id] == 0 ) { return "8px"; } 
+				else { return "6px"; }
 			});
 
 		nodeEnter.append("text")
