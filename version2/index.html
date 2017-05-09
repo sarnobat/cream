@@ -123,17 +123,23 @@ function createNetwork(iEdges, iNodes) {
 	// Edges
 	//------------------------------------------------------------------------------------
 			
-	var oEdges = [];
+	var oEdges = iEdges.forEach(function(edge) {
+		return {
+				id : allNodesById[edge.source].id + "-" + allNodesById[edge.target].id,
+				source : allNodesById[edge.source],
+				target : allNodesById[edge.target],
+			};
+	});
 
-	iEdges.forEach(function(edge) {
-
-		oEdges.push({
-			id : allNodesById[edge.source].id + "-" + allNodesById[edge.target].id,
-			source : allNodesById[edge.source],
-			target : allNodesById[edge.target],
-		});
-
-	});	
+// 	iEdges.forEach(function(edge) {
+// 
+// 		oEdges.push({
+// 			id : allNodesById[edge.source].id + "-" + allNodesById[edge.target].id,
+// 			source : allNodesById[edge.source],
+// 			target : allNodesById[edge.target],
+// 		});
+// 
+// 	});	
 	
 	// Add weights - number of outgoing edges
 	// Don't try to put them inside the node data. D3 maintains its own,
