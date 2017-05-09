@@ -136,14 +136,18 @@ function createNetwork(iEdges, iNodes) {
 	});	
 	
 	// Add weights - number of outgoing edges
-	// Don't try to put them inside the node data. D3 maintains its own, and it's undirected so you don't get what you want.
+	// Don't try to put them inside the node data. D3 maintains its own,
+	// and it's undirected so you don't get what you want.
+	oEdges.forEach(function(edge) {
+
+		incomingEdgeCounts[edge.source.id] = 0;
+		incomingEdgeCounts[edge.target.id] = 0;
+	});
+
 	oEdges.forEach(function(edge) {
 
 		outgoingEdgeCounts[edge.source.id] = 0;
-		incomingEdgeCounts[edge.source.id] = 0;
-		
 		outgoingEdgeCounts[edge.target.id] = 0;
-		incomingEdgeCounts[edge.target.id] = 0;
 	});
 
 	parents = getParents(oEdges);
