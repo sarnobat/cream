@@ -74,12 +74,7 @@ function createNetwork(edgelist, nodelist) {
 	var nodes2 = [];
 	var edges = [];
 	
-	var i = 0;
-	nodelist.forEach(function(node) {
-		i++;
-		if(i > 40) {
-			return;
-		}
+	nodelist.slice(0, 40).forEach(function(node) {
 
 		var obj = {
 			id : node,
