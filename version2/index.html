@@ -111,6 +111,38 @@ function createNetwork(iEdges, iNodes) {
 	});
 
 	createForceNetwork(oNodes, oEdges);
+	
+	var nodesWithNoParents = getNodesWithNoParent(oEdges, oNodes);
+	var heads1 = {};
+	for (var i = 0; i < nodesWithNoParents.length - 1; i += 2) {
+		if (nodesWithNoParents[i+1] == null) {
+			debugger;
+		}
+// 		console.debug(i);
+// 		console.debug(nodesWithNoParents[i+1]);
+		var u = nodesWithNoParents[i].id;
+// 		console.debug(u);
+		var v = nodesWithNoParents[i+1].id;
+// 		console.debug(v);
+		// console.debug(heads)
+		heads1[u] = v;
+	}
+	var heads = heads1;//Object.assign({},getNodesWithNoParent(oEdges, oNodes), { "http://images.amazon.com/images/P/1593275854.01.LZZZZZZZ.jpg": "http://images.amazon.com/images/P/013937681X.01.LZZZZZZZ.jpg"});
+	// console.debug(heads);	
+	var pairsHtml = Object.keys(heads).map(function(key, index) {
+		return "<span><img src='"+key +"' height=100><img src='"+ heads[key] +"' height=100><br><button onclick='makeRelationship(\""+key+"\",\""+heads[key]+"\");this.parentNode.parentNode.parentNode.removeChild(this.parentNode.parentNode)'>left higher</button><button onclick='makeRelationship(\""+heads[key]+"\",\""+key+"\");this.parentNode.parentNode.parentNode.removeChild(this.parentNode.parentNode)'>right higher</button></span>";
+	}).reduce(function (acc, pair) { return acc + "<br>" + pair;});
+//	console.debug(pairsHtml);
+	$("#pairs").html(pairsHtml);
+
+}
+
+function getNodesWithNoParent(iEdges, iNodes) {
+	var children = 	Object.keys(iEdges).map(function(k){return iEdges[k].target});
+	var allNodes = children.concat(iNodes);
+	var heads = allNodes.filter(function(x) { return children.indexOf(x) < 0 });
+//	console.debug(heads);
+	return heads;
 }
 
 function buildNodes(iNodes) {
@@ -218,10 +250,11 @@ function recharge() {
 }
 
 var forbiddenCreation = false;
-
+var allEdges;
 // Transform the node and link data into svg elements
 function createForceNetwork(nodes, edges) {
 
+	allEdges = edges;
 	force = d3.layout.force()
 		.nodes(nodes)
 		.links(edges)
@@ -670,6 +703,27 @@ function demote(toDemote, all) {
 		});	
 }
 
+function makeRelationship(parent, child) {
+
+	var saveToFile = '"'+ parent +'","'+ child +'"';
+	var url = "http://netgear.rohidekar.com:44475?value=" + encodeURIComponent(saveToFile);
+
+	var jqxhr = $.ajax(url)
+		.done(function() {
+			var newEdge = {				
+				id : parent + "-" + child,
+				source : parent,
+				target : child
+			};
+			allEdges.push(newEdge);
+		})
+		.fail(function() {
+				alert( "error" );
+		})
+		.always(function() {
+		});	
+}
+
 </script>
 <div id="viz">
 
@@ -701,7 +755,7 @@ function demote(toDemote, all) {
 <span id="highertext"></span>
 <span id="lowertext"></span>
 <span id="sort"></span>
-
+<div id="pairs"></div>
 
 <h3>TODO</h3>
 * subtraction to find head nodes is better done in javascript rather than in bash, because rerunning the server side script (diff/comm) each time a change is made will be cumbersome<br>
