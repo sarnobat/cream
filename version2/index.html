@@ -64,7 +64,7 @@ var hoveredLineId;
 function createNetwork(edgelist, nodelist) {
 
 
-	var nodes1 = nodelist.slice(0, 40).map(function(node) {
+	var nodes1 = nodelist.sort(function(n1,n2) {n2 > n1;} ).slice(0, 40).map(function(node) {
 		
 		return {
 			id : node,
@@ -85,7 +85,7 @@ function createNetwork(edgelist, nodelist) {
 	});
 	
 	if (true) {
-		debugger;
+		//debugger;
 	}
 	
 	var nodes = nodes2;
