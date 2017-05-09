@@ -72,16 +72,8 @@ function createNetwork(iEdges, iNodes) {
 	// Nodes
 	//------------------------------------------------------------------------------------
 
-	var oNodes1 = [];
-
-	// This returns null so no chaining possible here
-	iNodes.forEach(function(node) {
-		oNodes1.push({
-			id : node,
-			label : node,
-		});
-	});
-
+	var oNodes1 = buildNodes(iNodes);
+	
 	// Populate the node and edge list from the CSV file
 	// The edge list will have IDs added.
 	var nodes3 = createNodesFromEdges(iEdges, oNodes1);
@@ -123,6 +115,18 @@ function createNetwork(iEdges, iNodes) {
 	createForceNetwork(oNodes, oEdges);
 }
 
+function buildNodes(iNodes) {
+	var oNodes1 = [];
+
+	// This returns null so no chaining possible here
+	iNodes.forEach(function(node) {
+		oNodes1.push({
+			id : node,
+			label : node,
+		});
+	});
+	return oNodes1;
+}
 
 function buildNodesMap(iNodes) {
 	var allNodesById = {};
