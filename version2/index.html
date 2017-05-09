@@ -91,34 +91,8 @@ function createNetwork(iEdges, iNodes) {
 	var nodes3 = [];
 	// Populate the node and edge list from the CSV file
 	// The edge list will have IDs added.
-	iEdges
-		.sort(function (e1,e2) { return e1.source < e2.source ||  e1.source == e2.source && e2.target < e2.target} )
-		.forEach(function(edge) {
-
-		//console.debug(edge.source + " -- " + edge.target ); 
-		if (!allNodesById[edge.source]) {
-			var newNode =
-			 {
-				id : edge.source,
-				label : edge.source,
-				weight : 0,
-			};
-// 			allNodesById[edge.source] = newNode;
-			nodes3.push(newNode);
-		}
-
-		if (!allNodesById[edge.target]) {
-
-			var newNode = {
-				id : edge.target,
-				label : edge.target,
-				weight : 0
-			};
-// 			allNodesById[edge.target] = newNode;
-			nodes3.push(newNode);
-		}
-
-	});
+	
+	nodes3 = createNodesFromEdges(iEdges, allNodesById);
 	
 	nodes3.forEach(function(node) {	
 		allNodesById[edge.source] = newNode;
@@ -126,8 +100,6 @@ function createNetwork(iEdges, iNodes) {
 	nodes3.forEach(function(node) {
 		allNodesById[edge.target] = newNode;
 	}); 
-	
-	
 		
 	// I'm not sure this does anything
 	Array.prototype.push.apply(oNodes, nodes3)
@@ -162,6 +134,39 @@ function createNetwork(iEdges, iNodes) {
 	});
 
 	createForceNetwork(oNodes, oEdges);
+}
+
+function createNodesFromEdges(iEdges, allNodesById) {
+	var nodes3 = [];
+	iEdges
+		.sort(function (e1,e2) { return e1.source < e2.source ||  e1.source == e2.source && e2.target < e2.target} )
+		.forEach(function(edge) {
+
+			//console.debug(edge.source + " -- " + edge.target ); 
+			if (!allNodesById[edge.source]) {
+				var newNode =
+				 {
+					id : edge.source,
+					label : edge.source,
+					weight : 0,
+				};
+	// 			allNodesById[edge.source] = newNode;
+				nodes3.push(newNode);
+			}
+
+			if (!allNodesById[edge.target]) {
+
+				var newNode = {
+					id : edge.target,
+					label : edge.target,
+					weight : 0
+				};
+	// 			allNodesById[edge.target] = newNode;
+				nodes3.push(newNode);
+			}
+
+		});
+	return nodes3;
 }
 
 function getEdges(iEdges, allNodesById) {
