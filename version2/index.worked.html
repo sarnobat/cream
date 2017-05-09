@@ -98,12 +98,12 @@ function createNetwork(edgelist, nodelist) {
 		nodes.push(obj);
 		nodeHash[node] = obj;
 	});
-
+	
 	//------------------------------------------------------------------------------------
 	// Edges
 	//------------------------------------------------------------------------------------
-	
-	var oEdges = [];
+			
+	var oEdges = getEdges(iEdges, allNodesById);	
 /*
 	// Add weights - number of outgoing edges
 	// Don't try to put them inside the node data. D3 maintains its own,
@@ -231,7 +231,6 @@ function createNetwork(edgelist, nodelist) {
 //	console.debug(pairsHtml);
 	$("#pairs").html(pairsHtml);
 
-
 }
 
 function getNodesWithNoParent(iEdges, iNodes) {
@@ -344,6 +343,7 @@ function getParents(iEdges) {
 	});
 	return parents;
 }
+
 
 //----------------------------------------------------------------------------------------
 // SVG manipulation
