@@ -69,6 +69,7 @@ var hoveredLineId;
 function createNetwork(edgelist, nodelist) {
 
 	var limit = 40;
+	/*
 	var nodes1 = nodelist.sort(function(n1,n2) {n2 > n1;} ).slice(0, limit).map(function(node) {
 		
 		if (node == null) {
@@ -79,9 +80,10 @@ function createNetwork(edgelist, nodelist) {
 			label : node,
 		};
 		
-		nodeHash[node] = obj;
+//		nodeHash[node] = obj;
 		return obj;
 	});
+	*/
 	var nodes2 = [];
 	var edges = [];
 	
@@ -96,7 +98,7 @@ function createNetwork(edgelist, nodelist) {
 	});
 	
 	
-	var nodes0 = nodes1;
+	var nodes0 = nodes2;
 	
 	if (true) {
 		//debugger;
@@ -105,7 +107,7 @@ function createNetwork(edgelist, nodelist) {
 	// The edge list will have IDs added.
 	console.debug("size before adding edges: " + + nodes0.length);
 	edgelist.sort(function (e1,e2) { return e1.source < e2.source ||  e1.source == e2.source && e2.target < e2.target} )
-	.slice(0, 100)
+	.slice(0, limit)
 	.forEach(function(edge) {
 		console.debug(edge.source + " -- " + edge.target ); 
 		if (!nodeHash[edge.source]) {
