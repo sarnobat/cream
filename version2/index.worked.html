@@ -67,14 +67,20 @@ var limit = 20;
 
 // TODO: Rename to createNodes()
 function createNetwork(edgelist, nodelist) {
+	
 	var iEdges = edgelist;
 	var iNodes = nodelist;
 	//------------------------------------------------------------------------------------
 	// Nodes
 	//------------------------------------------------------------------------------------
 
+	var oNodes1 = buildNodes(iNodes).splice(0, 1);
+	
+	var nodes3 = createNodesFromEdges(iEdges, oNodes1);
 
-
+	var oNodes = oNodes1.concat(nodes3);
+	
+	var allNodesById = buildNodesMap(oNodes);
 	var nodes = [];
 	var edges = [];
 	
@@ -98,7 +104,30 @@ function createNetwork(edgelist, nodelist) {
 	//------------------------------------------------------------------------------------
 	
 	var oEdges = [];
+/*
+	// Add weights - number of outgoing edges
+	// Don't try to put them inside the node data. D3 maintains its own,
+	// and it's undirected so you don't get what you want.
+	incomingEdgeCounts = getIncomingEdgeCounts(oEdges);
+	outgoingEdgeCounts = getOutgoingEdgeCounts(oEdges);
 
+	parents = getParents(oEdges);
+
+	oNodes.forEach(function(n2) {
+		outgoingEdgeCounts[n2.id] = 0;
+		incomingEdgeCounts[n2.id] = 0;
+	});
+	
+	// Add outgoingEdgeCounts - number of outgoing edges
+	oEdges.forEach(function(edge) {
+		outgoingEdgeCounts[edge.source.id]++;
+		incomingEdgeCounts[edge.target.id]++;
+		
+		if (incomingEdgeCounts[edge.target.id] > 1) {
+			debugger;
+		}
+	});
+*/
 	// Populate the node and edge list from the CSV file
 	// The edge list will have IDs added.
 	edgelist.forEach(function(edge) {
