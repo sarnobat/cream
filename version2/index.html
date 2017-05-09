@@ -143,6 +143,15 @@ function createNetwork(iEdges, iNodes) {
 	createForceNetwork(oNodes, oEdges);
 }
 
+
+function buildNodesMap(iNodes) {
+	var allNodesById = {};
+
+	iNodes.forEach(function (obj) {
+		allNodesById[obj.id] = obj;
+	});
+	return allNodesById;
+}
 function createNodesFromEdges(iEdges, allNodesById) {
 	var nodes3 = [];
 	iEdges
