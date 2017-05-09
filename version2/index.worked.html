@@ -58,18 +58,20 @@ d3.text( "http://netgear.rohidekar.com/heap/nodes.txt", function(error, nodes) {
 	});
 });
 
-function recharge() {
-	force.start();
-}
-
 var nodeHash = {};
 var outgoingEdgeCounts = {};
 var incomingEdgeCounts = {};
 var parents = {};
 var hoveredLineId;
+var limit = 20;
 
 // TODO: Rename to createNodes()
 function createNetwork(edgelist, nodelist) {
+	
+	//------------------------------------------------------------------------------------
+	// Nodes
+	//------------------------------------------------------------------------------------
+
 
 
 	var nodes = [];
@@ -89,6 +91,10 @@ function createNetwork(edgelist, nodelist) {
 		nodes.push(obj);
 		nodeHash[node] = obj;
 	});
+
+	//------------------------------------------------------------------------------------
+	// Edges
+	//------------------------------------------------------------------------------------
 	
 	// Populate the node and edge list from the CSV file
 	// The edge list will have IDs added.
