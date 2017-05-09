@@ -60,7 +60,6 @@ d3.text(window.location.href  + "nodes.txt", function(error, nodes) {
 	});
 });
 
-var nodeHash = {};
 var outgoingEdgeCounts = {};
 var incomingEdgeCounts = {};
 var parents = {};
@@ -81,7 +80,9 @@ function createNetwork(edgelist, nodelist) {
 			label : node,
 		});
 	});
-	
+		
+	var nodeHash = {};
+
 	nodes0.forEach(function (obj) {
 		nodeHash[obj.id] = obj;
 	});
