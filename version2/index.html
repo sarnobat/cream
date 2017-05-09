@@ -63,7 +63,7 @@ var hoveredLineId;
 // TODO: Rename to createNodes()
 function createNetwork(edgelist, nodelist) {
 
-	var limit = 0;
+	var limit = 1;
 	var nodes1 = nodelist.sort(function(n1,n2) {n2 > n1;} ).slice(0, limit).map(function(node) {
 		
 		return {
@@ -88,7 +88,7 @@ function createNetwork(edgelist, nodelist) {
 	var nodes = nodes2;
 	
 	if (true) {
-		debugger;
+		//debugger;
 	}
 	// Populate the node and edge list from the CSV file
 	// The edge list will have IDs added.
