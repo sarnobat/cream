@@ -11,7 +11,7 @@
 </head>
 <style>
   svg {
-    height: 1000px;
+    height: 900px;
     width: 800px;
     border: 1px solid red;
   }
@@ -24,7 +24,8 @@
 
 <script>
 var CONTENT_URL = "http://netgear.rohidekar.com:44452";
-var height = 1000;
+// Need to change this in 2 places
+var height = 900;
 var force;
 var shifted = false;
 
@@ -91,7 +92,7 @@ function createNetwork(edgelist, nodelist) {
 		.sort(function (e1,e2) { return e1.source < e2.source ||  e1.source == e2.source && e2.target < e2.target} )
 		.forEach(function(edge) {
 
-		console.debug(edge.source + " -- " + edge.target ); 
+		//console.debug(edge.source + " -- " + edge.target ); 
 		if (!nodeHash[edge.source]) {
 			nodeHash[edge.source] = {
 				id : edge.source,
