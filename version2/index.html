@@ -63,7 +63,7 @@ var outgoingEdgeCounts = {};
 var incomingEdgeCounts = {};
 var parents = {};
 var hoveredLineId;
-var limit = 60;
+var limit = 20;
 
 // TODO: Rename to createNodes()
 function createNetwork(iEdges, iNodes) {
@@ -112,7 +112,7 @@ function createNetwork(iEdges, iNodes) {
 	createForceNetwork(oNodes, oEdges);
 	
 	var nodesWithNoParents = getNodesWithNoParent(oEdges, oNodes);
-	var pairsHtmlTempppppppp = nodesWithNoParents.map(function(x){ return x.id;}).reduce(function(acc, item){ return acc + "<br><img src='" + item + "'>";}, "");
+//	var pairsHtmlTempppppppp = nodesWithNoParents.map(function(x){ return x.id;}).reduce(function(acc, item){ return acc + "<br><img src='" + item + "'>";}, "");
 	var heads1 = {};
 	for (var i = 0; i < nodesWithNoParents.length - 1; i += 2) {
 		if (nodesWithNoParents[i+1] == null) {
@@ -134,7 +134,7 @@ function createNetwork(iEdges, iNodes) {
 		return "<span><img src='"+key +"' height=150><img src='"+ heads[key] +"' height=150><br><button onclick='makeRelationship(\""+key+"\",\""+heads[key]+"\");this.parentNode.parentNode.parentNode.removeChild(this.parentNode.parentNode)'>left higher</button><button onclick='makeRelationship(\""+heads[key]+"\",\""+key+"\");this.parentNode.parentNode.parentNode.removeChild(this.parentNode.parentNode)'>right higher</button></span>";
 	}).reduce(function (acc, pair) { return acc + "<br>" + pair;}, []);
 //	console.debug(pairsHtml);
-	$("#pairs").html(pairsHtmlTempppppppp);
+	$("#pairs").html(pairsHtml);
 
 }
 
