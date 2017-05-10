@@ -72,14 +72,11 @@ function createNetwork(iEdges, iNodes) {
 	// Nodes
 	//------------------------------------------------------------------------------------
 
-	var oNodes1 = buildNodes(iNodes).splice(0, 0);
-	
-	var nodes3 = createNodesFromEdges(iEdges, oNodes1);
-
-	var oNodes = oNodes1.concat(nodes3);
-	
-	var allNodesById = buildNodesMap(oNodes);
-	
+	var oNodes = createNodesFromEdges(iEdges);
+	var allNodesById = {};
+	oNodes.forEach(function(n){
+		allNodesById[n.id] = n;
+	});
 	//------------------------------------------------------------------------------------
 	// Edges
 	//------------------------------------------------------------------------------------
@@ -195,7 +192,7 @@ function buildNodesMap(iNodes) {
 
 // TODO: rewrite this
 function createNodesFromEdges(iEdges, oNodes1) {
- 	var allNodesById = buildNodesMap(oNodes1);
+ 	var allNodesById = {};//buildNodesMap(oNodes1);
 	var nodes3 = [];
 	iEdges
 		.sort(function (e1,e2) { return e1.source < e2.source ||  e1.source == e2.source && e2.target < e2.target} )
@@ -229,13 +226,25 @@ function createNodesFromEdges(iEdges, oNodes1) {
 }
 
 function getEdges(iEdges, allNodesById) {
+
 	return iEdges.map(function(edge) {
+	
+		if (allNodesById[edge.source] == null) {
+			debugger;
+		}
+		if (allNodesById[edge.target] == null) {
+			debugger;
+		}
 		return {
-				id : allNodesById[edge.source].id + "-" + allNodesById[edge.target].id,
+				id : edge.source + "-" + edge.target,
 				source : allNodesById[edge.source],
 				target : allNodesById[edge.target],
 			};
 	});
+}
+
+function mknode(d) {
+	return {id : d };
 }
 
 function getOutgoingEdgeCounts(iEdges) {
