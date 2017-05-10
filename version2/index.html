@@ -144,7 +144,7 @@ function createNetwork(iEdges, iNodes) {
 }
 
 function removePair(buttonElement) {
-	buttonElement.parent.parent.removeChild(buttonElement.parent);
+	buttonElement.parentElement.parentElement.removeChild(buttonElement.parentElement);
 }
 
 function getValues(objects) {
@@ -214,9 +214,9 @@ function getNodesFromEdges(iEdges, nodeHash) {
 function getNodesWithNoParent(iEdges, iNodes) {
 	var parents = 	Object.keys(iEdges).map(function(k){return iEdges[k].source});
 	var children = 	Object.keys(iEdges).map(function(k){return iEdges[k].target});
-	var allNodes = children.concat([]);//iNodes);
+	var allNodes = parents.concat(iNodes);
 	// PERFORMANCE. We need a faster check for membership than indexof
-	var heads = parents.filter(function(x) { 
+	var heads = allNodes.filter(function(x) { 
 	//console.debug(children.indexOf(x)); 
 		if (x == '"http://d.gr-assets.com/books/1403740280l/1852553.jpg"') { debugger;} return children.indexOf(x) < 0 });
 //	console.debug(heads);
