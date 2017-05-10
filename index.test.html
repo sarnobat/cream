@@ -83,9 +83,9 @@ function createNetwork(iEdges, iNodes) {
 	
 	var nodeHashFromNodes = createNodeHashFromNodes(iNodes);//TODO
 	var nodeHashFromEdges = createNodeHashFromEdges(iEdges);//TODO
-	var nodeHash = Object.assign({}, createNodeHashFromNodes, createNodeHashFromEdges);
+	var nodeHash = Object.assign({}, nodeHashFromNodes, nodeHashFromEdges);
 	var oEdges = getEdges(iEdges, nodeHash); // done	
-	var oNodes = Object.values(nodeHash);
+	var oNodes = getValues(nodeHash);
 	
 	// Add weights - number of outgoing edges
 	// Don't try to put them inside the node data. D3 maintains its own,
@@ -139,12 +139,20 @@ function createNetwork(iEdges, iNodes) {
 
 }
 
+function getValues(objects) {
+	var values = [];
+	for(var key in objects) {
+		values.push(objects[key]);
+	}
+	return values;
+}
+
 function createNodeHashFromNodes(iNodes) {
 	var oNodeHash = {};
 	iNodes.forEach(function(n){
 		if (oNodeHash.hasOwnProperty(n)) {
 		} else {
-			oNodeHash[n] = mkNode(n);
+			oNodeHash[n] = mknode(n);
 		}
 	});
 	return oNodeHash;
@@ -155,13 +163,13 @@ function createNodeHashFromEdges(iEdges) {
 	iEdges.forEach(function(e){
 		if (oNodeHash.hasOwnProperty(e.source)) {
 		} else {
-			oNodeHash[e.source] = mkNode(e.source);
+			oNodeHash[e.source] = mknode(e.source);
 		}
 	});
 	iEdges.forEach(function(e){
 		if (oNodeHash.hasOwnProperty(e.target)) {
 		} else {
-			oNodeHash[e.target] = mkNode(e.target);
+			oNodeHash[e.target] = mknode(e.target);
 		}
 	});	
 	return oNodeHash;
@@ -288,12 +296,12 @@ function getEdges(iEdges, nodeHash) {
 
 	return iEdges.map(function(edge) {
 	
-// 		if (allNodesById[edge.source] == null) {
-// 			debugger;
-// 		}
-// 		if (allNodesById[edge.target] == null) {
-// 			debugger;
-// 		}
+		if (nodeHash[edge.source] == null) {
+			debugger;
+		}
+		if (nodeHash[edge.target] == null) {
+			debugger;
+		}
 		return {
 				id : edge.source + "-" + edge.target,
 				source : nodeHash[edge.source],
