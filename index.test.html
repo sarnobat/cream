@@ -395,30 +395,6 @@ function createForceNetwork(nodes, edges) {
 
 	force.start();
 	
-
-	function removeLink(sourceid, targetid) {
-		var linkRow = '"' + sourceid + '","' + targetid + '"'; 
-		var url = "http://netgear.rohidekar.com:44476?value=" + encodeURIComponent(linkRow);
-
-		var linkId = sourceid + "-" + targetid; 
-		var jqxhr = $.ajax(url)
-				.done(function() {
-					d3.select("svg.main")
-						.selectAll("g.edge")
-						.filter(function(edge){
-							return edge.id === linkId;
-						})
-						.remove();
-						// redraw
-				})
-				.fail(function() {
-								alert( "error" );
-				})
-				.always(function() {
-								//alert( "complete" );
-				});
-	}
-
 	function tick(e) {
 
 		// Move the links to where the force algorithm recommends
@@ -449,40 +425,6 @@ function createForceNetwork(nodes, edges) {
 	}
 }
 
-function demote(toDemote, all) {
-
-	var url = "http://netgear.rohidekar.com:44478?value=" + toDemote + "&otherChildren=" + all;
-
-	var jqxhr = $.ajax(url)
-		.done(function() {
-		})
-		.fail(function() {
-			alert( "error" );
-		})
-		.always(function() {
-		});	
-}
-
-function makeRelationship(parent, child) {
-
-	var saveToFile = '"'+ parent +'","'+ child +'"';
-	var url = "http://netgear.rohidekar.com:44475?value=" + encodeURIComponent(saveToFile);
-
-	var jqxhr = $.ajax(url)
-		.done(function() {
-			var newEdge = {				
-				id : parent + "-" + child,
-				source : parent,
-				target : child
-			};
-			allEdges.push(newEdge);
-		})
-		.fail(function() {
-				alert( "error" );
-		})
-		.always(function() {
-		});	
-}
 
 </script>
 <div id="viz">
