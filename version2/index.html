@@ -63,7 +63,7 @@ var outgoingEdgeCounts = {};
 var incomingEdgeCounts = {};
 var parents = {};
 var hoveredLineId;
-var limit = 20;
+var limit = 60;
 
 // TODO: Rename to createNodes()
 function createNetwork(iEdges, iNodes) {
@@ -112,6 +112,7 @@ function createNetwork(iEdges, iNodes) {
 	createForceNetwork(oNodes, oEdges);
 	
 	var nodesWithNoParents = getNodesWithNoParent(oEdges, oNodes);
+	var pairsHtmlTempppppppp = nodesWithNoParents.map(function(x){ return x.id;}).reduce(function(acc, item){ return acc + "<br><img src='" + item + "'>";}, "");
 	var heads1 = {};
 	for (var i = 0; i < nodesWithNoParents.length - 1; i += 2) {
 		if (nodesWithNoParents[i+1] == null) {
@@ -127,31 +128,48 @@ function createNetwork(iEdges, iNodes) {
 		heads1[u] = v;
 	}
 	var heads = heads1;//Object.assign({},getNodesWithNoParent(oEdges, oNodes), { "http://images.amazon.com/images/P/1593275854.01.LZZZZZZZ.jpg": "http://images.amazon.com/images/P/013937681X.01.LZZZZZZZ.jpg"});
-	// console.debug(heads);	
+	//console.debug(heads);	
 	var acc = [];
 	var pairsHtml = Object.keys(heads).map(function(key, index) {
 		return "<span><img src='"+key +"' height=150><img src='"+ heads[key] +"' height=150><br><button onclick='makeRelationship(\""+key+"\",\""+heads[key]+"\");this.parentNode.parentNode.parentNode.removeChild(this.parentNode.parentNode)'>left higher</button><button onclick='makeRelationship(\""+heads[key]+"\",\""+key+"\");this.parentNode.parentNode.parentNode.removeChild(this.parentNode.parentNode)'>right higher</button></span>";
 	}).reduce(function (acc, pair) { return acc + "<br>" + pair;}, []);
 //	console.debug(pairsHtml);
-	$("#pairs").html(pairsHtml);
+	$("#pairs").html(pairsHtmlTempppppppp);
 
 }
 
 function getNodesWithNoParent(iEdges, iNodes) {
+	var parents = 	Object.keys(iEdges).map(function(k){return iEdges[k].source});
 	var children = 	Object.keys(iEdges).map(function(k){return iEdges[k].target});
-	var allNodes = children.concat(iNodes);
+	var allNodes = children.concat([]);//iNodes);
 	// PERFORMANCE. We need a faster check for membership than indexof
-	var heads = allNodes.filter(function(x) { return children.indexOf(x) < 0 });
+	var heads = parents.filter(function(x) { 
+	//console.debug(children.indexOf(x)); 
+		if (x == '"http://d.gr-assets.com/books/1403740280l/1852553.jpg"') { debugger;} return children.indexOf(x) < 0 });
 //	console.debug(heads);
-	return uniq(heads);
+// 	console.debug("Parent count = " + parents.removeDuplicates().length);
+// 	console.debug("Child count = " + children.removeDuplicates().length);
+// 	console.debug("All nodes count = " + allNodes.removeDuplicates().length);
+// 	console.debug("All nodes without parents count = " + heads.length);
+	if (heads.map(function(x){ return x.id;}).indexOf("http://d.gr-assets.com/books/1403740280l/1852553.jpg") > -1) {
+		console.debug(heads.removeDuplicates().map(function(x){ return x.id;}));
+		// This shouldn't happen
+		debugger;
+	}
+	return heads.removeDuplicates();
 }
 
-function uniq(a) {
-    var seen = {};
-    return a.filter(function(item) {
-        return seen.hasOwnProperty(item) ? false : (seen[item] = true);
+// function uniq(a) {
+//     var seen = {};
+//     return a.filter(function(item) {
+//         return seen.hasOwnProperty(item) ? false : (seen[item] = true);
+//     });
+// }
+Array.prototype.removeDuplicates = function () {
+    return this.filter(function (item, index, self) {
+        return self.indexOf(item) == index;
     });
-}
+};
 
 function buildNodes(iNodes) {
 	var oNodes1 = [];
