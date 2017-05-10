@@ -116,7 +116,7 @@ function createNetwork(iEdges, iNodes) {
 
 	createForceNetwork(oNodes, oEdges);
 	
-	var nodesWithNoParents = getNodesWithNoParent(oEdges, oNodes);
+	var nodesWithNoParents = getNodesWithNoParent(oEdges, shuffle(oNodes));
 //	var pairsHtmlTempppppppp = nodesWithNoParents.map(function(x){ return x.id;}).reduce(function(acc, item){ return acc + "<br><img src='" + item + "'>";}, "");
 	var heads1 = {};
 	for (var i = 0; i < nodesWithNoParents.length - 1; i += 2) {
@@ -136,11 +136,22 @@ function createNetwork(iEdges, iNodes) {
 	//console.debug(heads);	
 	var acc = [];
 	var pairsHtml = Object.keys(heads).map(function(key, index) {
-		return "<span><img src='"+key +"' height=150><img src='"+ heads[key] +"' height=150><br><button onclick='makeRelationship(\""+key+"\",\""+heads[key]+"\");removePair(this)'>left higher</button><button onclick='makeRelationship(\""+heads[key]+"\",\""+key+"\"); removePair(this)'>right higher</button></span>";
+		return "<span><img src='"+key +"' height=150><img src='"+ heads[key] +"' height=150><br><button onclick='makeRelationship(\""+key+"\",\""+heads[key]+"\");removePair(this)'>left higher</button><button onclick='makeRelationship(\""+heads[key]+"\",\""+key+"\"); removePair(this)'>right higher</button><br></span>";
 	}).reduce(function (acc, pair) { return acc + "<br>" + pair;}, []);
 //	console.debug(pairsHtml);
 	$("#pairs").html(pairsHtml);
 
+}
+
+function shuffle(a) {
+    var j, x, i;
+    for (i = a.length; i; i--) {
+        j = Math.floor(Math.random() * i);
+        x = a[i - 1];
+        a[i - 1] = a[j];
+        a[j] = x;
+    }
+    return a;
 }
 
 function removePair(buttonElement) {
