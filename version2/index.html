@@ -143,6 +143,10 @@ function createNetwork(iEdges, iNodes) {
 
 }
 
+function removePair(buttonElement) {
+	buttonElement.parent.parent.removeChild(buttonElement.parent);
+}
+
 function getValues(objects) {
 	var values = [];
 	for(var key in objects) {
