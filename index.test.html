@@ -72,16 +72,20 @@ function createNetwork(iEdges, iNodes) {
 	// Nodes
 	//------------------------------------------------------------------------------------
 
-	var oNodes = createNodesFromEdges(iEdges);
-	var allNodesById = {};
-	oNodes.forEach(function(n){
-		allNodesById[n.id] = n;
-	});
+//	var oNodes = createNodesFromEdges(iEdges);
+// 	var allNodesById = {};
+// 	oNodes.forEach(function(n){
+// 		allNodesById[n.id] = n;
+// 	});
 	//------------------------------------------------------------------------------------
 	// Edges
 	//------------------------------------------------------------------------------------
-			
-	var oEdges = getEdges(iEdges, allNodesById);	
+	
+	var nodeHashFromNodes = createNodeHashFromNodes(iNodes);//TODO
+	var nodeHashFromEdges = createNodeHashFromEdges(iEdges);//TODO
+	var nodeHash = Object.assign({}, createNodeHashFromNodes, createNodeHashFromEdges);
+	var oEdges = getEdges(iEdges, nodeHash); // done	
+	var oNodes = Object.values(nodeHash);
 	
 	// Add weights - number of outgoing edges
 	// Don't try to put them inside the node data. D3 maintains its own,
@@ -98,10 +102,10 @@ function createNetwork(iEdges, iNodes) {
 	
 	// Add outgoingEdgeCounts - number of outgoing edges
 	oEdges.forEach(function(edge) {
-		outgoingEdgeCounts[edge.source.id]++;
-		incomingEdgeCounts[edge.target.id]++;
+		outgoingEdgeCounts[edge.source]++;
+		incomingEdgeCounts[edge.target]++;
 		
-		if (incomingEdgeCounts[edge.target.id] > 1) {
+		if (incomingEdgeCounts[edge.target] > 1) {
 			debugger;
 		}
 	});
@@ -133,6 +137,62 @@ function createNetwork(iEdges, iNodes) {
 //	console.debug(pairsHtml);
 	$("#pairs").html(pairsHtml);
 
+}
+
+function createNodeHashFromNodes(iNodes) {
+	var oNodeHash = {};
+	iNodes.forEach(function(n){
+		if (oNodeHash.hasOwnProperty(n)) {
+		} else {
+			oNodeHash[n] = mkNode(n);
+		}
+	});
+	return oNodeHash;
+}
+
+function createNodeHashFromEdges(iEdges) {
+	var oNodeHash = {};
+	iEdges.forEach(function(e){
+		if (oNodeHash.hasOwnProperty(e.source)) {
+		} else {
+			oNodeHash[e.source] = mkNode(e.source);
+		}
+	});
+	iEdges.forEach(function(e){
+		if (oNodeHash.hasOwnProperty(e.target)) {
+		} else {
+			oNodeHash[e.target] = mkNode(e.target);
+		}
+	});	
+	return oNodeHash;
+}
+
+function getNodesFromEdges(iEdges, nodeHash) {
+	var oNodes = [];
+
+	iEdges.forEach(function(edge) {
+		oNodes.push(edge.source.id);
+		oNodes.push(edge.target.id);
+//		nodeHash[edge.source] = edge.source;
+	});
+	var oNodes2 = oNodes1.removeDuplicates();
+
+	oNodes2.forEach(function(edge) {
+	
+		if (nodeHash.hasOwnProperty(edge.source)) {
+		} else {
+			nodeHash[edge.source] = edge.source;
+		}
+	});
+	oNodes2.forEach(function(edge) {
+	
+		if (nodeHash.hasOwnProperty(edge.target)) {
+		} else {
+			nodeHash[edge.target] = edge.target;
+		}
+	});
+	var oNodes = [];
+	return oNodes;
 }
 
 function getNodesWithNoParent(iEdges, iNodes) {
@@ -195,7 +255,6 @@ function createNodesFromEdges(iEdges, oNodes1) {
  	var allNodesById = {};//buildNodesMap(oNodes1);
 	var nodes3 = [];
 	iEdges
-		.sort(function (e1,e2) { return e1.source < e2.source ||  e1.source == e2.source && e2.target < e2.target} )
 		.forEach(function(edge) {
 
 			//console.debug(edge.source + " -- " + edge.target ); 
@@ -225,24 +284,25 @@ function createNodesFromEdges(iEdges, oNodes1) {
 	return nodes3;
 }
 
-function getEdges(iEdges, allNodesById) {
+function getEdges(iEdges, nodeHash) {
 
 	return iEdges.map(function(edge) {
 	
-		if (allNodesById[edge.source] == null) {
-			debugger;
-		}
-		if (allNodesById[edge.target] == null) {
-			debugger;
-		}
+// 		if (allNodesById[edge.source] == null) {
+// 			debugger;
+// 		}
+// 		if (allNodesById[edge.target] == null) {
+// 			debugger;
+// 		}
 		return {
 				id : edge.source + "-" + edge.target,
-				source : allNodesById[edge.source],
-				target : allNodesById[edge.target],
+				source : nodeHash[edge.source],
+				target : nodeHash[edge.target],
 			};
 	});
 }
 
+// Be careful about creating new nodes. They are distinct objects, which causes missing nodes at the ends of links if we try to remove duplicates
 function mknode(d) {
 	return {id : d };
 }
