@@ -72,24 +72,16 @@ function createNetwork(iEdges, iNodes) {
 	// Nodes
 	//------------------------------------------------------------------------------------
 
-// 	var oNodes1 = buildNodes(iNodes).splice(0, 1);
-// 	
-// 	var nodes3 = createNodesFromEdges(iEdges, oNodes1);
-// 
-// 	var oNodes = oNodes1.concat(nodes3);
-// 	
-// 	var allNodesById = buildNodesMap(oNodes);
+	var nodeHashFromNodes = createNodeHashFromNodes(iNodes);
+	var nodeHashFromEdges = createNodeHashFromEdges(iEdges);
+	var nodeHash = Object.assign({}, nodeHashFromNodes, nodeHashFromEdges);
+	var oNodes = getValues(nodeHash);
 	
 	//------------------------------------------------------------------------------------
 	// Edges
 	//------------------------------------------------------------------------------------
 	
-// 	var oEdges = getEdges(iEdges, allNodesById);	
-	var nodeHashFromNodes = createNodeHashFromNodes(iNodes);//TODO
-	var nodeHashFromEdges = createNodeHashFromEdges(iEdges);//TODO
-	var nodeHash = Object.assign({}, nodeHashFromNodes, nodeHashFromEdges);
-	var oEdges = getEdges(iEdges, nodeHash); // done	
-	var oNodes = getValues(nodeHash);
+	var oEdges = getEdges(iEdges, nodeHash);
 	
 	// Add weights - number of outgoing edges
 	// Don't try to put them inside the node data. D3 maintains its own,
@@ -117,28 +109,17 @@ function createNetwork(iEdges, iNodes) {
 	createForceNetwork(oNodes, oEdges);
 	
 	var nodesWithNoParents = getNodesWithNoParent(oEdges, shuffle(oNodes));
-//	var pairsHtmlTempppppppp = nodesWithNoParents.map(function(x){ return x.id;}).reduce(function(acc, item){ return acc + "<br><img src='" + item + "'>";}, "");
 	var heads1 = {};
 	for (var i = 0; i < nodesWithNoParents.length - 1; i += 2) {
-		if (nodesWithNoParents[i+1] == null) {
-			debugger;
-		}
-// 		console.debug(i);
-// 		console.debug(nodesWithNoParents[i+1]);
 		var u = nodesWithNoParents[i].id;
-// 		console.debug(u);
 		var v = nodesWithNoParents[i+1].id;
-// 		console.debug(v);
-		// console.debug(heads)
 		heads1[u] = v;
 	}
-	var heads = heads1;//Object.assign({},getNodesWithNoParent(oEdges, oNodes), { "http://images.amazon.com/images/P/1593275854.01.LZZZZZZZ.jpg": "http://images.amazon.com/images/P/013937681X.01.LZZZZZZZ.jpg"});
-	//console.debug(heads);	
+	var heads = heads1;
 	var acc = [];
 	var pairsHtml = Object.keys(heads).map(function(key, index) {
 		return "<span><img src='"+key +"' height=150><img src='"+ heads[key] +"' height=150><br><button onclick='makeRelationship(\""+key+"\",\""+heads[key]+"\");removePair(this)'>left higher</button><button onclick='makeRelationship(\""+heads[key]+"\",\""+key+"\"); removePair(this)'>right higher</button><br></span>";
 	}).reduce(function (acc, pair) { return acc + "<br>" + pair;}, []);
-//	console.debug(pairsHtml);
 	$("#pairs").html(pairsHtml);
 
 }
@@ -152,6 +133,10 @@ function shuffle(a) {
         a[j] = x;
     }
     return a;
+}
+
+function removeElement(buttonElement) {
+	buttonElement.parentElement.parentElement.removeChild(buttonElement.parentElement);
 }
 
 function removePair(buttonElement) {
@@ -200,7 +185,6 @@ function getNodesFromEdges(iEdges, nodeHash) {
 	iEdges.forEach(function(edge) {
 		oNodes.push(edge.source.id);
 		oNodes.push(edge.target.id);
-//		nodeHash[edge.source] = edge.source;
 	});
 	var oNodes2 = oNodes1.removeDuplicates();
 
@@ -228,27 +212,11 @@ function getNodesWithNoParent(iEdges, iNodes) {
 	var allNodes = parents.concat(iNodes);
 	// PERFORMANCE. We need a faster check for membership than indexof
 	var heads = allNodes.filter(function(x) { 
-	//console.debug(children.indexOf(x)); 
-		if (x == '"http://d.gr-assets.com/books/1403740280l/1852553.jpg"') { debugger;} return children.indexOf(x) < 0 });
-//	console.debug(heads);
-// 	console.debug("Parent count = " + parents.removeDuplicates().length);
-// 	console.debug("Child count = " + children.removeDuplicates().length);
-// 	console.debug("All nodes count = " + allNodes.removeDuplicates().length);
-// 	console.debug("All nodes without parents count = " + heads.length);
-	if (heads.map(function(x){ return x.id;}).indexOf("http://d.gr-assets.com/books/1403740280l/1852553.jpg") > -1) {
-		console.debug(heads.removeDuplicates().map(function(x){ return x.id;}));
-		// This shouldn't happen
-		debugger;
-	}
+		return children.indexOf(x) < 0 
+	});
 	return heads.removeDuplicates();
 }
 
-// function uniq(a) {
-//     var seen = {};
-//     return a.filter(function(item) {
-//         return seen.hasOwnProperty(item) ? false : (seen[item] = true);
-//     });
-// }
 Array.prototype.removeDuplicates = function () {
     return this.filter(function (item, index, self) {
         return self.indexOf(item) == index;
@@ -277,40 +245,6 @@ function buildNodesMap(iNodes) {
 	return allNodesById;
 }
 
-// TODO: rewrite this
-function createNodesFromEdges(iEdges, oNodes1) {
- 	var allNodesById = {};//buildNodesMap(oNodes1);
-	var nodes3 = [];
-	iEdges
-		.forEach(function(edge) {
-
-			//console.debug(edge.source + " -- " + edge.target ); 
-			if (!allNodesById[edge.source]) {
-				var newNode =
-				 {
-					id : edge.source,
-					label : edge.source,
-					weight : 0,
-				};
-	// 			allNodesById[edge.source] = newNode;
-				nodes3.push(newNode);
-			}
-
-			if (!allNodesById[edge.target]) {
-
-				var newNode = {
-					id : edge.target,
-					label : edge.target,
-					weight : 0
-				};
-	// 			allNodesById[edge.target] = newNode;
-				nodes3.push(newNode);
-			}
-
-		});
-	return nodes3;
-}
-
 function getEdges(iEdges, nodeHash) {
 
 	return iEdges.map(function(edge) {
@@ -329,7 +263,8 @@ function getEdges(iEdges, nodeHash) {
 	});
 }
 
-// Be careful about creating new nodes. They are distinct objects, which causes missing nodes at the ends of links if we try to remove duplicates
+// Be careful about creating new nodes. They are distinct objects, which causes missing
+// nodes at the ends of links if we try to remove duplicates
 function mknode(d) {
 	return {id : d };
 }
@@ -367,12 +302,9 @@ function getParents(iEdges) {
 // SVG manipulation
 //----------------------------------------------------------------------------------------
 
-function recharge() {
-	force.start();
-}
-
 var forbiddenCreation = false;
 var allEdges;
+
 // Transform the node and link data into svg elements
 function createForceNetwork(nodes, edges) {
 
@@ -579,7 +511,7 @@ function createForceNetwork(nodes, edges) {
 						} else {
 							url = CONTENT_URL + entry;
 						}
-						$("#sort").append("<img src='" + url  + "' width=200><button onclick='demote(\""+encodeURIComponent(entry)+"\",\""+encodeURIComponent(JSON.stringify(otherChildren))+"\")'>Move down</button><br>");
+						$("#sort").append("<td><img src='" + url  + "' width=200><br><button onclick='demote(\""+encodeURIComponent(entry)+"\",\""+encodeURIComponent(JSON.stringify(otherChildren))+"\"); removeElement(this)'>Move down</button></td>");
 					}
 
 				})
@@ -803,6 +735,10 @@ function createForceNetwork(nodes, edges) {
 	}
 }
 
+function recharge() {
+	force.start();
+}
+
 function demote(toDemote, all) {
 
 	var url = "http://netgear.rohidekar.com:44478?value=" + toDemote + "&otherChildren=" + all;
@@ -868,7 +804,11 @@ function makeRelationship(parent, child) {
 <br>
 <span id="highertext"></span>
 <span id="lowertext"></span>
-<span id="sort"></span>
+<hr>
+<table>
+<tr id="sort"></tr>
+</table>
+<hr>
 <div id="pairs"></div>
 
 <h3>TODO</h3>
