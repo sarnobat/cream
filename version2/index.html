@@ -467,9 +467,13 @@ function createForceNetwork(nodes, edges) {
 	}
 	
 	function singleclick(d) {
+		singleclickhelper(d.id);
+	}
+	
+	function singleclickhelper(did) {
 
 		// For this simple httpgrep to work, we need to click on the common parent
-		var url = "http://netgear.rohidekar.com:44477?value=" + encodeURIComponent(d.id);
+		var url = "http://netgear.rohidekar.com:44477?value=" + encodeURIComponent(did);
 
 		var jqxhr = $.ajax(url)
 				.done(function(response) {
@@ -485,7 +489,7 @@ function createForceNetwork(nodes, edges) {
 					var otherChildren = {};
 					for (var i in allNodes) {
 						var entries = allNodes[i];
-						if (entries === d.id) {
+						if (entries === did) {
 							// don't add the node to the list of candidate new parents
 						} else {
 							otherChildren[entries] = entries;
@@ -495,7 +499,7 @@ function createForceNetwork(nodes, edges) {
 					var allChildren = {};
 					for (var i = 0; i < Object.keys(allNodes).length; i++) {
 						var entries = Object.keys(allNodes)[i];
-						if (entries === d.id) {
+						if (entries === did) {
 							// Don't add the common parent
 						} else {
 							allChildren[entries] = entries;
