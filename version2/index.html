@@ -10,7 +10,7 @@
 </head>
 <style>
   svg {
-    height: 900px;
+    height: 800px;
     width: 800px;
     border: 1px solid red;
   }
@@ -24,7 +24,7 @@
 <script>
 var CONTENT_URL = "http://netgear.rohidekar.com:44452";
 // Need to change this in the CSS too
-var height = 900;
+var height = 800;
 var force;
 var shifted = false;
 
@@ -466,65 +466,7 @@ function createForceNetwork(nodes, edges) {
 	function mouseout(d) {
 	}
 	
-	function singleclick(d) {
-		singleclickhelper(d.id);
-	}
-	
-	function singleclickhelper(did) {
 
-		// For this simple httpgrep to work, we need to click on the common parent
-		var url = "http://netgear.rohidekar.com:44477?value=" + encodeURIComponent(did);
-
-		var jqxhr = $.ajax(url)
-				.done(function(response) {
-					$("#sort").text("");
-					var data = d3.csv.parse("parent,child\n" + response);  //now you have the header
-
-					var allNodes = {};
-					for (var i = 0; i < data.length; i++) {
-						var entries = data[i];
-						allNodes[entries.child] = entries.child;
-					}
-					
-					var otherChildren = {};
-					for (var i in allNodes) {
-						var entries = allNodes[i];
-						if (entries === did) {
-							// don't add the node to the list of candidate new parents
-						} else {
-							otherChildren[entries] = entries;
-						}
-					}
-
-					var allChildren = {};
-					for (var i = 0; i < Object.keys(allNodes).length; i++) {
-						var entries = Object.keys(allNodes)[i];
-						if (entries === did) {
-							// Don't add the common parent
-						} else {
-							allChildren[entries] = entries;
-						}
-					}
-					
-					var links = [];
-					for (var i in allChildren) {
-						var entry = allChildren[i];
-						var url;
-						if (entry.startsWith('http')) {
-							url = entry;
-						} else {
-							url = CONTENT_URL + entry;
-						}
-						$("#sort").append("<td><img src='" + url  + "' width=200><br><button onclick='demote(\""+encodeURIComponent(entry)+"\",\""+encodeURIComponent(JSON.stringify(otherChildren))+"\"); removeElement(this)'>Move down</button></td>");
-					}
-
-				})
-				.fail(function() {
-					alert( "error" );
-				})
-				.always(function() {
-				});
-	}
 
 	function doubleclick(d) {
 	
@@ -778,6 +720,69 @@ function makeRelationship(parent, child) {
 		});	
 }
 
+function singleclickhelper2 (imageElement) {
+	singleclickhelper(imageElement.src);
+}
+function singleclick(d) {
+	singleclickhelper(d.id);
+}
+
+function singleclickhelper(did) {
+
+	// For this simple httpgrep to work, we need to click on the common parent
+	var url = "http://netgear.rohidekar.com:44477?value=" + encodeURIComponent(did);
+
+	var jqxhr = $.ajax(url)
+			.done(function(response) {
+				$("#sort").text("");
+				var data = d3.csv.parse("parent,child\n" + response);  //now you have the header
+
+				var allNodes = {};
+				for (var i = 0; i < data.length; i++) {
+					var entries = data[i];
+					allNodes[entries.child] = entries.child;
+				}
+				
+				var otherChildren = {};
+				for (var i in allNodes) {
+					var entries = allNodes[i];
+					if (entries === did) {
+						// don't add the node to the list of candidate new parents
+					} else {
+						otherChildren[entries] = entries;
+					}
+				}
+
+				var allChildren = {};
+				for (var i = 0; i < Object.keys(allNodes).length; i++) {
+					var entries = Object.keys(allNodes)[i];
+					if (entries === did) {
+						// Don't add the common parent
+					} else {
+						allChildren[entries] = entries;
+					}
+				}
+				
+				var links = [];
+				for (var i in allChildren) {
+					var entry = allChildren[i];
+					var url;
+					if (entry.startsWith('http')) {
+						url = entry;
+					} else {
+						url = CONTENT_URL + entry;
+					}
+					$("#sort").append("<td><img src='" + url  + "' width=200 onclick='singleclickhelper2(this)'><br><button onclick='demote(\""+encodeURIComponent(entry)+"\",\""+encodeURIComponent(JSON.stringify(otherChildren))+"\"); removeElement(this)'>Move down</button></td>");
+				}
+
+			})
+			.fail(function() {
+				alert( "error" );
+			})
+			.always(function() {
+			});
+}
+
 </script>
 <div id="viz">
 
@@ -809,6 +814,9 @@ function makeRelationship(parent, child) {
 <span id="highertext"></span>
 <span id="lowertext"></span>
 <hr>
+TODO:
+<br>
+Make the "Move Down" operation repeatable without having to refresh the page.
 <table>
 <tr id="sort"></tr>
 </table>
