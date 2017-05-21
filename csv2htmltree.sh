@@ -1,1 +1,1 @@
-cat heap.txt | groovy csv2htmltree.groovy | tee out2.html
+cat heap.txt | groovy csv2htmltree.groovy | tee tree.html
