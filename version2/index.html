@@ -148,6 +148,7 @@ function createNetwork(iEdges, iNodes) {
 		var v = nodesWithNoParents[i+1].id;
 		heads1[u] = v;
 	}
+	singleclickhelper(nodesWithNoParents[0].id);
 	var heads = heads1;
 	var acc = [];
 	var pairsHtml = Object.keys(heads).map(function(key, index) {
@@ -768,7 +769,6 @@ function makeRelationship(parent, child) {
 }
 
 function singleclickhelper2 (imageElement) {
-	console.debug('singleclickhelper2()');
 	singleclickhelper(imageElement.src);
 }
 function singleclick(d) {
@@ -778,20 +778,23 @@ function singleclick(d) {
 function singleclickhelperParent(imageElement) {
 	var did = imageElement.src;
 	var parent = parents[did];
-	singleclickhelper(parent);
+	if (parent == null) {
+		$("#upResponse").text("This is the top level element");
+	} else {
+		singleclickhelper(parent);
+	}
 }
 
 function singleclickhelper(did) {
-	console.debug('singleclickhelper()');
 
 	// For this simple httpgrep to work, we need to click on the common parent
 	var url = "http://netgear.rohidekar.com:44477?value=" + encodeURIComponent(did);
 
 	var jqxhr = $.ajax(url)
 			.done(function(response) {
-				console.debug('singleclickhelper() - got response');
 				$("#sort").text("");
 				$("#up").text("");
+				$("#upResponse").text("");
 				$("#up").append("<img src='" + did + "' height=100 onclick='singleclickhelperParent(this)'>");
 				
 				var data = d3.csv.parse("parent,child\n" + response);  //now you have the header
@@ -884,6 +887,7 @@ TODO:
 Make the "Move Down" operation repeatable without having to refresh the page.
 <table>
 <tr><td id="up"></td></tr>
+<tr><td id="upResponse"></td></tr>
 <tr id="sort"></tr>
 </table>
 <hr>
