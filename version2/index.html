@@ -141,7 +141,10 @@ function createNetwork(iEdges, iNodes) {
 
 	createForceNetwork(oNodes, oEdges);
 	
-	var nodesWithNoParents = getNodesWithNoParent(oEdges, shuffle(oNodes));
+	var nodesWithNoParentsUnshuffled = getNodesWithNoParent(oEdges, oNodes);
+	console.debug(nodesWithNoParentsUnshuffled);
+	var nodesWithNoParents = shuffle(nodesWithNoParentsUnshuffled);
+	console.debug(nodesWithNoParents);
 	var heads1 = {};
 	for (var i = 0; i < nodesWithNoParents.length - 1; i += 2) {
 		var u = nodesWithNoParents[i].id;
@@ -492,7 +495,7 @@ function createForceNetwork(nodes, edges) {
 		if (d.id.startsWith('http')) {
 		} else {
 			url = "http://netgear.rohidekar.com:44452" + d.id ;		
-		}	
+		}
 		document.getElementById('preview').innerHTML = "<img height=300 src='" + url + "'>";
 		document.getElementById('previewtext').innerHTML = d.id;
 	}	
@@ -777,25 +780,33 @@ function singleclick(d) {
 
 function singleclickhelperParent(imageElement) {
 	var did = imageElement.src;
-	var parent = parents[did];
+	var parent = parents[did.replace(CONTENT_URL,'')];
 	if (parent == null) {
 		$("#upResponse").text("This is the top level element");
 	} else {
-		singleclickhelper(parent);
+		singleclickhelper(parent.replace(CONTENT_URL,''));
 	}
 }
 
 function singleclickhelper(did) {
 
+
+	console.debug('singleclickhelper(): ' + did);
 	// For this simple httpgrep to work, we need to click on the common parent
-	var url = "http://netgear.rohidekar.com:44477?value=" + encodeURIComponent(did);
+	var url = "http://netgear.rohidekar.com:44477?value=" + encodeURIComponent(did.replace(CONTENT_URL,''));
 
 	var jqxhr = $.ajax(url)
 			.done(function(response) {
 				$("#sort").text("");
 				$("#up").text("");
 				$("#upResponse").text("");
-				$("#up").append("<img src='" + did + "' height=100 onclick='singleclickhelperParent(this)'>");
+				var url;
+				if (did.startsWith('http')) {
+					url = did;
+				} else {
+					url = CONTENT_URL + did;
+				}
+				$("#up").append("<img src='" + url + "' height=100 onclick='singleclickhelperParent(this)'>");
 				
 				var data = d3.csv.parse("parent,child\n" + response);  //now you have the header
 
@@ -808,7 +819,7 @@ function singleclickhelper(did) {
 				var otherChildren = {};
 				for (var i in allNodes) {
 					var entries = allNodes[i];
-					if (entries === did) {
+					if (entries === did.replace(CONTENT_URL,'')) {
 						// don't add the node to the list of candidate new parents
 					} else {
 						otherChildren[entries] = entries;
@@ -824,7 +835,9 @@ function singleclickhelper(did) {
 						allChildren[entries] = entries;
 					}
 				}
-				
+				if (Object.keys(allChildren).length == 0) {
+					debugger;
+				}
 				var links = [];
 				for (var i in allChildren) {
 					var entry = allChildren[i];
@@ -890,10 +903,11 @@ function singleclickhelper(did) {
 <table>
 <tr><td id="up"></td></tr>
 <tr><td id="upResponse"></td></tr>
-<h2>Pair comparison</h2>
+
 <tr id="sort"></tr>
 </table>
 <hr>
+<h2>Pair comparison</h2>
 <div id="pairs"></div>
 
 <h3>TODO</h3>
