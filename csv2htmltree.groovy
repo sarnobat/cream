@@ -56,7 +56,13 @@ public class Csv2HtmlTree {
 	private static StringBuffer printSubtreeHtml(String root,
 			Multimap<String, String> m, String prefix) {
 		StringBuffer sb = new StringBuffer();
-		sb.append(prefix + "<img src='" + root + "' height=100>\n");
+		String url1 ;
+		if (root.startsWith("http")) {
+			url1 = root;
+		} else {
+			url1 = "http://netgear.rohidekar.com:44452" + root;
+		}
+		sb.append(prefix + "<img src='" + url1 + "' height=100>\n");
 		if (m.get(root).isEmpty()) {
 
 		} else {

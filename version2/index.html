@@ -155,7 +155,19 @@ function createNetwork(iEdges, iNodes) {
 	var heads = heads1;
 	var acc = [];
 	var pairsHtml = Object.keys(heads).map(function(key, index) {
-		return "<span><img src='"+key +"' height=150><img src='"+ heads[key] +"' height=150><br><button onclick='makeRelationship(\""+key+"\",\""+heads[key]+"\");removePair(this)'>left higher</button><button onclick='makeRelationship(\""+heads[key]+"\",\""+key+"\"); removePair(this)'>right higher</button><br></span>";
+		var srcLeft;
+		if (key.startsWith('http')) {
+			srcLeft  = key;
+		} else {
+			srcLeft = CONTENT_URL + key;
+		}
+		var srcRight;
+		if (heads[key].startsWith('http')) {
+			srcRight = heads[key];
+		} else {
+			srcRight = CONTENT_URL + heads[key];
+		}
+		return "<span><img src='"+ srcLeft +"' height=150><img src='"+ srcRight +"' height=150><br><button onclick='makeRelationship(\""+key+"\",\""+heads[key]+"\");removePair(this)'>left higher</button><button onclick='makeRelationship(\""+heads[key]+"\",\""+key+"\"); removePair(this)'>right higher</button><br></span>";
 	}).reduce(function (acc, pair) { return acc + "<br>" + pair;}, []);
 	$("#pairs").html(pairsHtml);
 
@@ -781,20 +793,36 @@ function singleclick(d) {
 function singleclickhelperParent(imageElement) {
 	var did = imageElement.src;
 	var parent = parents[did.replace(CONTENT_URL,'')];
-	if (parent == null) {
-		$("#upResponse").text("This is the top level element");
+	var parent1 = decodeURIComponent(did.replace(CONTENT_URL,''));
+	var parent2 = parents[parent1];
+
+	
+	if (parent != null)  {
+		singleclickhelper(parent);
+	} else if (parent2 != null)  {
+		singleclickhelper(parent2);
 	} else {
-		singleclickhelper(parent.replace(CONTENT_URL,''));
+		$("#upResponse").text("This is the top level element");
 	}
 }
 
 function singleclickhelper(did) {
 
+	did = decodeURIComponent(did);
 
+	if (did.startsWith(CONTENT_URL)) {
+		console.debug('Developer warning: we should strip the http prefix from the asset if it is a local resource');
+		did = did.replace(CONTENT_URL,'');
+		//debugger;
+	}
+	
 	console.debug('singleclickhelper(): ' + did);
 	// For this simple httpgrep to work, we need to click on the common parent
 	var url = "http://netgear.rohidekar.com:44477?value=" + encodeURIComponent(did.replace(CONTENT_URL,''));
 
+	if (url.endsWith('IMG_0371.JPG')) {
+		debugger;
+	}
 	var jqxhr = $.ajax(url)
 			.done(function(response) {
 				$("#sort").text("");
@@ -809,7 +837,10 @@ function singleclickhelper(did) {
 				$("#up").append("<img src='" + url + "' height=100 onclick='singleclickhelperParent(this)'>");
 				
 				var data = d3.csv.parse("parent,child\n" + response);  //now you have the header
-
+	
+				if (url.endsWith('IMG_0371.JPG')) {
+					debugger;
+				}
 				var allNodes = {};
 				for (var i = 0; i < data.length; i++) {
 					var entries = data[i];
