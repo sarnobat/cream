@@ -26,8 +26,9 @@ public class Csv2HtmlTree {
 		Map<String, String> child2ParentMap = new HashMap<String, String>();
 		br = new BufferedReader(new InputStreamReader(System.in));
 		String line;
+		int i = 1;
 		while ((line = br.readLine()) != null) {
-
+			System.err.println(i++);
 			CSVParser p = new CSVParser(new StringReader(line));
 			String[] line2 = p.getLine();
 			String parent = line2[0];

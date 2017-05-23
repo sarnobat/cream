@@ -54,9 +54,19 @@ public class HttpCsvGraphMoveNodeUp {
 				throw new RuntimeException("Impossible 2: " + iNodeToMoveUp);
 			}
 			
-			for (String sibling : otherSiblings) {
-				reparent(sibling, iNodeToMoveUp);
-			}
+			// Strategy 1) Make promoted node the new parent of its siblings
+			// The problem I'm finding in this approach is that siblings get pushed down 
+			// to be part of a very large number of children
+			//for (String sibling : otherSiblings) {
+			//	reparent(sibling, iNodeToMoveUp);
+			//}
+			
+			// Strategy 2) Make promoted node a sibling of its current parent
+			// Hmmmm, I'm not convinced this is any more correct. I'm just trying it out.
+			String parent = getParent(iNodeToMoveUp);
+			String grandParent = getParent(parent);
+			reparent(iNodeToMoveUp, grandParent);
+			
 			System.out
 					.println("HttpCsvGraphMoveNodeUp.MyResource.moveUp() 2");
 			JSONObject jsonObject = new JSONObject();
