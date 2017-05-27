@@ -50,13 +50,14 @@ public class HttpCsvGraphMoveNodeUp {
 			
 			System.err.println("[DEBUG] begin new method: " + iNodeToMoveUp);
 			Collection<String> otherSiblings = getOtherSiblings(iNodeToMoveUp);
-			if (otherSiblings.size() == 0) {
-				throw new RuntimeException("Impossible 2: " + iNodeToMoveUp);
-			}
+			System.err.println("[DEBUG] other siblings: " + otherSiblings);
 			
 			// Strategy 1) Make promoted node the new parent of its siblings
 			// The problem I'm finding in this approach is that siblings get pushed down 
 			// to be part of a very large number of children
+			//if (otherSiblings.size() == 0) {
+			//	throw new RuntimeException("Impossible 2: " + iNodeToMoveUp);
+			//}
 			//for (String sibling : otherSiblings) {
 			//	reparent(sibling, iNodeToMoveUp);
 			//}
@@ -64,7 +65,13 @@ public class HttpCsvGraphMoveNodeUp {
 			// Strategy 2) Make promoted node a sibling of its current parent
 			// Hmmmm, I'm not convinced this is any more correct. I'm just trying it out.
 			String parent = getParent(iNodeToMoveUp);
+
+			System.err.println("[DEBUG] parent : " + parent);
+
 			String grandParent = getParent(parent);
+			
+			System.err.println("[DEBUG] grandparent : " + grandParent);
+			
 			reparent(iNodeToMoveUp, grandParent);
 			
 			System.out
@@ -91,8 +98,11 @@ public class HttpCsvGraphMoveNodeUp {
 					reduced.add(aNode);
 				}
 			}
-			System.out.println("HttpCsvGraphMoveNodeUp.MyResource.remove() end");
-			return reduced.build();
+			System.out.println("HttpCsvGraphMoveNodeUp.MyResource.remove() end 1");
+			Collection<String> c = reduced.build();
+			
+			System.out.println("HttpCsvGraphMoveNodeUp.MyResource.remove() end 2");
+			return c;
 		}
 
 		private static Collection<String> getChildren(String iParentNode) throws IOException {
