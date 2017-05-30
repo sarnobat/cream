@@ -72,7 +72,12 @@ public class HttpCsvGraphMoveNodeUp {
 			
 			System.err.println("[DEBUG] grandparent : " + grandParent);
 			
+			// Not easy to use in the UI. Use "move others down" instead
+			//if (grandParent == null) {			
+			//	removeParent(iNodeToMoveUp);
+			//} else {
 			reparent(iNodeToMoveUp, grandParent);
+			//}
 			
 			System.out
 					.println("HttpCsvGraphMoveNodeUp.MyResource.moveUp() 2");
