@@ -763,6 +763,21 @@ function demote(toDemote, all) {
 		});	
 }
 
+
+function reparent(child, newParent) {
+
+	var url = "http://netgear.rohidekar.com:44480?child=" + child  + "&newParent=" + newParent;
+
+	var jqxhr = $.ajax(url)
+		.done(function() {
+		})
+		.fail(function() {
+			alert( "error" );
+		})
+		.always(function() {
+		});	
+}
+
 function makeRelationship(parent, child) {
 
 	var saveToFile = '"'+ parent +'","'+ child +'"';
@@ -871,6 +886,9 @@ function singleclickhelper(did) {
 					debugger;
 				}
 				var links = [];
+				//
+				// 
+				//
 				for (var i in allChildren) {
 					var entry = allChildren[i];
 					var url;
@@ -882,6 +900,33 @@ function singleclickhelper(did) {
 					$("#sort").append("<td><img src='" + url  + "' width=200 onclick='singleclickhelper2(this)'><br>"
 						+ "<button onclick='promote(\""+encodeURIComponent(entry)+"\",\""+encodeURIComponent(JSON.stringify(otherChildren))+"\"); removeElement(this)'>Move Up</button>"
 						+ "<button onclick='demote(\""+encodeURIComponent(entry)+"\",\""+encodeURIComponent(JSON.stringify(otherChildren))+"\"); removeElement(this)'>Move down</button></td>");
+				}
+				
+				//
+				//
+				//
+				var pairs = shuffle(Object.keys(allChildren));
+				$("#pairs_at_level").text("");
+				for (var i = 0; i < pairs.length - 1; i += 2) {
+					var entry = pairs[i];
+					var entry2 = pairs[i+1];
+					var url;
+					if (entry.startsWith('http')) {
+						url = entry;
+					} else {
+						url = CONTENT_URL + entry;
+					}
+					var url2;
+					if (entry.startsWith('http')) {
+						url2 = entry;
+					} else {
+						url2 = CONTENT_URL + entry2;
+					}
+
+
+					$("#pairs_at_level").append("<tr><td><img src='" + url  + "' width=200 ><img src='" + url2  + "' width=200 ><br>"
+						+ "<button onclick='reparent(\""+encodeURIComponent(entry2)+"\",\""+encodeURIComponent(entry)+"\"); removeElement(this)'>Left higher</button>"
+						+ "<button onclick='reparent(\""+encodeURIComponent(entry)+"\",\""+encodeURIComponent(entry2)+"\"); removeElement(this)'>Right higher</button></td></tr>");
 				}
 
 			})
@@ -939,7 +984,11 @@ function singleclickhelper(did) {
 <tr id="sort"></tr>
 </table>
 <hr>
-<h2>Pair comparison</h2>
+
+<h2>Pair comparison (at clicked level)</h2>
+<div id="pairs_at_level"></div>
+<hr>
+<h2>Pair comparison (heads)</h2>
 <div id="pairs"></div>
 
 <h3>TODO</h3>
