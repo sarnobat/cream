@@ -168,10 +168,14 @@ function createNetwork(iEdges, iNodes) {
 		} else {
 			srcRight = CONTENT_URL + heads[key];
 		}
-		return "<span><img src='"+ srcLeft +"' height=150><img src='"+ srcRight +"' height=150><br><button onclick='makeRelationship(\""+key+"\",\""+heads[key]+"\");removePair(this)'>left higher</button><button onclick='makeRelationship(\""+heads[key]+"\",\""+key+"\"); removePair(this)'>right higher</button><br></span>";
+		return "<span><img src='"+ myEncodeURI(srcLeft) +"' height=150><img src='"+ myEncodeURI(srcRight) +"' height=150><br><button onclick='makeRelationship(\""+myEncodeURI(key)+"\",\""+myEncodeURI(heads[key])+"\");removePair(this)'>left higher</button><button onclick='makeRelationship(\""+myEncodeURI(heads[key])+"\",\""+myEncodeURI(key)+"\"); removePair(this)'>right higher</button><br></span>";
 	}).reduce(function (acc, pair) { return acc + "<br>" + pair;}, []);
 	$("#pairs").html(pairsHtml);
 
+}
+
+function myEncodeURI(text) {
+	return text.replace(/"/g, '&#34;').replace(/'/g, "&#39;");
 }
 
 function shuffle(a) {
@@ -897,7 +901,7 @@ function singleclickhelper(did) {
 					} else {
 						url = CONTENT_URL + entry;
 					}
-					$("#sort").append("<td><img src='" + url  + "' width=200 onclick='singleclickhelper2(this)'><br>"
+					$("#sort").append("<td><img src='" + myEncodeURI(url)  + "' width=200 onclick='singleclickhelper2(this)'><br>"
 						+ "<button onclick='promote(\""+encodeURIComponent(entry)+"\",\""+encodeURIComponent(JSON.stringify(otherChildren))+"\"); removeElement(this)'>Move Up</button>"
 						+ "<button onclick='demote(\""+encodeURIComponent(entry)+"\",\""+encodeURIComponent(JSON.stringify(otherChildren))+"\"); removeElement(this)'>Move down</button></td>");
 				}
@@ -924,9 +928,9 @@ function singleclickhelper(did) {
 					}
 
 
-					$("#pairs_at_level").append("<tr><td><img src='" + url  + "' width=200 ><img src='" + url2  + "' width=200 ><br>"
-						+ "<button onclick='reparent(\""+encodeURIComponent(entry2)+"\",\""+encodeURIComponent(entry)+"\"); removeElement(this)'>Left higher</button>"
-						+ "<button onclick='reparent(\""+encodeURIComponent(entry)+"\",\""+encodeURIComponent(entry2)+"\"); removeElement(this)'>Right higher</button></td></tr>");
+					$("#pairs_at_level").append("<tr><td><img src='" + myEncodeURI(url)  + "' width=200 ><img src='" + myEncodeURI(url2)  + "' width=200 ><br>"
+						+ "<button onclick='reparent(\""+myEncodeURI(entry2)+"\",\""+myEncodeURI(entry)+"\"); removeElement(this)'>Left higher</button>"
+						+ "<button onclick='reparent(\""+myEncodeURI(entry)+"\",\""+myEncodeURI(entry2)+"\"); removeElement(this)'>Right higher</button></td></tr>");
 				}
 
 			})
