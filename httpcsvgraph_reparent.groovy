@@ -163,7 +163,7 @@ public class HttpCsvGraphReparent {
 				FileUtils.writeLines(Paths.get(filepath).toFile(), lines, false);
 				System.err.println("[DEBUG] Successfully removed from file: " + iNodeToReparent);
 			} else {
-				System.err.println("[DEBUG] 10: Nothing got removed");
+				System.err.println("[DEBUG] 10: Couldn't find parent row for " + iNodeToReparent);
 				throw new RuntimeException("Nothing got removed");
 			}
 		}
@@ -183,7 +183,7 @@ public class HttpCsvGraphReparent {
 		private List<String> removeRelationshipWithParent(String iChildNodeToRemove,
 				List<String> beforeRemoval) {
 			System.out
-					.println("HttpCsvGraphReparent.MyResource.removeRelationshipWithParent()");
+					.println("HttpCsvGraphReparent.MyResource.removeRelationshipWithParent() - " + iChildNodeToRemove);
 			List<String> lines = new LinkedList<String>();
 			lines.addAll(beforeRemoval);
 			try {
