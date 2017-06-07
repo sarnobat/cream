@@ -168,14 +168,20 @@ function createNetwork(iEdges, iNodes) {
 		} else {
 			srcRight = CONTENT_URL + heads[key];
 		}
-		return "<span><img src='"+ myEncodeURI(srcLeft) +"' height=150><img src='"+ myEncodeURI(srcRight) +"' height=150><br><button onclick='makeRelationship(\""+myEncodeURI(key)+"\",\""+myEncodeURI(heads[key])+"\");removePair(this)'>left higher</button><button onclick='makeRelationship(\""+myEncodeURI(heads[key])+"\",\""+myEncodeURI(key)+"\"); removePair(this)'>right higher</button><br></span>";
+		return "<span><img src='"+ escapeQuotes(srcLeft) +"' height=150><img src='"+ escapeQuotes(srcRight) +"' height=150><br><button onclick='makeRelationship(\""+escapeQuotes(key)+"\",\""+escapeQuotes(heads[key])+"\");removePair(this)'>left higher</button><button onclick='makeRelationship(\""+escapeQuotes(heads[key])+"\",\""+escapeQuotes(key)+"\"); removePair(this)'>right higher</button><br></span>";
 	}).reduce(function (acc, pair) { return acc + "<br>" + pair;}, []);
 	$("#pairs").html(pairsHtml);
 
 }
 
-function myEncodeURI(text) {
+// Do not encode plusses etc, that's done by encodeURIComponent.
+// This is just so onclick="..text.." quotes doesn't prematurely get closed
+function escapeQuotes(text) {
 	return text.replace(/"/g, '&#34;').replace(/'/g, "&#39;");
+}
+
+function unescapeQuotes(text) {
+	return text.replace(/&#34;/g, '"').replace(/&#39;/g, "'");
 }
 
 function shuffle(a) {
@@ -770,7 +776,7 @@ function demote(toDemote, all) {
 
 function reparent(child, newParent) {
 
-	var url = "http://netgear.rohidekar.com:44480?child=" + child  + "&newParent=" + newParent;
+	var url = "http://netgear.rohidekar.com:44480?child=" + encodeURIComponent(unescapeQuotes(child))  + "&newParent=" + encodeURIComponent(unescapeQuotes(newParent));
 
 	var jqxhr = $.ajax(url)
 		.done(function() {
@@ -784,7 +790,7 @@ function reparent(child, newParent) {
 
 function makeRelationship(parent, child) {
 
-	var saveToFile = '"'+ parent +'","'+ child +'"';
+	var saveToFile = '"'+ unescapeQuotes(parent) +'","'+ unescapeQuotes(child) +'"';
 	var url = "http://netgear.rohidekar.com:44475?value=" + encodeURIComponent(saveToFile);
 
 	var jqxhr = $.ajax(url)
@@ -901,7 +907,7 @@ function singleclickhelper(did) {
 					} else {
 						url = CONTENT_URL + entry;
 					}
-					$("#sort").append("<td><img src='" + myEncodeURI(url)  + "' width=200 onclick='singleclickhelper2(this)'><br>"
+					$("#sort").append("<td><img src='" + escapeQuotes(url)  + "' width=200 onclick='singleclickhelper2(this)'><br>"
 						+ "<button onclick='promote(\""+encodeURIComponent(entry)+"\",\""+encodeURIComponent(JSON.stringify(otherChildren))+"\"); removeElement(this)'>Move Up</button>"
 						+ "<button onclick='demote(\""+encodeURIComponent(entry)+"\",\""+encodeURIComponent(JSON.stringify(otherChildren))+"\"); removeElement(this)'>Move down</button></td>");
 				}
@@ -914,11 +920,6 @@ function singleclickhelper(did) {
 				for (var i = 0; i < pairs.length - 1; i += 2) {
 					var entry = pairs[i];
 					var entry2 = pairs[i+1];
-					console.debug("1: " + entry);
-					console.debug("2: " + entry2);
-					if (entry == entry2) {
-						debugger;
-					}
 					var url;
 					if (entry.startsWith('http')) {
 						url = entry;
@@ -926,16 +927,16 @@ function singleclickhelper(did) {
 						url = CONTENT_URL + entry;
 					}
 					var url2;
-					if (entry2.startsWith('http')) {
-						url2 = entry2;
+					if (entry.startsWith('http')) {
+						url2 = entry;
 					} else {
 						url2 = CONTENT_URL + entry2;
 					}
 
 
-					$("#pairs_at_level").append("<tr><td><img src='" + myEncodeURI(url)  + "' width=200 ><img src='" + myEncodeURI(url2)  + "' width=200 ><br>"
-						+ "<button onclick='reparent(\""+myEncodeURI(entry2)+"\",\""+myEncodeURI(entry)+"\"); removeElement(this)'>Left higher</button>"
-						+ "<button onclick='reparent(\""+myEncodeURI(entry)+"\",\""+myEncodeURI(entry2)+"\"); removeElement(this)'>Right higher</button></td></tr>");
+					$("#pairs_at_level").append("<tr><td><img src='" + escapeQuotes(url)  + "' width=200 ><img src='" + escapeQuotes(url2)  + "' width=200 ><br>"
+						+ "<button onclick='reparent(\""+escapeQuotes(entry2)+"\",\""+escapeQuotes(entry)+"\"); removeElement(this)'>Left higher</button>"
+						+ "<button onclick='reparent(\""+escapeQuotes(entry)+"\",\""+escapeQuotes(entry2)+"\"); removeElement(this)'>Right higher</button></td></tr>");
 				}
 
 			})
