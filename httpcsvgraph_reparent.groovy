@@ -1,5 +1,6 @@
 import com.google.common.collect.*;
 
+import java.util.regex.*;
 import org.apache.commons.csv.CSVParser;
 import java.io.File;
 import java.io.IOException;
@@ -35,7 +36,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 /**  */
-public class HttpCsvGraphMoveNodeUp {
+public class HttpCsvGraphReparent {
 
 	@javax.ws.rs.Path("")
 	public static class MyResource { // Must be public
@@ -45,42 +46,14 @@ public class HttpCsvGraphMoveNodeUp {
 		@Produces("application/json")
 		// We can only call this once between each browser refresh. Our method
 		// should in theory not need to know the other siblings.
-		public Response moveUp(@QueryParam("value") String iNodeToMoveUp)
+		public Response moveUp(@QueryParam("child") String iChild, 
+					@QueryParam("newParent") String newParent)
 				throws JSONException, IOException {
 			
-			System.err.println("[DEBUG] begin new method: " + iNodeToMoveUp);
-			Collection<String> otherSiblings = getOtherSiblings(iNodeToMoveUp);
-			System.err.println("[DEBUG] other siblings: " + otherSiblings);
-			
-			// Strategy 1) Make promoted node the new parent of its siblings
-			// The problem I'm finding in this approach is that siblings get pushed down 
-			// to be part of a very large number of children
-			//if (otherSiblings.size() == 0) {
-			//	throw new RuntimeException("Impossible 2: " + iNodeToMoveUp);
-			//}
-			//for (String sibling : otherSiblings) {
-			//	reparent(sibling, iNodeToMoveUp);
-			//}
-			
-			// Strategy 2) Make promoted node a sibling of its current parent
-			// Hmmmm, I'm not convinced this is any more correct. I'm just trying it out.
-			String parent = getParent(iNodeToMoveUp);
-
-			System.err.println("[DEBUG] parent : " + parent);
-
-			String grandParent = getParent(parent);
-			
-			System.err.println("[DEBUG] grandparent : " + grandParent);
-			
-			// Not easy to use in the UI. Use "move others down" instead
-			//if (grandParent == null) {			
-			//	removeParent(iNodeToMoveUp);
-			//} else {
-			reparent(iNodeToMoveUp, grandParent);
-			//}
+			reparent(iChild, newParent);
 			
 			System.out
-					.println("HttpCsvGraphMoveNodeUp.MyResource.moveUp() 2");
+					.println("HttpCsvGraphReparent.MyResource.moveUp() 2");
 			JSONObject jsonObject = new JSONObject();
 			return Response.ok().header("Access-Control-Allow-Origin", "*")
 					.type("application/json")
@@ -89,62 +62,62 @@ public class HttpCsvGraphMoveNodeUp {
 		}
 
 		private static Collection<String> getOtherSiblings(String iNodeToMoveUp) throws IOException {
-			System.out.println("HttpCsvGraphMoveNodeUp.MyResource.getOtherSiblings()");
+			System.out.println("HttpCsvGraphReparent.MyResource.getOtherSiblings()");
 			String parent = getParent(iNodeToMoveUp);
 			return remove(getChildren(parent), iNodeToMoveUp);
 		}
 
 		private static Collection<String> remove(Collection<String> iNodes,
 				String iExclude) {
-			System.out.println("HttpCsvGraphMoveNodeUp.MyResource.remove() begin");
+			System.out.println("HttpCsvGraphReparent.MyResource.remove() begin");
 			ImmutableSet.Builder<String> reduced = ImmutableSet.builder();
 			for (String aNode : iNodes) {
 				if (!aNode.equals(iExclude)) {
 					reduced.add(aNode);
 				}
 			}
-			System.out.println("HttpCsvGraphMoveNodeUp.MyResource.remove() end 1");
+			System.out.println("HttpCsvGraphReparent.MyResource.remove() end 1");
 			Collection<String> c = reduced.build();
 			
-			System.out.println("HttpCsvGraphMoveNodeUp.MyResource.remove() end 2");
+			System.out.println("HttpCsvGraphReparent.MyResource.remove() end 2");
 			return c;
 		}
 
 		private static Collection<String> getChildren(String iParentNode) throws IOException {
 			System.out
-					.println("HttpCsvGraphMoveNodeUp.MyResource.getChildren() begin");
+					.println("HttpCsvGraphReparent.MyResource.getChildren() begin");
 			List<String> children = new LinkedList<String>();
-			System.out.println("HttpCsvGraphMoveNodeUp.MyResource.getChildren() 1");
+			System.out.println("HttpCsvGraphReparent.MyResource.getChildren() 1");
 			List<String> lines;
 			try {
-				lines = getFileLines(HttpCsvGraphMoveNodeUp.filepath);
+				lines = getFileLines(HttpCsvGraphReparent.filepath);
 			} catch (Exception e) {
 				e.printStackTrace();
 				throw e;
 			}
 
-			System.out.println("HttpCsvGraphMoveNodeUp.MyResource.getChildren() 2");
+			System.out.println("HttpCsvGraphReparent.MyResource.getChildren() 2");
 			for (String line : lines) {
 				if (line.contains(iParentNode)) { // avoid expensive parsing
 					String[] relationship = new CSVParser(
 							new StringReader(line)).getLine();
 					String aNode = relationship[0];
 					System.out
-							.println("HttpCsvGraphMoveNodeUp.MyResource.getChildren() aNode = " + aNode);
+							.println("HttpCsvGraphReparent.MyResource.getChildren() aNode = " + aNode);
 					if (aNode.equals(iParentNode)) {
 						children.add(relationship[1]);
 					}
 				}
 			}
 			System.out
-					.println("HttpCsvGraphMoveNodeUp.MyResource.getChildren() end");
+					.println("HttpCsvGraphReparent.MyResource.getChildren() end");
 			return children;
 		}
 
 		private static String getParent(String iChildNode) throws IOException {
 			System.out
-					.println("HttpCsvGraphMoveNodeUp.MyResource.getParent()");
-			List<String> lines = getFileLines(HttpCsvGraphMoveNodeUp.filepath);
+					.println("HttpCsvGraphReparent.MyResource.getParent()");
+			List<String> lines = getFileLines(HttpCsvGraphReparent.filepath);
 			String parent = null;
 			for (String line : lines) {
 				if (line.contains(iChildNode)) { // avoid expensive parsing
@@ -177,28 +150,87 @@ public class HttpCsvGraphMoveNodeUp {
 				System.err.println("[DEBUG] 5: " + iNodeToReparent);
 				throw new RuntimeException("Developer Error 1 (I don't remember why this is invalid)");
 			}
-			List<String> beforeRemoval = getFileLines(HttpCsvGraphMoveNodeUp.filepath);
+			List<String> beforeRemoval = getFileLines(HttpCsvGraphReparent.filepath);
 			List<String> afterRemoval = removeRelationshipWithParent(iNodeToReparent, beforeRemoval);
-			System.err.println("[DEBUG] 7.5: " + iNodeToReparent);
+// 			System.err.println("[DEBUG] 7.5: " + iNodeToReparent);
 			int removed = beforeRemoval.size() - afterRemoval.size();
 			if (removed > 0) {
-				System.err.println("[DEBUG] 8: removed " + removed);
+// 				System.err.println("[DEBUG] 8: will remove " + removed);
 				String s = "\""+newParent+"\",\"" +iNodeToReparent+ "\"";
 				List<String> lines = new LinkedList<String>();
 				lines.addAll(afterRemoval);
 				lines.add(s);
-				System.err.println("[DEBUG] 9: " + s);
+// 				System.err.println("[DEBUG] 8.5: checking for cycles ");
+				_checkForCycles : {
+					Map<String, String> childToParent = parseLinesAndReverse(lines);
+// 					System.err.println("[DEBUG] 8.6");
+					// if (childToParent.size() < lines.size()) {
+// 						System.err.println("[DEBUG] 8.7");
+// 						// children must be unique, so if the same child appears twice,
+// 						// the keyset only stores the last added one
+// 						System.err.println("[ERROR] Cycle found");
+// 						throw new RuntimeException("Cycle found");
+// 					} else {
+// 						System.err.println("[DEBUG] No cycles found");
+// 					}
+				}
+				
+// 				System.err.println("[DEBUG] 9: " + s);
 				FileUtils.writeLines(Paths.get(filepath).toFile(), lines, false);
 				System.err.println("[DEBUG] Successfully removed from file: " + iNodeToReparent);
 			} else {
-				System.err.println("[DEBUG] 10: Nothing got removed");
+				System.err.println("[DEBUG] 10: Couldn't find parent row for " + iNodeToReparent);
 				throw new RuntimeException("Nothing got removed");
 			}
+		}
+		
+		private static Map<String, String> parseLinesAndReverse(List<String> lines) {
+// 			System.err.println("[DEBUG] parseLinesAndReverse() - begin ");
+			Map<String, String> childToParent = new HashMap<String, String>();
+// 			System.err.println("[DEBUG] parseLinesAndReverse() - 1");
+			Pattern p = Pattern.compile("\"(.*)\",\"(.*)\"");
+// 			System.err.println("[DEBUG] parseLinesAndReverse() - 2");
+			for (String line : lines) {
+// 				System.err.println("[DEBUG] parseLinesAndReverse() - 3");
+				Matcher m = p.matcher(line);
+// 				System.err.println("[DEBUG] parseLinesAndReverse() - 4");
+				if (!m.find()) {
+					System.err.println("[DEBUG] parseLinesAndReverse() - 4.01 no match:  " + line);
+					continue;
+				}
+				String parent  = "";
+				try {
+					parent = m.group(1);
+				} catch (Exception e) {
+				
+					System.err.println("[DEBUG] parseLinesAndReverse() - 4.1 " + line);
+					e.printStackTrace();
+					throw e;
+				}
+				
+// 								System.err.println("[DEBUG] parseLinesAndReverse() - 5");
+				String child = m.group(2);
+// 								System.err.println("[DEBUG] parseLinesAndReverse() - 6");
+// 				System.err.println("[DEBUG] parent = " + parent);
+// 				System.err.println("[DEBUG] child = " + child);
+				if (childToParent.containsKey(child)) {
+					if (!childToParent.get(child).equals(parent)) {
+						System.err.println("[WARNING] duplicate line (ideally it shouldn't have):  " + line);
+						System.err.println("[DEBUG] Child already has a parent:  " + child);
+						System.err.println("[DEBUG] Parent is:  " + childToParent.get(child));
+						System.err.println("[DEBUG] Attempted to change parent to:  " + parent);
+						throw new RuntimeException("Child already has a parent " + child);
+					}
+				}
+				childToParent.put(child, parent);
+			}
+// 			System.err.println("[DEBUG] parseLinesAndReverse() - end ");
+			return childToParent;
 		}
 
 		private static List<String> getFileLines(String filepath) throws IOException {
 			System.out
-					.println("HttpCsvGraphMoveNodeUp.MyResource.getFileLines()");
+					.println("HttpCsvGraphReparent.MyResource.getFileLines()");
 			try {
 				return ImmutableList.copyOf(FileUtils.readLines(new File(
 						filepath), Charset.defaultCharset()));
@@ -211,7 +243,7 @@ public class HttpCsvGraphMoveNodeUp {
 		private List<String> removeRelationshipWithParent(String iChildNodeToRemove,
 				List<String> beforeRemoval) {
 			System.out
-					.println("HttpCsvGraphMoveNodeUp.MyResource.removeRelationshipWithParent()");
+					.println("HttpCsvGraphReparent.MyResource.removeRelationshipWithParent() - " + iChildNodeToRemove);
 			List<String> lines = new LinkedList<String>();
 			lines.addAll(beforeRemoval);
 			try {
@@ -220,7 +252,7 @@ public class HttpCsvGraphMoveNodeUp {
 					if (line.endsWith("\"" + iChildNodeToRemove + "\"")) {
 						System.err.println("[DEBUG] 6: " + iChildNodeToRemove);
 						lines.remove(line);
-						System.err.println("[DEBUG] 6.5: " + iChildNodeToRemove);
+// 						System.err.println("[DEBUG] 6.5: " + iChildNodeToRemove);
 					}
 				}
 			} catch (Exception e) {
