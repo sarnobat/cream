@@ -1,0 +1,7 @@
+"http://localhost:8000/Teju/69827_447906272551_530162551_5106741_4485558_n.jpg","http://localhost:8000/Teju/69827_447906272551_530162551_5106741_4485558_n.jpg"
+"http://localhost:8000/_-1/4427_616744332253_214565_35712267_4426653_n.jpg","http://localhost:8000/_-1/n1073670022_30158124_5458.jpg"
+"http://localhost:8000/duplicates/100000844909172_428033-001.jpg","http://localhost:8000/_-1/4427_616744332253_214565_35712267_4426653_n.jpg"
+"http://localhost:8000/_-1/4427_616744332253_214565_35712267_4426653_n.jpg","http://localhost:8000/duplicates/100000844909172_428033-001.jpg"
+"http://localhost:8000/duplicates/100000844909172_428033-001.jpg","http://localhost:8000/Priyanka/n214565_33383151_9884.jpg"
+"http://localhost:8000/002.jpg","http://localhost:8000/vandita3.jpg"
+"http://localhost:8000/Priyanka/n214565_33383151_9884.jpg","http://localhost:8000/002.jpg"

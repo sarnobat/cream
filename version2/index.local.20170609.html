@@ -4,9 +4,9 @@
 	<link rel="shortcut icon" href="http://netgear.rohidekar.com/static/icons/skin/ball/ball_009.png" type="image/x-icon" />
 	<meta charset="utf-8" />
 
-	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
-	<script src="http://netgear.rohidekar.com/cream/jsLouvain.js" type="text/JavaScript"></script>
+	<script src="/js/jquery/1.9.1/jquery.min.js"></script>
+	<script src="/d3/d3.min.js"></script>
+	<script src="/d3/jsLouvain.js" type="text/JavaScript"></script>
 </head>
 <style>
   svg {
@@ -23,6 +23,8 @@
 
 <script>
 var CONTENT_URL = "http://netgear.rohidekar.com:44452";
+var MAKE_RELATIONSHIP_URL = "http://netgear.rohidekar.com:44475"; // this is simply httpcat
+
 // Need to change this in the CSS too
 var height = 800;
 var force;
@@ -76,10 +78,10 @@ function rerender() {
 	parents = {};
 	hoveredLineId;
 	limit = 20;
-	
-	var dir = window.location.href.replace('index.html','');
-	d3.text(dir  + "nodes.txt", function(error, nodes) {
-	d3.text(dir  + "heap.txt?t=" + Math.random(), function(error, data1) {
+
+	var dir = window.location.href.replace('index.html','');	
+	d3.text(dir  + "nodes_local.txt", function(error, nodes) {
+	d3.text(dir  + "heap_local.txt?t=" + Math.random(), function(error, data1) {
 
 		// add a header so we can parse the data
 		createNetwork(
@@ -155,7 +157,7 @@ function createNetwork(iEdges, iNodes) {
 	singleclickhelper(nodesWithNoParents[0].id);
 	var heads = heads1;
 	var acc = [];
-	var pairsHtml = Object.keys(heads).map(function(key, index) {
+	var pairsHeadsHtml = Object.keys(heads).map(function(key, index) {
 		var srcLeft;
 		if (key.startsWith('http')) {
 			srcLeft  = key;
@@ -170,9 +172,59 @@ function createNetwork(iEdges, iNodes) {
 		}
 		return "<span><img src='"+ escapeQuotes(srcLeft) +"' height=150><img src='"+ escapeQuotes(srcRight) +"' height=150><br><button onclick='makeRelationship(\""+escapeQuotes(key)+"\",\""+escapeQuotes(heads[key])+"\");removePair(this)'>left higher</button><button onclick='makeRelationship(\""+escapeQuotes(heads[key])+"\",\""+escapeQuotes(key)+"\"); removePair(this)'>right higher</button><br></span>";
 	}).reduce(function (acc, pair) { return acc + "<br>" + pair;}, []);
-	$("#pairs").html(pairsHtml);
+	$("#pairs_heads").html(pairsHeadsHtml);
+	
+	// --------------------------- NOT USEFUL - begin ------------------------------------
+	//
+	// make relationship between:
+	//
+	// 1) a node without a parent and 
+	// 2) a node that already is part of a tree.
+	//
+	var pairsTreeHtml = "";
+	var nonOrphans = oEdges.map(function(edge){ return edge.target.id; });
+	var heads = nodesWithNoParents.map(function(node) { return node.id; });
 
+	var singletons = oNodes.map(function(node) {return node.id;} ).diff(nonOrphans);
+	var orphans = singletons.concat(heads);
+
+	for (var i = 0; i < Math.min(orphans.length, nonOrphans.length); i++) {
+		// remove this once you're on wifi
+		if (i > 20) {
+			break;
+		}
+		var orphan = orphans[i];
+		var nonOrphan = nonOrphans[i];
+		
+		var srcLeft;
+		if (orphan.startsWith('http')) {
+			srcLeft  = orphan;
+		} else {
+			srcLeft = CONTENT_URL + orphan;
+		}
+		var srcRight;
+		console.debug('nonOrphan = ' + nonOrphan);
+		if (nonOrphan.startsWith('http')) {
+			srcRight = nonOrphan;
+		} else {
+			srcRight = CONTENT_URL + nonOrphan;
+		}
+		
+		// shouldn't be null
+		var grandparent = parents[nonOrphan];
+		if (grandparent == null) {
+			alert("This shouldn't happen");
+		}
+		// Only the 1st button needs to preserve the parent
+		pairsTreeHtml += "<span><img src='"+ escapeQuotes(srcLeft) +"' height=150><img src='"+ escapeQuotes(srcRight) +"' height=150><br><button onclick='makeRelationshipAndUpdateParent(\""+escapeQuotes(srcLeft)+"\",\""+escapeQuotes(srcRight) +"\",\""+escapeQuotes(grandparent) + "\");removePair(this)'>left higher</button><button onclick='makeRelationship(\""+escapeQuotes(srcRight)+"\",\""+escapeQuotes(srcLeft)+"\"); removePair(this)'>right higher</button><br></span>";
+	}
+	$("#pairs_tree").html(pairsTreeHtml);
+	// --------------------------- NOT USEFUL - end ------------------------------------
 }
+
+Array.prototype.diff = function(a) {
+    return this.filter(function(i) {return a.indexOf(i) < 0;});
+};
 
 // Do not encode plusses etc, that's done by encodeURIComponent.
 // This is just so onclick="..text.." quotes doesn't prematurely get closed
@@ -506,7 +558,7 @@ function createForceNetwork(nodes, edges) {
 						// redraw
 				})
 				.fail(function() {
-								alert( "error" );
+								alert( "error 560" );
 				})
 				.always(function() {
 								//alert( "complete" );
@@ -557,7 +609,7 @@ function createForceNetwork(nodes, edges) {
 
 					})
 					.fail(function() {
-						alert( "error" );
+						alert( "error 611" );
 					})
 					.always(function() {
 					});
@@ -667,7 +719,7 @@ function createForceNetwork(nodes, edges) {
 				}
 			
 				var saveToFile = '"'+src.id+'","'+dest.id+'"';
-				var url = "http://netgear.rohidekar.com:44475?value=" + encodeURIComponent(saveToFile);
+				var url = "http://localhost:4475" + "?value=" + encodeURIComponent(saveToFile);
 
 				var jqxhr = $.ajax(url)
 					.done(function() {
@@ -679,7 +731,7 @@ function createForceNetwork(nodes, edges) {
 						edges.push(newEdge);
 					})
 					.fail(function() {
-							alert( "error" );
+							alert( "error 733" );
 					})
 					.always(function() {
 					});							
@@ -753,7 +805,7 @@ function promote(toDemote, all) {
 		.done(function() {
 		})
 		.fail(function() {
-			alert( "error" );
+			alert( "error 807" );
 		})
 		.always(function() {
 		});	
@@ -767,7 +819,7 @@ function demote(toDemote, all) {
 		.done(function() {
 		})
 		.fail(function() {
-			alert( "error" );
+			alert( "error 821" );
 		})
 		.always(function() {
 		});	
@@ -782,16 +834,55 @@ function reparent(child, newParent) {
 		.done(function() {
 		})
 		.fail(function() {
-			alert( "error" );
+			alert( "error 836" );
 		})
 		.always(function() {
 		});	
 }
 
+function makeRelationshipAndUpdateParent(newParent, child, grandparent) {
+	// First reparent the child to the new parent
+	var url1 = "http://localhost:4480?child=" + encodeURIComponent(unescapeQuotes(child))  + "&newParent=" + encodeURIComponent(unescapeQuotes(newParent));
+
+	var jqxhr = $.ajax(url1)
+		.done(function() {
+			console.debug("4480 success");
+			// second, incorporate the parent with the grandparent
+			var saveToFile = 
+		//		'"' + unescapeQuotes(parent) 	  +'","'+ unescapeQuotes(child) +'"\n'
+				'"' + unescapeQuotes(grandparent) +'","'+ unescapeQuotes(newParent) +'"';
+			;
+			var url = "http://localhost:4475" + "?value=" + encodeURIComponent(saveToFile);
+
+			var jqxhr = $.ajax(url)
+				.done(function() {
+		
+					// not that important
+					var newEdge = {				
+						id : newParent + "-" + child,
+						source : newParent,
+						target : child
+					};
+					allEdges.push(newEdge);
+				})
+				.fail(function() {
+						alert( "error 868" );
+				})
+				.always(function() {
+				});	
+		})
+		.fail(function() {
+			alert( "error 874" );
+		})
+		.always(function() {
+		});	
+}
+	
+
 function makeRelationship(parent, child) {
 
 	var saveToFile = '"'+ unescapeQuotes(parent) +'","'+ unescapeQuotes(child) +'"';
-	var url = "http://netgear.rohidekar.com:44475?value=" + encodeURIComponent(saveToFile);
+	var url = "http://localhost:4475" + "?value=" + encodeURIComponent(saveToFile);
 
 	var jqxhr = $.ajax(url)
 		.done(function() {
@@ -803,7 +894,7 @@ function makeRelationship(parent, child) {
 			allEdges.push(newEdge);
 		})
 		.fail(function() {
-				alert( "error" );
+				alert( "error 896" );
 		})
 		.always(function() {
 		});	
@@ -893,7 +984,8 @@ function singleclickhelper(did) {
 					}
 				}
 				if (Object.keys(allChildren).length == 0) {
-					debugger;
+					//debugger;
+					console.debug('error');
 				}
 				var links = [];
 				//
@@ -941,7 +1033,7 @@ function singleclickhelper(did) {
 
 			})
 			.fail(function() {
-				alert( "error" );
+				alert( "error 1035" );
 			})
 			.always(function() {
 			});
@@ -999,7 +1091,12 @@ function singleclickhelper(did) {
 <div id="pairs_at_level"></div>
 <hr>
 <h2>Pair comparison (heads)</h2>
-<div id="pairs"></div>
+<div id="pairs_heads"></div>
+
+
+<h2>Pair comparison (head and tree)</h2>
+Don't use this. When we incorporate a high quality new item into the tree it will be lower than the parent of the random non-orphan we're comparing with. It was worth a shot.
+<div id="pairs_tree"></div>
 
 <h3>TODO</h3>
 * subtraction to find head nodes is better done in javascript rather than in bash, because rerunning the server side script (diff/comm) each time a change is made will be cumbersome<br>
