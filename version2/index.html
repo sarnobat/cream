@@ -1,0 +1,1018 @@
+<html>
+<head>
+	<title>Edge creation</title>
+	<link rel="shortcut icon" href="http://netgear.rohidekar.com/static/icons/skin/ball/ball_009.png" type="image/x-icon" />
+	<meta charset="utf-8" />
+
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
+	<script src="http://netgear.rohidekar.com/cream/jsLouvain.js" type="text/JavaScript"></script>
+</head>
+<style>
+  svg {
+    height: 800px;
+    width: 800px;
+    border: 1px solid red;
+  }
+  
+  .candidate {
+  	height :200px;
+  }
+</style>
+<body>
+
+<script>
+var CONTENT_URL = "http://netgear.rohidekar.com:44452";
+// Need to change this in the CSS too
+var height = 800;
+var force;
+var shifted = false;
+
+$(document).on('keyup keydown', function(e){
+        shifted = e.shiftKey;
+        if (shifted) {
+                document.body.style.background = "#DDDDDD";
+        } else {
+                document.body.style.background = "white";       
+        }
+});
+
+//----------------------------------------------------------------------------------------
+// Data acquisition
+//----------------------------------------------------------------------------------------
+
+// d3.text(window.location.href  + "nodes.txt", function(error, nodes) {
+// 	d3.text(window.location.href  + "heap.txt?t=" + Math.random(), function(error, data1) {
+// 
+// 		// add a header so we can parse the data
+// 		createNetwork(
+// 			d3.csv.parse("src,dest\n" + data1).map(function(heapEntry) {
+// 				return {
+// 					id : heapEntry.src + "-" + heapEntry.dest,
+// 					source: heapEntry.src,
+// 					target: heapEntry.dest
+// 				};
+// 			}),
+// 			d3.csv.parseRows(nodes).map(function(node) {
+// 				return node[0];
+// 			}));
+// 	});
+// });
+
+
+
+var outgoingEdgeCounts = {};
+var incomingEdgeCounts = {};
+var parents = {};
+var hoveredLineId;
+var limit = 20;
+
+function rerender() {
+	if ($("svg")[0] != null) {
+		$("svg")[0].innerHTML = '';
+	}
+	outgoingEdgeCounts = {};
+	incomingEdgeCounts = {};
+	parents = {};
+	hoveredLineId;
+	limit = 20;
+	
+	var dir = window.location.href.replace('index.html','');
+	d3.text(dir  + "nodes.txt", function(error, nodes) {
+	d3.text(dir  + "heap.txt?t=" + Math.random(), function(error, data1) {
+
+		// add a header so we can parse the data
+		createNetwork(
+			d3.csv.parse("src,dest\n" + data1).map(function(heapEntry) {
+				return {
+					id : heapEntry.src + "-" + heapEntry.dest,
+					source: heapEntry.src,
+					target: heapEntry.dest
+				};
+			}),
+			d3.csv.parseRows(nodes).map(function(node) {
+				return node[0];
+			}));
+		});
+	});
+}
+
+rerender();
+
+// TODO: Rename to createNodes()
+function createNetwork(iEdges, iNodes) {
+	
+	//------------------------------------------------------------------------------------
+	// Nodes
+	//------------------------------------------------------------------------------------
+
+	var nodeHashFromNodes = createNodeHashFromNodes(iNodes);
+	var nodeHashFromEdges = createNodeHashFromEdges(iEdges);
+	var nodeHash = Object.assign({}, nodeHashFromNodes, nodeHashFromEdges);
+	var oNodes = getValues(nodeHash);
+	
+	//------------------------------------------------------------------------------------
+	// Edges
+	//------------------------------------------------------------------------------------
+	
+	var oEdges = getEdges(iEdges, nodeHash);
+	
+	// Add weights - number of outgoing edges
+	// Don't try to put them inside the node data. D3 maintains its own,
+	// and it's undirected so you don't get what you want.
+	incomingEdgeCounts = getIncomingEdgeCounts(oEdges);
+	outgoingEdgeCounts = getOutgoingEdgeCounts(oEdges);
+
+	parents = getParents(oEdges);
+
+	oNodes.forEach(function(n2) {
+		outgoingEdgeCounts[n2.id] = 0;
+		incomingEdgeCounts[n2.id] = 0;
+	});
+	
+	// Add outgoingEdgeCounts - number of outgoing edges
+	oEdges.forEach(function(edge) {
+		outgoingEdgeCounts[edge.source.id]++;
+		incomingEdgeCounts[edge.target.id]++;
+		
+		if (incomingEdgeCounts[edge.target.id] > 1) {
+			debugger;
+		}
+	});
+
+	createForceNetwork(oNodes, oEdges);
+	
+	var nodesWithNoParentsUnshuffled = getNodesWithNoParent(oEdges, oNodes);
+	console.debug(nodesWithNoParentsUnshuffled);
+	var nodesWithNoParents = shuffle(nodesWithNoParentsUnshuffled);
+	console.debug(nodesWithNoParents);
+	var heads1 = {};
+	for (var i = 0; i < nodesWithNoParents.length - 1; i += 2) {
+		var u = nodesWithNoParents[i].id;
+		var v = nodesWithNoParents[i+1].id;
+		heads1[u] = v;
+	}
+	singleclickhelper(nodesWithNoParents[0].id);
+	var heads = heads1;
+	var acc = [];
+	var pairsHtml = Object.keys(heads).map(function(key, index) {
+		var srcLeft;
+		if (key.startsWith('http')) {
+			srcLeft  = key;
+		} else {
+			srcLeft = CONTENT_URL + key;
+		}
+		var srcRight;
+		if (heads[key].startsWith('http')) {
+			srcRight = heads[key];
+		} else {
+			srcRight = CONTENT_URL + heads[key];
+		}
+		return "<span><img src='"+ escapeQuotes(srcLeft) +"' height=150><img src='"+ escapeQuotes(srcRight) +"' height=150><br><button onclick='makeRelationship(\""+escapeQuotes(key)+"\",\""+escapeQuotes(heads[key])+"\");removePair(this)'>left higher</button><button onclick='makeRelationship(\""+escapeQuotes(heads[key])+"\",\""+escapeQuotes(key)+"\"); removePair(this)'>right higher</button><br></span>";
+	}).reduce(function (acc, pair) { return acc + "<br>" + pair;}, []);
+	$("#pairs").html(pairsHtml);
+
+}
+
+// Do not encode plusses etc, that's done by encodeURIComponent.
+// This is just so onclick="..text.." quotes doesn't prematurely get closed
+function escapeQuotes(text) {
+	return text.replace(/"/g, '&#34;').replace(/'/g, "&#39;");
+}
+
+function unescapeQuotes(text) {
+	return text.replace(/&#34;/g, '"').replace(/&#39;/g, "'");
+}
+
+function shuffle(a) {
+    var j, x, i;
+    for (i = a.length; i; i--) {
+        j = Math.floor(Math.random() * i);
+        x = a[i - 1];
+        a[i - 1] = a[j];
+        a[j] = x;
+    }
+    return a;
+}
+
+function removeElement(buttonElement) {
+	buttonElement.parentElement.parentElement.removeChild(buttonElement.parentElement);
+}
+
+function removePair(buttonElement) {
+	buttonElement.parentElement.parentElement.removeChild(buttonElement.parentElement);
+}
+
+function getValues(objects) {
+	var values = [];
+	for(var key in objects) {
+		values.push(objects[key]);
+	}
+	return values;
+}
+
+function createNodeHashFromNodes(iNodes) {
+	var oNodeHash = {};
+	iNodes.forEach(function(n){
+		if (oNodeHash.hasOwnProperty(n)) {
+		} else {
+			oNodeHash[n] = mknode(n);
+		}
+	});
+	return oNodeHash;
+}
+
+function createNodeHashFromEdges(iEdges) {
+	var oNodeHash = {};
+	iEdges.forEach(function(e){
+		if (oNodeHash.hasOwnProperty(e.source)) {
+		} else {
+			oNodeHash[e.source] = mknode(e.source);
+		}
+	});
+	iEdges.forEach(function(e){
+		if (oNodeHash.hasOwnProperty(e.target)) {
+		} else {
+			oNodeHash[e.target] = mknode(e.target);
+		}
+	});	
+	return oNodeHash;
+}
+
+function getNodesFromEdges(iEdges, nodeHash) {
+	var oNodes = [];
+
+	iEdges.forEach(function(edge) {
+		oNodes.push(edge.source.id);
+		oNodes.push(edge.target.id);
+	});
+	var oNodes2 = oNodes1.removeDuplicates();
+
+	oNodes2.forEach(function(edge) {
+	
+		if (nodeHash.hasOwnProperty(edge.source)) {
+		} else {
+			nodeHash[edge.source] = edge.source;
+		}
+	});
+	oNodes2.forEach(function(edge) {
+	
+		if (nodeHash.hasOwnProperty(edge.target)) {
+		} else {
+			nodeHash[edge.target] = edge.target;
+		}
+	});
+	var oNodes = [];
+	return oNodes;
+}
+
+function getNodesWithNoParent(iEdges, iNodes) {
+	var parents = 	Object.keys(iEdges).map(function(k){return iEdges[k].source});
+	var children = 	Object.keys(iEdges).map(function(k){return iEdges[k].target});
+	var allNodes = parents.concat(iNodes);
+	// PERFORMANCE. We need a faster check for membership than indexof
+	var heads = allNodes.filter(function(x) { 
+		return children.indexOf(x) < 0 
+	});
+	return heads.removeDuplicates();
+}
+
+Array.prototype.removeDuplicates = function () {
+    return this.filter(function (item, index, self) {
+        return self.indexOf(item) == index;
+    });
+};
+
+function buildNodes(iNodes) {
+	var oNodes1 = [];
+
+	// This returns null so no chaining possible here
+	iNodes.forEach(function(node) {
+		oNodes1.push({
+			id : node,
+			label : node,
+		});
+	});
+	return oNodes1;
+}
+
+function buildNodesMap(iNodes) {
+	var allNodesById = {};
+
+	iNodes.forEach(function (obj) {
+		allNodesById[obj.id] = obj;
+	});
+	return allNodesById;
+}
+
+function getEdges(iEdges, nodeHash) {
+
+	return iEdges.map(function(edge) {
+	
+		if (nodeHash[edge.source] == null) {
+			debugger;
+		}
+		if (nodeHash[edge.target] == null) {
+			debugger;
+		}
+		return {
+				id : edge.source + "-" + edge.target,
+				source : nodeHash[edge.source],
+				target : nodeHash[edge.target],
+			};
+	});
+}
+
+// Be careful about creating new nodes. They are distinct objects, which causes missing
+// nodes at the ends of links if we try to remove duplicates
+function mknode(d) {
+	return {id : d };
+}
+
+function getOutgoingEdgeCounts(iEdges) {
+	iEdges.forEach(function(edge) {
+		outgoingEdgeCounts[edge.source.id] = 0;
+		outgoingEdgeCounts[edge.target.id] = 0;
+	});
+	return outgoingEdgeCounts;
+}
+
+function getIncomingEdgeCounts(iEdges) {
+	var incomingEdgeCounts = {};
+	if (iEdges == null) {
+		debugger;
+	}
+	iEdges.forEach(function(edge) {
+		incomingEdgeCounts[edge.source.id] = 0;
+		incomingEdgeCounts[edge.target.id] = 0;
+	});
+	return incomingEdgeCounts;
+}
+
+function getParents(iEdges) {
+	var parents = {};
+	iEdges.forEach(function(edge) {
+		parents[edge.target.id] = edge.source.id;
+	});
+	return parents;
+}
+
+
+//----------------------------------------------------------------------------------------
+// SVG manipulation
+//----------------------------------------------------------------------------------------
+
+var forbiddenCreation = false;
+var allEdges;
+
+// Transform the node and link data into svg elements
+function createForceNetwork(nodes, edges) {
+
+	allEdges = edges;
+	force = d3.layout.force()
+		.nodes(nodes)
+		.links(edges)
+		.size([800, height ])
+		.charge(-500)
+		.chargeDistance(100)
+		.gravity(0.05).on("tick", tick);
+
+
+
+	// Transform the link data into svg elements	
+	{
+		var edgeEnter = d3.select("svg.main")
+			.selectAll("g.edge")
+			.data(edges, function(d) {
+				return d.id;
+			})
+			.enter()
+			.append("g")
+			.attr("class", "edge")
+			.attr("id", function(d) {
+				return d.id;
+			});
+
+		edgeEnter
+			.append("line")
+			.style("stroke-width", function(d) {
+				return d.border ? "3px" : "1px";
+			}).style("stroke", "black")
+			.on("mouseover", function(d) {d3.select(this).style("stroke","red").style("stroke-width","8px");})
+			.on("mouseout", function(d) {d3.select(this).style("stroke","black").style("stroke-width","1px");})
+			.on("dblclick", function(d) {
+				//var linkid = '"' + d.source.id + '","' + d.target.id + '"'; 
+				//console.debug(linkid);
+				removeLink(d.source.id, d.target.id);
+			});
+	}
+	
+	// Transform the node data into svg elements
+	{
+		var nodeEnter = d3.select("svg.main").selectAll("g.node").data(nodes,
+			function(d) {
+				return d.id;
+			}).enter().append("g").attr("class", "node")
+			.on("mouseover", mouseover)
+			.on("mouseout", mouseout)
+			.on("dblclick", doubleclick)
+			.on("click", singleclick)
+			.call(force
+				.drag().on("drag", drag)
+				.on("dragend", dragend)
+				.on("dragstart", dragstart));
+
+		nodeEnter.append("circle")
+			.attr("r", 16)
+			.attr("class", "background")
+			.style("fill", function (d) {  return "lightgreen";})
+			.style("opacity", 0)
+			.style("pointer-events", "none");
+
+		nodeEnter.append("circle").attr("r", 8)
+			.attr("class", "foreground")
+			.style("fill", function(d) { 
+				if (outgoingEdgeCounts[d.id] == 0 && incomingEdgeCounts[d.id] == 0) { return "green"; } 
+				else if (outgoingEdgeCounts[d.id] > 3 && incomingEdgeCounts[d.id] == 0){ return "blue"; }
+				else if (outgoingEdgeCounts[d.id] > 3 && incomingEdgeCounts[d.id] > 0) { return "red";}
+				else if (outgoingEdgeCounts[d.id] == 3 && incomingEdgeCounts[d.id] > 0) { return "orange";}
+				else if (outgoingEdgeCounts[d.id] == 2 && incomingEdgeCounts[d.id] > 0) { return "yellow";}
+				else if (incomingEdgeCounts[d.id] == 1) { return "#eeeeee"; } 
+				else if (incomingEdgeCounts[d.id] > 1) { return "red"; } 
+				else { return "#888888"; }
+			})
+			.style("stroke", function(d) { if (incomingEdgeCounts[d.id] > 0) { return "green" ;} else {  return "black"; } } )
+			.style("stroke-width", function(d) {
+				if (outgoingEdgeCounts[d.id] == 0 && incomingEdgeCounts[d.id] == 0) { return "0px"; } 
+				else if (outgoingEdgeCounts[d.id] > 3 && incomingEdgeCounts[d.id] == 0){ return "0px"; }
+				else if (outgoingEdgeCounts[d.id] > 3 && incomingEdgeCounts[d.id] > 0) { return "0px";}
+				else if (outgoingEdgeCounts[d.id] == 3 && incomingEdgeCounts[d.id] > 0) { return "0px";}
+				else if (outgoingEdgeCounts[d.id] == 2 && incomingEdgeCounts[d.id] > 0) { return "0px";}
+				else if (outgoingEdgeCounts[d.id] == 0 && incomingEdgeCounts[d.id] == 1) { return "3px"; } 
+				else if (incomingEdgeCounts[d.id] == 1) { return "2px"; } 
+				else if (incomingEdgeCounts[d.id] > 1) { return "0px"; } 
+				else { return "0px"; }
+			})
+			.style("r", function(d) {
+				if (incomingEdgeCounts[d.id] == 0 && outgoingEdgeCounts[d.id] > 0) {  return "12px";  } 
+				else if (incomingEdgeCounts[d.id] == 0 ) { return "8px"; } 
+				else { return "6px"; }
+			});
+
+		nodeEnter.append("text")
+			.style("text-anchor", "middle")
+			.attr("y", 3)
+			.style("font-size", "8px")
+			.text(function(d) {
+				return "";
+			})
+			.style("pointer-events", "none");
+	}
+
+	// Transform the link data into svg elements	
+	{
+		var edgeEnter = d3.select("svg.main")
+			.selectAll("g.edge")
+			.data(edges, function(d) {
+				return d.id;
+			})
+			.enter()
+			.append("g")
+			.attr("class", "edge");
+
+		edgeEnter
+			.append("line")
+			.style("stroke-width", function(d) {
+				return d.border ? "3px" : "1px";
+			}).style("stroke", "black" );
+	}
+
+	force.start();
+	
+
+	function removeLink(sourceid, targetid) {
+		var linkRow = '"' + sourceid + '","' + targetid + '"'; 
+		var url = "http://netgear.rohidekar.com:44476?value=" + encodeURIComponent(linkRow);
+
+		var linkId = sourceid + "-" + targetid; 
+		var jqxhr = $.ajax(url)
+				.done(function() {
+					d3.select("svg.main")
+						.selectAll("g.edge")
+						.filter(function(edge){
+							return edge.id === linkId;
+						})
+						.remove();
+						// redraw
+				})
+				.fail(function() {
+								alert( "error" );
+				})
+				.always(function() {
+								//alert( "complete" );
+				});
+	}
+
+	function mouseover(d) {
+		var url = d.id;		
+		if (d.id.startsWith('http')) {
+		} else {
+			url = "http://netgear.rohidekar.com:44452" + d.id ;		
+		}
+		document.getElementById('preview').innerHTML = "<img height=300 src='" + url + "'>";
+		document.getElementById('previewtext').innerHTML = d.id;
+	}	
+
+	function mouseout(d) {
+	}
+	
+
+
+	function doubleclick(d) {
+	
+		var toBeRemoved = [];
+		for (var key in parents) {
+			var idToRemove;
+			if (parents[key] === d.id) {
+				toBeRemoved.push("\""+d.id + "\",\""+ key+ "\"");
+			} else if (key === d.id) {
+				toBeRemoved.push("\"" + parents[key]  + "\",\""+  d.id+ "\"");
+			} else {
+			}
+		}
+	
+		for (var toBeRemovedIter in toBeRemoved) {
+		
+			var url = "http://netgear.rohidekar.com:44476?value=" + encodeURIComponent(toBeRemoved[toBeRemovedIter]);
+
+			var jqxhr = $.ajax(url)
+					.done(function() {
+					
+						d3.select("svg.main")
+							.selectAll("g.edge")
+							.filter(function(edge){
+								return edge.id.startsWith(d.id + "-") || edge.id.endsWith("-" + d.id) ;
+							})
+							.remove();					
+
+					})
+					.fail(function() {
+						alert( "error" );
+					})
+					.always(function() {
+					});
+		}
+	}
+
+	function dragstart() {
+		nodes.forEach(function(node) {
+			node.fixed = true;
+		});
+	}
+
+	function drag(d) {
+		var nodeDom = this;		
+	
+		// Check for overlapping nodes
+		var foundOverlap = false;
+		var otherNodeNearby;
+		nodes.forEach(function(otherNode) {
+		
+			var distance = Math.sqrt(Math.pow(otherNode.x - d.x, 2)
+					+ Math.pow(otherNode.y - d.y, 2));
+			if (otherNode != d && distance < 16) {
+				foundOverlap = true;
+				otherNodeNearby = otherNode;
+			}
+		});
+		
+		if (shifted) {
+			src = d;
+			dest = otherNodeNearby;
+		} else {
+			src = otherNodeNearby;
+			dest = d;
+		}
+
+		var node = d3
+			.selectAll("circle")
+			.style("r", function(d) {
+				if (incomingEdgeCounts[d.id] == 1 && outgoingEdgeCounts[d.id] == 0) { 
+					return "12px"; 
+				} else if (incomingEdgeCounts[d.id] == 0 ) {
+					return "8px";
+				} else {
+					return "6px";
+				}
+			});
+
+		// Show the green highlight if we are overlapping
+		if (foundOverlap == true) {
+			var node = d3.select(nodeDom)
+				.select("circle.background")
+				.style("opacity", 0.5);
+			if (incomingEdgeCounts[dest.id] > 0) {
+				forbiddenCreation = true;
+				node.style("fill", "red");
+			} else {		
+				node.style("fill", "lightgreen");
+				document.getElementById('higher').innerHTML = "<img class='candidate' src=\"http://netgear.rohidekar.com:44452" + src.id + "\">" + src.id;
+				document.getElementById('lower').innerHTML = "<img class='candidate' src=\"http://netgear.rohidekar.com:44452" + dest.id + "\">" + dest.id;
+			}
+		} else {
+			d3.select(nodeDom).select("circle.background").style("opacity", 0);
+		}
+	}
+
+	function dragend(d) {
+	
+	
+		force.stop();
+
+		d3.selectAll("circle.background").style("opacity", 0);
+		
+		d3.selectAll("circle")
+			.style("r", function(d) {
+				if (incomingEdgeCounts[d.id] == 0 && outgoingEdgeCounts[d.id] == 1) { 
+					return "12px"; 
+				} else if (incomingEdgeCounts[d.id] == 0 ) {
+					return "8px";
+				} else {
+					return "6px";
+				}
+			});
+
+		nodes.forEach(function(otherNode) {
+			otherNode.fixed = false;
+			var distance = Math.sqrt(Math.pow(otherNode.x - d.x, 2)
+					+ Math.pow(otherNode.y - d.y, 2));
+			if (otherNode != d && distance < 16) {
+				var src;
+				var dest;
+				if (shifted) {
+					src = d;
+					dest = otherNode;
+				} else {
+					src = otherNode;
+					dest = d;
+				}
+			
+			
+				if (shifted) {
+				} else {
+					if (incomingEdgeCounts[dest.id] > 0) {
+						alert("not allowed - already has an incoming edge: " + d.id);		
+						return;
+					}
+				}
+			
+				var saveToFile = '"'+src.id+'","'+dest.id+'"';
+				var url = "http://netgear.rohidekar.com:44475?value=" + encodeURIComponent(saveToFile);
+
+				var jqxhr = $.ajax(url)
+					.done(function() {
+						var newEdge = {				
+							id : src.id + "-" + dest.id,
+							source : src.id,
+							target : dest.id
+						};
+						edges.push(newEdge);
+					})
+					.fail(function() {
+							alert( "error" );
+					})
+					.always(function() {
+					});							
+			}
+		});
+		force.links(edges);
+
+		// Transform the new link data into svg elements
+		// (otherwise the new link will not be displayed)
+		{
+			var edgeEnter = d3.select("svg.main")
+				.selectAll("g.edge")
+				.data(edges, function(d) {
+					return d.id;
+				})
+				.enter()
+				.insert("g", "g.node")
+				.attr("class", "edge");
+
+			edgeEnter
+				.append("line")
+				.style("stroke-width", "1px")
+				.style("stroke", "black")
+				.style("pointer-events", "none");
+		}
+		
+		// I think it's better not to do this after creating an edge. The nodes keep wobbling
+		//force.start();
+
+	}
+
+	function tick(e) {
+
+		// Move the links to where the force algorithm recommends
+		{
+			d3.select("svg.main").selectAll("line")
+				.attr("x1", function(d) {
+					return d.source.x;
+				}).attr("y1", function(d) {
+					return d.source.y;
+				}).attr("x2", function(d) {
+					return d.target.x;
+				}).attr("y2", function(d) {
+					return d.target.y;
+				});
+		}
+
+		// Move the nodes (everything in the svg group) to where the algorithm
+		// dictates.
+		{
+
+			d3.select("svg.main")
+				.selectAll("g.node")
+
+				.attr("transform", function(d) {
+					return "translate(" + d.x + "," + d.y + ")";
+				});
+		}
+	}
+}
+
+function recharge() {
+	force.start();
+}
+
+function promote(toDemote, all) {
+
+	var url = "http://netgear.rohidekar.com:44479?value=" + toDemote ;
+
+	var jqxhr = $.ajax(url)
+		.done(function() {
+		})
+		.fail(function() {
+			alert( "error" );
+		})
+		.always(function() {
+		});	
+}
+
+function demote(toDemote, all) {
+
+	var url = "http://netgear.rohidekar.com:44478?value=" + toDemote ;
+
+	var jqxhr = $.ajax(url)
+		.done(function() {
+		})
+		.fail(function() {
+			alert( "error" );
+		})
+		.always(function() {
+		});	
+}
+
+
+function reparent(child, newParent) {
+
+	var url = "http://netgear.rohidekar.com:44480?child=" + encodeURIComponent(unescapeQuotes(child))  + "&newParent=" + encodeURIComponent(unescapeQuotes(newParent));
+
+	var jqxhr = $.ajax(url)
+		.done(function() {
+		})
+		.fail(function() {
+			alert( "error" );
+		})
+		.always(function() {
+		});	
+}
+
+function makeRelationship(parent, child) {
+
+	var saveToFile = '"'+ unescapeQuotes(parent) +'","'+ unescapeQuotes(child) +'"';
+	var url = "http://netgear.rohidekar.com:44475?value=" + encodeURIComponent(saveToFile);
+
+	var jqxhr = $.ajax(url)
+		.done(function() {
+			var newEdge = {				
+				id : parent + "-" + child,
+				source : parent,
+				target : child
+			};
+			allEdges.push(newEdge);
+		})
+		.fail(function() {
+				alert( "error" );
+		})
+		.always(function() {
+		});	
+}
+
+function singleclickhelper2 (imageElement) {
+	singleclickhelper(imageElement.src);
+}
+function singleclick(d) {
+	singleclickhelper(d.id);
+}
+
+function singleclickhelperParent(imageElement) {
+	var did = imageElement.src;
+	var parent = parents[did.replace(CONTENT_URL,'')];
+	var parent1 = decodeURIComponent(did.replace(CONTENT_URL,''));
+	var parent2 = parents[parent1];
+
+	
+	if (parent != null)  {
+		singleclickhelper(parent);
+	} else if (parent2 != null)  {
+		singleclickhelper(parent2);
+	} else {
+		$("#upResponse").text("This is the top level element");
+	}
+}
+
+function singleclickhelper(did) {
+
+	did = decodeURIComponent(did);
+
+	if (did.startsWith(CONTENT_URL)) {
+		console.debug('Developer warning: we should strip the http prefix from the asset if it is a local resource');
+		did = did.replace(CONTENT_URL,'');
+		//debugger;
+	}
+	
+	console.debug('singleclickhelper(): ' + did);
+	// For this simple httpgrep to work, we need to click on the common parent
+	var url = "http://netgear.rohidekar.com:44477?value=" + encodeURIComponent(did.replace(CONTENT_URL,''));
+
+	if (url.endsWith('IMG_0371.JPG')) {
+		debugger;
+	}
+	var jqxhr = $.ajax(url)
+			.done(function(response) {
+				$("#sort").text("");
+				$("#up").text("");
+				$("#upResponse").text("");
+				var url;
+				if (did.startsWith('http')) {
+					url = did;
+				} else {
+					url = CONTENT_URL + did;
+				}
+				$("#up").append("<img src='" + url + "' height=100 onclick='singleclickhelperParent(this)'>");
+				
+				var data = d3.csv.parse("parent,child\n" + response);  //now you have the header
+	
+				if (url.endsWith('IMG_0371.JPG')) {
+					debugger;
+				}
+				var allNodes = {};
+				for (var i = 0; i < data.length; i++) {
+					var entries = data[i];
+					allNodes[entries.child] = entries.child;
+				}
+				
+				var otherChildren = {};
+				for (var i in allNodes) {
+					var entries = allNodes[i];
+					if (entries === did.replace(CONTENT_URL,'')) {
+						// don't add the node to the list of candidate new parents
+					} else {
+						otherChildren[entries] = entries;
+					}
+				}
+
+				var allChildren = {};
+				for (var i = 0; i < Object.keys(allNodes).length; i++) {
+					var entries = Object.keys(allNodes)[i];
+					if (entries === did) {
+						// Don't add the common parent
+					} else {
+						allChildren[entries] = entries;
+					}
+				}
+				if (Object.keys(allChildren).length == 0) {
+					debugger;
+				}
+				var links = [];
+				//
+				// 
+				//
+				for (var i in allChildren) {
+					var entry = allChildren[i];
+					var url;
+					if (entry.startsWith('http')) {
+						url = entry;
+					} else {
+						url = CONTENT_URL + entry;
+					}
+					$("#sort").append("<td><img src='" + escapeQuotes(url)  + "' width=200 onclick='singleclickhelper2(this)'><br>"
+						+ "<button onclick='promote(\""+encodeURIComponent(entry)+"\",\""+encodeURIComponent(JSON.stringify(otherChildren))+"\"); removeElement(this)'>Move Up</button>"
+						+ "<button onclick='demote(\""+encodeURIComponent(entry)+"\",\""+encodeURIComponent(JSON.stringify(otherChildren))+"\"); removeElement(this)'>Move down</button></td>");
+				}
+				
+				//
+				//
+				//
+				var pairs = shuffle(Object.keys(allChildren));
+				$("#pairs_at_level").text("");
+				for (var i = 0; i < pairs.length - 1; i += 2) {
+					var entry = pairs[i];
+					var entry2 = pairs[i+1];
+					var url;
+					if (entry.startsWith('http')) {
+						url = entry;
+					} else {
+						url = CONTENT_URL + entry;
+					}
+					var url2;
+					if (entry.startsWith('http')) {
+						url2 = entry;
+					} else {
+						url2 = CONTENT_URL + entry2;
+					}
+
+
+					$("#pairs_at_level").append("<tr><td><img src='" + escapeQuotes(url)  + "' width=200 ><img src='" + escapeQuotes(url2)  + "' width=200 ><br>"
+						+ "<button onclick='reparent(\""+escapeQuotes(entry2)+"\",\""+escapeQuotes(entry)+"\"); removeElement(this)'>Left higher</button>"
+						+ "<button onclick='reparent(\""+escapeQuotes(entry)+"\",\""+escapeQuotes(entry2)+"\"); removeElement(this)'>Right higher</button></td></tr>");
+				}
+
+			})
+			.fail(function() {
+				alert( "error" );
+			})
+			.always(function() {
+			});
+}
+
+</script>
+<div id="viz">
+
+	<table>
+		<tr>
+			<td>
+				<div style="overflow : scroll; height : 500px; border : 1px dotted blue">
+					<svg class="main">
+					</svg>
+				</div>
+			</td>
+			<td>
+				<table>
+					<tr><td id="preview"></td></tr>
+					<tr><td id="previewtext"></td></tr>
+					<tr></tr>
+				</table>
+			</td>
+		</tr>
+	</table>
+
+	<br>
+	<button onclick="recharge()" >Recharge</button>
+	<br>
+	<br>
+	<br>
+	<button onclick="rerender()" >Rerender</button>
+	<br>
+	<br>
+	<br>
+	<a href="tree.html">HTML Tree (full)</a>
+	<br>
+	<span id="higher"></span>
+	<span id="lower"></span>
+</div>
+<br>
+<span id="highertext"></span>
+<span id="lowertext"></span>
+<hr>
+<h2>HTML Tree (clickable)</h2>
+<table>
+<tr><td id="up"></td></tr>
+<tr><td id="upResponse"></td></tr>
+
+<tr id="sort"></tr>
+</table>
+<hr>
+
+<h2>Pair comparison (at clicked level)</h2>
+<div id="pairs_at_level"></div>
+<hr>
+<h2>Pair comparison (heads)</h2>
+<div id="pairs"></div>
+
+<h3>TODO</h3>
+* subtraction to find head nodes is better done in javascript rather than in bash, because rerunning the server side script (diff/comm) each time a change is made will be cumbersome<br>
+<h3>Hints</h3>
+Drag the lesser one to the better one<br>
+Lighter grey means we can't drag it (but we can drag something else onto it).<br>
+
+</body>
+<footer>
+
+</footer>
+
+
+
+</html>
+
