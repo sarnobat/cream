@@ -168,10 +168,29 @@ function createNetwork(iEdges, iNodes) {
 		} else {
 			srcRight = CONTENT_URL + heads[key];
 		}
-		return "<span><img src='"+ escapeQuotes(srcLeft) +"' height=150><img src='"+ escapeQuotes(srcRight) +"' height=150><br><button onclick='makeRelationship(\""+escapeQuotes(key)+"\",\""+escapeQuotes(heads[key])+"\");removePair(this)'>left higher</button><button onclick='makeRelationship(\""+escapeQuotes(heads[key])+"\",\""+escapeQuotes(key)+"\"); removePair(this)'>right higher</button><br></span>";
+	
+		var html = "<span><img src='"+ escapeQuotes(srcLeft) +"' height=150><img src='"+ escapeQuotes(srcRight) +"' height=150><br><button onclick='makeRelationship(\""+escapeQuotes(key)+"\",\""+escapeQuotes(heads[key])+"\");removePair(this)'>left higher</button><button onclick='makeRelationship(\""+escapeQuotes(heads[key])+"\",\""+escapeQuotes(key)+"\"); removePair(this)'>right higher</button><br>";
+		if (!isImage(key)) {
+			html += "<table><tr>"
+			+ "<td>" + key + "</td>"
++ "<td><button text='Hello'>world</button></td>"			+ "<td>" + heads[key] + "</td>"
+			+ "</tr></table>"
+			;
+		}
+		html += "</span>";
+		return html;
+
 	}).reduce(function (acc, pair) { return acc + "<br>" + pair;}, []);
 	$("#pairs").html(pairsHtml);
 
+}
+
+
+function isImage(item) {
+	if (item.endsWith('jpg')) {
+		return true;
+	}
+	return false;
 }
 
 // Do not encode plusses etc, that's done by encodeURIComponent.
