@@ -161,16 +161,16 @@ function createNetwork(iEdges, iNodes) {
 		if (key.startsWith('http')) {
 			srcLeft  = key;
 		} else {
-			srcLeft = CONTENT_URL + key;
+			srcLeft = CONTENT_URL + escapeQuotes(key);
 		}
 		var srcRight;
 		if (heads[key].startsWith('http')) {
 			srcRight = heads[key];
 		} else {
-			srcRight = CONTENT_URL + heads[key];
+			srcRight = CONTENT_URL + escapeQuotes(heads[key]);
 		}
 	
-		var html = "<span><img src='"+ escapeQuotes(srcLeft) +"' height=150><img src='"+ escapeQuotes(srcRight) +"' height=150><br><button onclick='makeRelationship(\""+escapeQuotes(key)+"\",\""+escapeQuotes(heads[key])+"\");removePair(this)'>left higher</button><button onclick='makeRelationship(\""+escapeQuotes(heads[key])+"\",\""+escapeQuotes(key)+"\"); removePair(this)'>right higher</button><br>";
+		var html = "<span><img src='"+ srcLeft +"' height=150><img src='"+ srcRight +"' height=150><br><button onclick='makeRelationship(\""+escapeQuotes(key)+"\",\""+escapeQuotes(heads[key])+"\");removePair(this)'>left higher</button><button onclick='makeRelationship(\""+escapeQuotes(heads[key])+"\",\""+escapeQuotes(key)+"\"); removePair(this)'>right higher</button><br>";
 		if (!isImage(key)) {
 			html += "<table><tr>"
 			+ "<td>" + key + "</td>"
@@ -197,7 +197,7 @@ function isImage(item) {
 // Do not encode plusses etc, that's done by encodeURIComponent.
 // This is just so onclick="..text.." quotes doesn't prematurely get closed
 function escapeQuotes(text) {
-	return text.replace(/"/g, '&#34;').replace(/'/g, "&#39;");
+	return text.replace(/"/g, '&#34;').replace(/'/g, "&#39;").replace(/\+/g, "%252B").replace(/;/g, "%3B");
 }
 
 function unescapeQuotes(text) {
@@ -878,7 +878,7 @@ function singleclickhelper(did) {
 				if (did.startsWith('http')) {
 					url = did;
 				} else {
-					url = CONTENT_URL + did;
+					url = CONTENT_URL + escapeQuotes(did);
 				}
 				$("#up").append("<img src='" + url + "' height=100 onclick='singleclickhelperParent(this)'>");
 				
@@ -925,7 +925,7 @@ function singleclickhelper(did) {
 					if (entry.startsWith('http')) {
 						url = entry;
 					} else {
-						url = CONTENT_URL + entry;
+						url = CONTENT_URL + escapeQuotes(entry);
 					}
 					$("#sort").append("<td><img src='" + escapeQuotes(url)  + "' width=200 onclick='singleclickhelper2(this)'><br>"
 						+ "<button onclick='promote(\""+encodeURIComponent(entry)+"\",\""+encodeURIComponent(JSON.stringify(otherChildren))+"\"); removeElement(this)'>Move Up</button>"
@@ -944,13 +944,13 @@ function singleclickhelper(did) {
 					if (entry.startsWith('http')) {
 						url = entry;
 					} else {
-						url = CONTENT_URL + entry;
+						url = CONTENT_URL + escapeQuotes(entry);
 					}
 					var url2;
 					if (entry.startsWith('http')) {
 						url2 = entry;
 					} else {
-						url2 = CONTENT_URL + entry2;
+						url2 = CONTENT_URL + escapeQuotes(entry2);
 					}
 
 
