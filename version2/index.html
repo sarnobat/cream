@@ -203,7 +203,9 @@ function isImage(item) {
 // Do not encode plusses etc, that's done by encodeURIComponent.
 // This is just so onclick="..text.." quotes doesn't prematurely get closed
 function escapeQuotes(text) {
-	return text.replace(/"/g, '&#34;').replace(/'/g, "&#39;").replace(/\+/g, "%252B").replace(/;/g, "%3B");
+//	if (text.contains("")) {
+//	}
+	return text.replace(/%/g, encodeURIComponent('%')).replace(/"/g, '&#34;').replace(/'/g, "&#39;").replace(/\+/g, "%2B").replace(/;/g, "%3B").replace(/\(/g, "%28").replace(/\)/g, "%29").replace(/ /g, "%20");
 }
 
 function unescapeQuotes(text) {
@@ -543,9 +545,10 @@ function createForceNetwork(nodes, edges) {
 		var url = d.id;		
 		if (d.id.startsWith('http')) {
 		} else {
-			url = "http://netgear.rohidekar.com:44452" + d.id ;		
+			url = "http://netgear.rohidekar.com:44452" + escapeQuotes(d.id) ;
 		}
-		document.getElementById('preview').innerHTML = "<img height=300 src='" + url + "'>";
+		document.getElementById('preview').innerHTML = "<img height=300 src='" +  url 
++ "'>";
 		document.getElementById('previewtext').innerHTML = d.id;
 	}	
 
@@ -860,7 +863,7 @@ function singleclickhelperParent(imageElement) {
 
 function singleclickhelper(did) {
 
-	did = decodeURIComponent(did);
+//	did = decodeURIComponent(did);
 
 	if (did.startsWith(CONTENT_URL)) {
 		console.debug('Developer warning: we should strip the http prefix from the asset if it is a local resource');
@@ -933,7 +936,7 @@ function singleclickhelper(did) {
 					} else {
 						url = CONTENT_URL + escapeQuotes(entry);
 					}
-					$("#sort").append("<td><img src='" + escapeQuotes(url)  + "' width=200 onclick='singleclickhelper2(this)'><br>"
+					$("#sort").append("<td><img src='" + url  + "' width=200 onclick='singleclickhelper2(this)'><br>"
 						+ "<button onclick='promote(\""+encodeURIComponent(entry)+"\",\""+encodeURIComponent(JSON.stringify(otherChildren))+"\"); removeElement(this)'>Move Up</button>"
 						+ "<button onclick='demote(\""+encodeURIComponent(entry)+"\",\""+encodeURIComponent(JSON.stringify(otherChildren))+"\"); removeElement(this)'>Move down</button></td>");
 				}
