@@ -161,21 +161,13 @@ function createNetwork(iEdges, iNodes) {
 		if (key.startsWith('http')) {
 			srcLeft  = key;
 		} else {
-<<<<<<< HEAD
 			srcLeft = CONTENT_URL + escapeQuotes(key);
-=======
-			srcLeft = CONTENT_URL + encodeChars(key);
->>>>>>> 7f300e7f3644e78fcc56e7b962a02527bddcf113
 		}
 		var srcRight;
 		if (heads[key].startsWith('http')) {
 			srcRight = heads[key];
 		} else {
-<<<<<<< HEAD
 			srcRight = CONTENT_URL + escapeQuotes(heads[key]);
-=======
-			srcRight = CONTENT_URL + encodeChars(heads[key]);
->>>>>>> 7f300e7f3644e78fcc56e7b962a02527bddcf113
 		}
 	
 		var html = "<span><img src='"+ srcLeft +"' height=150><img src='"+ srcRight +"' height=150><br><button onclick='makeRelationship(\""+escapeQuotes(key)+"\",\""+escapeQuotes(heads[key])+"\");removePair(this)'>left higher</button><button onclick='makeRelationship(\""+escapeQuotes(heads[key])+"\",\""+escapeQuotes(key)+"\"); removePair(this)'>right higher</button><br>";
