@@ -203,13 +203,29 @@ function isImage(item) {
 // Do not encode plusses etc, that's done by encodeURIComponent.
 // This is just so onclick="..text.." quotes doesn't prematurely get closed
 function escapeQuotes(text) {
-//	if (text.contains("")) {
-//	}
-	return text.replace(/%/g, encodeURIComponent('%')).replace(/"/g, '&#34;').replace(/'/g, "&#39;").replace(/\+/g, "%2B").replace(/;/g, "%3B").replace(/\(/g, "%28").replace(/\)/g, "%29").replace(/ /g, "%20");
+
+	return text
+		.replace(/%/g, encodeURIComponent('%'))
+		.replace(/"/g, '&#34;')
+		.replace(/'/g, "&#39;")
+		.replace(/\+/g, "%2B")
+		.replace(/;/g, "%3B")
+		.replace(/\(/g, "%28")
+		.replace(/\)/g, "%29")
+		.replace(/ /g, "%20");
 }
 
 function unescapeQuotes(text) {
-	return text.replace(/&#34;/g, '"').replace(/&#39;/g, "'");
+
+	return text	
+		.replace(/%20/, " ")
+		.replace(/%29/g, ")")
+		.replace(/%28/g, "(")
+		.replace(/%3B/g, ";")
+		.replace(/%2B/g, "+")
+		.replace(/&#39;/g, "'")
+		.replace(/&#34;/g, '"')
+		.replace(/%25/g, '%');
 }
 
 function shuffle(a) {
