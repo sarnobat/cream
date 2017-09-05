@@ -137,7 +137,8 @@ function createNetwork(iEdges, iNodes) {
 		incomingEdgeCounts[edge.target.id]++;
 		
 		if (incomingEdgeCounts[edge.target.id] > 1) {
-			debugger;
+			console.debug("[error] more than one incoming edge: " + edge.target.id);
+			//debugger;
 		}
 	});
 
@@ -186,13 +187,6 @@ function createNetwork(iEdges, iNodes) {
 
 }
 
-function encodeChars(url) {
-	// we need to double-escape plus signs because the server will unescape them into spaces instead of plusses.
-	return url.replace(/\[/g,"%5B").replace(/\]/g,"%5D")
-		.replace(/\+/g, "%252B")
-		.replace(/;/g, "%3B");
-}
-
 function isImage(item) {
 	if (item.endsWith('jpg')) {
 		return true;
@@ -204,8 +198,9 @@ function isImage(item) {
 // This is just so onclick="..text.." quotes doesn't prematurely get closed
 function escapeQuotes(text) {
 
-	return text
-		.replace(/%/g, encodeURIComponent('%'))
+
+	var ret = text
+//		.replace(/%/g, encodeURIComponent('%'))
 		.replace(/"/g, '&#34;')
 		.replace(/'/g, "&#39;")
 		.replace(/\+/g, "%2B")
@@ -213,6 +208,15 @@ function escapeQuotes(text) {
 		.replace(/\(/g, "%28")
 		.replace(/\)/g, "%29")
 		.replace(/ /g, "%20");
+
+
+
+	if (ret.match(/252B/) || ret.match(/253B/)) {
+		console.debug("[error] Too much escaping, file server will not find it: " + text);
+		debugger;
+	}
+	return ret;
+	
 }
 
 function unescapeQuotes(text) {
@@ -905,6 +909,9 @@ function singleclickhelper(did) {
 				} else {
 					url = CONTENT_URL + escapeQuotes(did);
 				}
+				if (url.match(/252B/)) {
+					debugger;
+				}
 				$("#up").append("<img src='" + url + "' height=100 onclick='singleclickhelperParent(this)'>");
 				
 				var data = d3.csv.parse("parent,child\n" + response);  //now you have the header
@@ -938,7 +945,8 @@ function singleclickhelper(did) {
 					}
 				}
 				if (Object.keys(allChildren).length == 0) {
-					debugger;
+					console.debug("[error] no children for " + allNodes);
+					//debugger;
 				}
 				var links = [];
 				//
@@ -979,7 +987,7 @@ function singleclickhelper(did) {
 					}
 
 
-					$("#pairs_at_level").append("<tr><td><img src='" + escapeQuotes(url)  + "' width=200 ><img src='" + escapeQuotes(url2)  + "' width=200 ><br>"
+					$("#pairs_at_level").append("<tr><td><img src='" + url  + "' width=200 ><img src='" + url2  + "' width=200 ><br>"
 						+ "<button onclick='reparent(\""+escapeQuotes(entry2)+"\",\""+escapeQuotes(entry)+"\"); removeElement(this)'>Left higher</button>"
 						+ "<button onclick='reparent(\""+escapeQuotes(entry)+"\",\""+escapeQuotes(entry2)+"\"); removeElement(this)'>Right higher</button></td></tr>");
 				}
