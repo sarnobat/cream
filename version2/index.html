@@ -61,8 +61,11 @@ function rerender() {
 	limit = 20;
 	
 	
-	//var heapFile = $.url().param('heapFile');
-	//alert("heapFile = " + heapFile);
+	var heapFile = $.url().param('heapFile');
+	if (heapFile == null) {
+		heapFile = "/home/sarnobat/sarnobat.git/db/cream/other_teen_middle/heap.txt";
+		history.pushState(null, null, '/?heapFile=' + heapFile);
+	}
 
 	var dir = window.location.href.replace(/(index.html)?\?.*/,'');
 	d3.text(dir  + "nodes.txt", function(error, nodes) {
