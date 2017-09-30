@@ -69,7 +69,7 @@ function rerender() {
 
 	var dir = window.location.href.replace(/(index.html)?\?.*/,'');
 	d3.text(dir  + "nodes.txt", function(error, nodes) {
-	d3.text(dir  + "heap.txt?t=" + Math.random(), function(error, data1) {
+	d3.text("http://netgear.rohidekar.com/heap/heap.txt?t=" + Math.random(), function(error, data1) {
 
 		// add a header so we can parse the data
 		createNetwork(
