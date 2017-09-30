@@ -24,7 +24,7 @@ import org.glassfish.jersey.server.ResourceConfig;
 import org.json.JSONException;
 import org.apache.commons.csv.CSVParser;
 
-/** Check that both elements of the CSV pair exist on disk */
+/** Write to disk, but only after checking that both elements of the CSV pair exist on disk */
 public class HttpCatFilesExist {
 
   @javax.ws.rs.Path("")
