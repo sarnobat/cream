@@ -70,7 +70,7 @@ function rerender() {
 	var dir = window.location.href.replace(/(index.html)?\?.*/,''); 
 	var dir2 = heapFile.replace(/heap.txt/,''); 
 	d3.text(CONTENT_URL + dir2 + "nodes.txt", function(error, nodes) {
-	d3.text(CONTENT_URL + "/home/sarnobat/sarnobat.git/db/cream/other_teen_middle/heap.txt?t=" + Math.random(), function(error, data1) {
+	d3.text(CONTENT_URL + dir2 + "heap.txt?t=" + Math.random(), function(error, data1) {
 
 		// add a header so we can parse the data
 		createNetwork(
