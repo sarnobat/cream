@@ -74,7 +74,8 @@ function rerender() {
 
 		// add a header so we can parse the data
 		createNetwork(
-			d3.csv.parse("src,dest\n" + data1).map(function(heapEntry) {
+			d3.csv.parse("src,dest\n" + data1)
+			.map(function(heapEntry) {
 				return {
 					id : heapEntry.src + "-" + heapEntry.dest,
 					source: heapEntry.src,
