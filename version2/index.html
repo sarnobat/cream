@@ -63,14 +63,14 @@ function rerender() {
 	
 	var heapFile = $.url().param('heapFile');
 	if (heapFile == null) {
-		heapFile = "/home/sarnobat/sarnobat.git/db/cream/other_teen_middle/heap.txt";
+		heapFile = "cream/db/ketki/heap.txt";
 		history.pushState(null, null, '/?heapFile=' + heapFile);
 	}
 
 	var dir = window.location.href.replace(/(index.html)?\?.*/,''); 
 	var dir2 = heapFile.replace(/heap.txt/,''); 
-	d3.text(CONTENT_URL + dir2 + "nodes.txt", function(error, nodes) {
-	d3.text(CONTENT_URL + dir2 + "heap.txt?t=" + Math.random(), function(error, data1) {
+	d3.text("http://netgear.rohidekar.com/"+dir2+"nodes.txt", function(error, nodes) {
+	d3.text("http://netgear.rohidekar.com/" +heapFile+ "?t=" + Math.random(), function(error, data1) {
 
 		// add a header so we can parse the data
 		createNetwork(
@@ -153,13 +153,13 @@ function createNetwork(iEdges, iNodes) {
 		if (key.startsWith('http')) {
 			srcLeft  = key;
 		} else {
-			srcLeft = CONTENT_URL + escapeQuotes(key);
+			srcLeft = CONTENT_URL + "/" + encodeURIComponent(key);//escapeQuotes(key);
 		}
 		var srcRight;
 		if (heads[key].startsWith('http')) {
 			srcRight = heads[key];
 		} else {
-			srcRight = CONTENT_URL + escapeQuotes(heads[key]);
+			srcRight = CONTENT_URL + "/" + encodeURIComponent(heads[key]);
 		}
 	
 		var html = "<span><img src='"+ srcLeft +"' height=150><img src='"+ srcRight +"' height=150><br><button onclick='makeRelationship(\""+escapeQuotes(key)+"\",\""+escapeQuotes(heads[key])+"\");removePair(this)'>left higher</button><button onclick='makeRelationship(\""+escapeQuotes(heads[key])+"\",\""+escapeQuotes(key)+"\"); removePair(this)'>right higher</button><br>";
@@ -556,9 +556,9 @@ function createForceNetwork(nodes, edges) {
 		var url = d.id;		
 		if (d.id.startsWith('http')) {
 		} else {
-			url = "http://netgear.rohidekar.com:44452" + escapeQuotes(d.id) ;
+			url = "http://netgear.rohidekar.com:44452" + d.id ;
 		}
-		document.getElementById('preview').innerHTML = "<img height=300 src='" +  url 
+		document.getElementById('preview').innerHTML = "<img height=300 src='" +  encodeURI(url) 
 + "'>";
 		document.getElementById('previewtext').innerHTML = d.id;
 	}	
@@ -656,8 +656,8 @@ function createForceNetwork(nodes, edges) {
 				node.style("fill", "red");
 			} else {		
 				node.style("fill", "lightgreen");
-				document.getElementById('higher').innerHTML = "<img class='candidate' src=\"http://netgear.rohidekar.com:44452" + src.id + "\">" + src.id;
-				document.getElementById('lower').innerHTML = "<img class='candidate' src=\"http://netgear.rohidekar.com:44452" + dest.id + "\">" + dest.id;
+				document.getElementById('higher').innerHTML = "<img class='candidate' src=\"http://netgear.rohidekar.com:44452" +"/" + encodeURIComponent(src.id) + "\">" + src.id;
+				document.getElementById('lower').innerHTML = "<img class='candidate' src=\"http://netgear.rohidekar.com:44452"  +"/"+ encodeURIComponent(dest.id) + "\">" + dest.id;
 			}
 		} else {
 			d3.select(nodeDom).select("circle.background").style("opacity", 0);
@@ -898,7 +898,7 @@ function singleclickhelper(did) {
 				if (did.startsWith('http')) {
 					url = did;
 				} else {
-					url = CONTENT_URL + escapeQuotes(did);
+					url = CONTENT_URL  +"/"+ encodeURIComponent(did);
 				}
 				if (url.match(/252B/)) {
 					debugger;
@@ -949,7 +949,7 @@ function singleclickhelper(did) {
 					if (entry.startsWith('http')) {
 						url = entry;
 					} else {
-						url = CONTENT_URL + escapeQuotes(entry);
+						url = CONTENT_URL +"/" + encodeURIComponent(entry);
 					}
 					$("#sort").append("<td><img src='" + url  + "' width=200 onclick='singleclickhelper2(this)'><br>"
 						+ "<button onclick='promote(\""+encodeURIComponent(entry)+"\",\""+encodeURIComponent(JSON.stringify(otherChildren))+"\"); removeElement(this)'>Move Up</button>"
@@ -968,13 +968,13 @@ function singleclickhelper(did) {
 					if (entry.startsWith('http')) {
 						url = entry;
 					} else {
-						url = CONTENT_URL + escapeQuotes(entry);
+						url = CONTENT_URL +"/" + encodeURIComponent(entry);
 					}
 					var url2;
 					if (entry.startsWith('http')) {
 						url2 = entry;
 					} else {
-						url2 = CONTENT_URL + escapeQuotes(entry2);
+						url2 = CONTENT_URL +"/" + encodeURIComponent(entry2);
 					}
 
 
