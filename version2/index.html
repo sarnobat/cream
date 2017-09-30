@@ -8,6 +8,8 @@
 	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
 	<script src="http://netgear.rohidekar.com/cream/jsLouvain.js" type="text/JavaScript"></script>
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/purl/2.3.1/purl.js"></script>
+
 </head>
 <style>
   svg {
@@ -78,7 +80,11 @@ function rerender() {
 	hoveredLineId;
 	limit = 20;
 	
-	var dir = window.location.href.replace('index.html','');
+	
+	//var heapFile = $.url().param('heapFile');
+	//alert("heapFile = " + heapFile);
+
+	var dir = window.location.href.replace(/(index.html)?\?.*/,'');
 	d3.text(dir  + "nodes.txt", function(error, nodes) {
 	d3.text(dir  + "heap.txt?t=" + Math.random(), function(error, data1) {
 
