@@ -67,9 +67,9 @@ function rerender() {
 		history.pushState(null, null, '/?heapFile=' + heapFile);
 	}
 
-	var dir = window.location.href.replace(/(index.html)?\?.*/,'');
-	d3.text(dir  + "nodes.txt", function(error, nodes) {
-	d3.text("http://netgear.rohidekar.com/heap/heap.txt?t=" + Math.random(), function(error, data1) {
+	var dir = window.location.href.replace(/(index.html)?\?.*/,''); 
+	d3.text("http://netgear.rohidekar.com:44452/home/sarnobat/sarnobat.git/db/cream/other_teen_middle/nodes.txt", function(error, nodes) {
+	d3.text("http://netgear.rohidekar.com:44452/home/sarnobat/sarnobat.git/db/cream/other_teen_middle/heap.txt?t=" + Math.random(), function(error, data1) {
 
 		// add a header so we can parse the data
 		createNetwork(
