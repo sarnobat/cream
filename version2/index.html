@@ -153,16 +153,17 @@ function createNetwork(iEdges, iNodes) {
 		if (key.startsWith('http')) {
 			srcLeft  = key;
 		} else {
-			srcLeft = CONTENT_URL + "/" + encodeURIComponent(key);//escapeQuotes(key);
+			srcLeft = "http://netgear.rohidekar.com:4418/" + btoa(key);//escapeQuotes(key);
 		}
 		var srcRight;
 		if (heads[key].startsWith('http')) {
 			srcRight = heads[key];
 		} else {
-			srcRight = CONTENT_URL + "/" + encodeURIComponent(heads[key]);
+			srcRight = "http://netgear.rohidekar.com:4418/" + btoa(heads[key]);
 		}
 	
-		var html = "<span><img src='"+ srcLeft +"' height=150><img src='"+ srcRight +"' height=150><br><button onclick='makeRelationship(\""+escapeQuotes(key)+"\",\""+escapeQuotes(heads[key])+"\");removePair(this)'>left higher</button><button onclick='makeRelationship(\""+escapeQuotes(heads[key])+"\",\""+escapeQuotes(key)+"\"); removePair(this)'>right higher</button><br>";
+		var html = "<span><img src='"+ encodeURI(srcLeft) +"' height=150>" 
+			+ "<img src='"+ encodeURI(srcRight) +"' height=150><br><button onclick='makeRelationship(\""+key+"\",\""+heads[key]+"\");removePair(this)'>left higher</button><button onclick='makeRelationship(\""+heads[key]+"\",\""+key+"\"); removePair(this)'>right higher</button><br>";
 		if (!isImage(key)) {
 			html += "<table><tr>"
 			+ "<td>" + key + "</td>"
@@ -830,8 +831,8 @@ function reparent(child, newParent) {
 
 function makeRelationship(parent, child) {
 
-	var saveToFile = '"'+ unescapeQuotes(parent) +'","'+ unescapeQuotes(child) +'"';
-	var url = "http://netgear.rohidekar.com:44475?value=" + encodeURIComponent(saveToFile);
+	var saveToFile = '"'+ parent +'","'+ child +'"';
+	var url = "http://netgear.rohidekar.com:44475?value=" + btoa(saveToFile);
 
 	var jqxhr = $.ajax(url)
 		.done(function() {
