@@ -25,7 +25,8 @@
 <body>
 
 <script>
-var CONTENT_URL = "http://netgear.rohidekar.com:44452";
+// deprecated
+var CONTENT_URL = "http://netgear.rohidekar.com:44418";
 // Need to change this in the CSS too
 var height = 800;
 var force;
@@ -65,26 +66,27 @@ function rerender() {
 	if (heapFile == null) {
 		heapFile = "cream/db/ketki/heap.txt";
 		history.pushState(null, null, '/?heapFile=' + heapFile);
+		debugger;
 	}
 
 	var dir = window.location.href.replace(/(index.html)?\?.*/,''); 
 	var dir2 = heapFile.replace(/heap.txt/,''); 
-	d3.text("http://netgear.rohidekar.com/"+dir2+"nodes.txt", function(error, nodes) {
-	d3.text("http://netgear.rohidekar.com/" +heapFile+ "?t=" + Math.random(), function(error, data1) {
-
-		// add a header so we can parse the data
-		createNetwork(
-			d3.csv.parse("src,dest\n" + data1)
-			.map(function(heapEntry) {
-				return {
-					id : heapEntry.src + "-" + heapEntry.dest,
-					source: heapEntry.src,
-					target: heapEntry.dest
-				};
-			}),
-			d3.csv.parseRows(nodes).map(function(node) {
-				return node[0];
-			}));
+	d3.text("http://netgear.rohidekar.com/"+dir2+"/nodes.txt", function(error, nodes) {
+		d3.text("http://netgear.rohidekar.com/" +heapFile+ "?t=" + Math.random(), function(error, data1) {
+			// add a header so we can parse the data
+			createNetwork(
+				d3.csv.parse("src,dest\n" + data1)
+				.map(function(heapEntry) {
+					return {
+						id : heapEntry.src + "-" + heapEntry.dest,
+						source: heapEntry.src,
+						target: heapEntry.dest
+					};
+				}),
+				d3.csv.parseRows(nodes).map(function(node) {
+					return node[0];
+				})
+			);
 		});
 	});
 }
@@ -136,9 +138,9 @@ function createNetwork(iEdges, iNodes) {
 	createForceNetwork(oNodes, oEdges);
 	
 	var nodesWithNoParentsUnshuffled = getNodesWithNoParent(oEdges, oNodes);
-	console.debug(nodesWithNoParentsUnshuffled);
+	//console.debug(nodesWithNoParentsUnshuffled);
 	var nodesWithNoParents = shuffle(nodesWithNoParentsUnshuffled);
-	console.debug(nodesWithNoParents);
+	//console.debug(nodesWithNoParents);
 	var heads1 = {};
 	for (var i = 0; i < nodesWithNoParents.length - 1; i += 2) {
 		var u = nodesWithNoParents[i].id;
@@ -163,7 +165,7 @@ function createNetwork(iEdges, iNodes) {
 		}
 	
 		var html = "<span><img src='"+ encodeURI(srcLeft) +"' height=150>" 
-			+ "<img src='"+ encodeURI(srcRight) +"' height=150><br><button onclick='makeRelationship(\""+key+"\",\""+heads[key]+"\");removePair(this)'>left higher</button><button onclick='makeRelationship(\""+heads[key]+"\",\""+key+"\"); removePair(this)'>right higher</button><br>";
+			+ "<img src='"+ encodeURI(srcRight) +"' height=150><br><button onclick='makeRelationship(\""+btoa(key)+"\",\""+btoa(heads[key])+"\");removePair(this)'>left higher</button><button onclick='makeRelationship(\""+btoa(heads[key])+"\",\""+btoa(key)+"\"); removePair(this)'>right higher</button><br>";
 		if (!isImage(key)) {
 			html += "<table><tr>"
 			+ "<td>" + key + "</td>"
@@ -370,6 +372,7 @@ function mknode(d) {
 }
 
 function getOutgoingEdgeCounts(iEdges) {
+	var outgoingEdgeCounts = {};
 	iEdges.forEach(function(edge) {
 		outgoingEdgeCounts[edge.source.id] = 0;
 		outgoingEdgeCounts[edge.target.id] = 0;
@@ -557,9 +560,9 @@ function createForceNetwork(nodes, edges) {
 		var url = d.id;		
 		if (d.id.startsWith('http')) {
 		} else {
-			url = "http://netgear.rohidekar.com:44452" + d.id ;
+			url = "http://netgear.rohidekar.com:44418/" + btoa(d.id) ;
 		}
-		document.getElementById('preview').innerHTML = "<img height=300 src='" +  encodeURI(url) 
+		document.getElementById('preview').innerHTML = "<img height=300 src='" +  url 
 + "'>";
 		document.getElementById('previewtext').innerHTML = d.id;
 	}	
@@ -831,8 +834,8 @@ function reparent(child, newParent) {
 
 function makeRelationship(parent, child) {
 
-	var saveToFile = '"'+ parent +'","'+ child +'"';
-	var url = "http://netgear.rohidekar.com:44475?value=" + btoa(saveToFile);
+	var saveToFile = '"'+ atob(parent) +'","'+ atob(child) +'"';
+	var url = "http://netgear.rohidekar.com:44481?value=" + btoa(saveToFile);
 
 	var jqxhr = $.ajax(url)
 		.done(function() {
@@ -858,9 +861,10 @@ function singleclick(d) {
 }
 
 function singleclickhelperParent(imageElement) {
+
 	var did = imageElement.src;
-	var parent = parents[did.replace(CONTENT_URL,'')];
-	var parent1 = decodeURIComponent(did.replace(CONTENT_URL,''));
+	var parent = parents[atob(did.replace(CONTENT_URL + '/',''))];
+	var parent1 = atob(did.replace(CONTENT_URL + '/',''));
 	var parent2 = parents[parent1];
 
 	
@@ -879,7 +883,7 @@ function singleclickhelper(did) {
 
 	if (did.startsWith(CONTENT_URL)) {
 		console.debug('Developer warning: we should strip the http prefix from the asset if it is a local resource');
-		did = did.replace(CONTENT_URL,'');
+		did = atob(did.replace(CONTENT_URL + '/',''));
 		//debugger;
 	}
 	
@@ -896,10 +900,11 @@ function singleclickhelper(did) {
 				$("#up").text("");
 				$("#upResponse").text("");
 				var url;
+				var contentUrl = CONTENT_URL;
 				if (did.startsWith('http')) {
 					url = did;
 				} else {
-					url = CONTENT_URL  +"/"+ encodeURIComponent(did);
+					url = contentUrl  +"/"+ btoa(did);
 				}
 				if (url.match(/252B/)) {
 					debugger;
@@ -920,7 +925,7 @@ function singleclickhelper(did) {
 				var otherChildren = {};
 				for (var i in allNodes) {
 					var entries = allNodes[i];
-					if (entries === did.replace(CONTENT_URL,'')) {
+					if (entries === did.replace(contentUrl + '/','')) {
 						// don't add the node to the list of candidate new parents
 					} else {
 						otherChildren[entries] = entries;
@@ -950,7 +955,7 @@ function singleclickhelper(did) {
 					if (entry.startsWith('http')) {
 						url = entry;
 					} else {
-						url = CONTENT_URL +"/" + encodeURIComponent(entry);
+						url = contentUrl +"/" + btoa(entry);
 					}
 					$("#sort").append("<td><img src='" + url  + "' width=200 onclick='singleclickhelper2(this)'><br>"
 						+ "<button onclick='promote(\""+encodeURIComponent(entry)+"\",\""+encodeURIComponent(JSON.stringify(otherChildren))+"\"); removeElement(this)'>Move Up</button>"
@@ -969,13 +974,13 @@ function singleclickhelper(did) {
 					if (entry.startsWith('http')) {
 						url = entry;
 					} else {
-						url = CONTENT_URL +"/" + encodeURIComponent(entry);
+						url = contentUrl +"/" + btoa(entry);
 					}
 					var url2;
 					if (entry.startsWith('http')) {
 						url2 = entry;
 					} else {
-						url2 = CONTENT_URL +"/" + encodeURIComponent(entry2);
+						url2 = contentUrl +"/" + btoa(entry2);
 					}
 
 
