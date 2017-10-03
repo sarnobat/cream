@@ -36,12 +36,12 @@ public class HttpGrep {
 		@GET
 		@javax.ws.rs.Path("")
 		@Produces("application/json")
-		public Response grep(@QueryParam("value") String iValue)
+		public Response grep(@QueryParam("value") String iValue, @QueryParam("key") String iKey)
 				throws JSONException, IOException {
 
 			System.err.println("[DEBUG] begin: " + iValue);
 
-			List<String> lines = FileUtils.readLines(new File(filepath),
+			List<String> lines = FileUtils.readLines(new File("/home/sarnobat/www/" + iKey),
 					Charset.defaultCharset());
 
 			String s = "";

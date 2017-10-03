@@ -50,6 +50,7 @@ var incomingEdgeCounts = {};
 var parents = {};
 var hoveredLineId;
 var limit = 20;
+var heapFile;
 
 function rerender() {
 	if ($("svg")[0] != null) {
@@ -62,7 +63,7 @@ function rerender() {
 	limit = 20;
 	
 	
-	var heapFile = $.url().param('heapFile');
+	heapFile = $.url().param('heapFile');
 	if (heapFile == null) {
 		heapFile = "cream/db/ketki/heap.txt";
 		history.pushState(null, null, '/?heapFile=' + heapFile);
@@ -820,7 +821,7 @@ function demote(toDemote, all) {
 
 function reparent(child, newParent) {
 
-	var url = "http://netgear.rohidekar.com:44480?child=" + encodeURIComponent(unescapeQuotes(child))  + "&newParent=" + encodeURIComponent(unescapeQuotes(newParent));
+	var url = "http://netgear.rohidekar.com:44482?child=" + child  + "&newParent=" + newParent + "&heapFile=" + encodeURIComponent(heapFile);
 
 	var jqxhr = $.ajax(url)
 		.done(function() {
@@ -835,7 +836,7 @@ function reparent(child, newParent) {
 function makeRelationship(parent, child) {
 
 	var saveToFile = '"'+ atob(parent) +'","'+ atob(child) +'"';
-	var url = "http://netgear.rohidekar.com:44481?value=" + btoa(saveToFile);
+	var url = "http://netgear.rohidekar.com:44481?value=" + btoa(saveToFile) + "&key=" + heapFile;
 
 	var jqxhr = $.ajax(url)
 		.done(function() {
@@ -889,7 +890,7 @@ function singleclickhelper(did) {
 	
 	console.debug('singleclickhelper(): ' + did);
 	// For this simple httpgrep to work, we need to click on the common parent
-	var url = "http://netgear.rohidekar.com:44477?value=" + encodeURIComponent(did.replace(CONTENT_URL,''));
+	var url = "http://netgear.rohidekar.com:44477?value=" + encodeURIComponent(did.replace(CONTENT_URL,'')) + "&key=" + heapFile;
 
 	if (url.endsWith('IMG_0371.JPG')) {
 		debugger;
@@ -985,8 +986,8 @@ function singleclickhelper(did) {
 
 
 					$("#pairs_at_level").append("<tr><td><img src='" + url  + "' width=200 ><img src='" + url2  + "' width=200 ><br>"
-						+ "<button onclick='reparent(\""+escapeQuotes(entry2)+"\",\""+escapeQuotes(entry)+"\"); removeElement(this)'>Left higher</button>"
-						+ "<button onclick='reparent(\""+escapeQuotes(entry)+"\",\""+escapeQuotes(entry2)+"\"); removeElement(this)'>Right higher</button></td></tr>");
+						+ "<button onclick='reparent(\""+btoa(entry2)+"\",\""+btoa(entry)+"\"); removeElement(this)'>Left higher</button>"
+						+ "<button onclick='reparent(\""+btoa(entry)+"\",\""+ btoa(entry2)+"\"); removeElement(this)'>Right higher</button></td></tr>");
 				}
 
 			})
@@ -1035,6 +1036,11 @@ function singleclickhelper(did) {
 <br>
 <span id="highertext"></span>
 <span id="lowertext"></span>
+<hr>
+cd ~/github/cream			&& groovy httpgrep.groovy                 		--port=4477 --file=/home/sarnobat/sarnobat.git/src/javascript/cream/heap.txt 2>&1 | tee ~/httpgrep.log<br>
+<br>
+cd ~/github/cream                  && groovy reparent.groovy                               --port=4480 --file=/home/sarnobat/sarnobat.git/src/javascript/cream/heap.txt 2>&1 | tee ~/reparent.log<br>
+<br>
 <hr>
 <h2>HTML Tree (clickable)</h2>
 <table>

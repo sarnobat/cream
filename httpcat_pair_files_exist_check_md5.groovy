@@ -59,7 +59,7 @@ public class HttpCatFilesExist {
       // the browser was returning success, nothing was getting written to the
       // file.
       System.err.println("[DEBUG] about to write to file: " + filepath);
-      FileUtils.write(Paths.get(filepath).toFile(), line + "\n", "UTF-8", true);
+      FileUtils.write(Paths.get("/home/sarnobat/www/" + iKey).toFile(), line + "\n", "UTF-8", true);
       System.err.println("[DEBUG] wrote to file");
       System.out.println(line);
       Response r = Response.ok().header("Access-Control-Allow-Origin", "*").type("application/json").entity(new JSONObject().toString()).build();

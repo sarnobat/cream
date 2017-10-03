@@ -34,6 +34,7 @@ import org.glassfish.jersey.jdkhttp.JdkHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.apache.commons.codec.binary.*;
 
 /**  */
 public class HttpCsvGraphReparent {
@@ -46,11 +47,14 @@ public class HttpCsvGraphReparent {
 		@Produces("application/json")
 		// We can only call this once between each browser refresh. Our method
 		// should in theory not need to know the other siblings.
-		public Response moveUp(@QueryParam("child") String iChild, 
-					@QueryParam("newParent") String newParent,
+		public Response moveUp(@QueryParam("child") String iChild1, 
+					@QueryParam("newParent") String newParent1,
 					@QueryParam("heapFile") String heapFile)
 				throws JSONException, IOException {
 			
+      String iChild = StringUtils.newStringUtf8(Base64.decodeBase64(iChild1));
+      String newParent = StringUtils.newStringUtf8(Base64.decodeBase64(newParent1));
+
 			reparent(iChild, newParent, "/home/sarnobat/www/" + heapFile);
 			
 			System.out
