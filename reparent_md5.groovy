@@ -37,7 +37,7 @@ import org.json.JSONObject;
 import org.apache.commons.codec.binary.*;
 
 /**  */
-public class HttpCsvGraphReparent {
+public class HttpCsvGraphReparentMd5 {
 
 	@javax.ws.rs.Path("")
 	public static class MyResource { // Must be public
@@ -58,7 +58,7 @@ public class HttpCsvGraphReparent {
 			reparent(iChild, newParent, "/home/sarnobat/www/" + heapFile);
 			
 			System.out
-					.println("HttpCsvGraphReparent.MyResource.moveUp() 2");
+					.println("HttpCsvGraphReparentMd5.MyResource.moveUp() 2");
 			JSONObject jsonObject = new JSONObject();
 			return Response.ok().header("Access-Control-Allow-Origin", "*")
 					.type("application/json")
@@ -67,32 +67,32 @@ public class HttpCsvGraphReparent {
 		}
 
 		private static Collection<String> getOtherSiblings(String iNodeToMoveUp, String filepath) throws IOException {
-			System.out.println("HttpCsvGraphReparent.MyResource.getOtherSiblings()");
+			System.out.println("HttpCsvGraphReparentMd5.MyResource.getOtherSiblings()");
 			String parent = getParent(iNodeToMoveUp);
 			return remove(getChildren(parent, filepath), iNodeToMoveUp);
 		}
 
 		private static Collection<String> remove(Collection<String> iNodes,
 				String iExclude) {
-			System.out.println("HttpCsvGraphReparent.MyResource.remove() begin");
+			System.out.println("HttpCsvGraphReparentMd5.MyResource.remove() begin");
 			ImmutableSet.Builder<String> reduced = ImmutableSet.builder();
 			for (String aNode : iNodes) {
 				if (!aNode.equals(iExclude)) {
 					reduced.add(aNode);
 				}
 			}
-			System.out.println("HttpCsvGraphReparent.MyResource.remove() end 1");
+			System.out.println("HttpCsvGraphReparentMd5.MyResource.remove() end 1");
 			Collection<String> c = reduced.build();
 			
-			System.out.println("HttpCsvGraphReparent.MyResource.remove() end 2");
+			System.out.println("HttpCsvGraphReparentMd5.MyResource.remove() end 2");
 			return c;
 		}
 
 		private static Collection<String> getChildren(String iParentNode, String filepath) throws IOException {
 			System.out
-					.println("HttpCsvGraphReparent.MyResource.getChildren() begin");
+					.println("HttpCsvGraphReparentMd5.MyResource.getChildren() begin");
 			List<String> children = new LinkedList<String>();
-			System.out.println("HttpCsvGraphReparent.MyResource.getChildren() 1");
+			System.out.println("HttpCsvGraphReparentMd5.MyResource.getChildren() 1");
 			List<String> lines;
 			try {
 				lines = getFileLines(filepath);
@@ -101,27 +101,27 @@ public class HttpCsvGraphReparent {
 				throw e;
 			}
 
-			System.out.println("HttpCsvGraphReparent.MyResource.getChildren() 2");
+			System.out.println("HttpCsvGraphReparentMd5.MyResource.getChildren() 2");
 			for (String line : lines) {
 				if (line.contains(iParentNode)) { // avoid expensive parsing
 					String[] relationship = new CSVParser(
 							new StringReader(line)).getLine();
 					String aNode = relationship[0];
 					System.out
-							.println("HttpCsvGraphReparent.MyResource.getChildren() aNode = " + aNode);
+							.println("HttpCsvGraphReparentMd5.MyResource.getChildren() aNode = " + aNode);
 					if (aNode.equals(iParentNode)) {
 						children.add(relationship[1]);
 					}
 				}
 			}
 			System.out
-					.println("HttpCsvGraphReparent.MyResource.getChildren() end");
+					.println("HttpCsvGraphReparentMd5.MyResource.getChildren() end");
 			return children;
 		}
 
 		private static String getParent(String iChildNode, String filepath) throws IOException {
 			System.out
-					.println("HttpCsvGraphReparent.MyResource.getParent()");
+					.println("HttpCsvGraphReparentMd5.MyResource.getParent()");
 			List<String> lines = getFileLines(filepath);
 			String parent = null;
 			for (String line : lines) {
@@ -235,7 +235,7 @@ public class HttpCsvGraphReparent {
 
 		private static List<String> getFileLines(String filepath) throws IOException {
 			System.out
-					.println("HttpCsvGraphReparent.MyResource.getFileLines()");
+					.println("HttpCsvGraphReparentMd5.MyResource.getFileLines()");
 			try {
 				return ImmutableList.copyOf(FileUtils.readLines(new File(
 						filepath), Charset.defaultCharset()));
@@ -248,7 +248,7 @@ public class HttpCsvGraphReparent {
 		private List<String> removeRelationshipWithParent(String iChildNodeToRemove,
 				List<String> beforeRemoval) {
 			System.out
-					.println("HttpCsvGraphReparent.MyResource.removeRelationshipWithParent() - " + iChildNodeToRemove);
+					.println("HttpCsvGraphReparentMd5.MyResource.removeRelationshipWithParent() - " + iChildNodeToRemove);
 			List<String> lines = new LinkedList<String>();
 			lines.addAll(beforeRemoval);
 			try {
