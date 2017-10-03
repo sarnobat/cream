@@ -157,31 +157,32 @@ public class HttpCsvGraphReparentMd5 {
 			}
 			List<String> beforeRemoval = getFileLines(heapFile);
 			List<String> afterRemoval = removeRelationshipWithParent(iNodeToReparent, beforeRemoval);
-// 			System.err.println("[DEBUG] 7.5: " + iNodeToReparent);
+ 			System.err.println("[DEBUG] 7.5: " + iNodeToReparent);
 			int removed = beforeRemoval.size() - afterRemoval.size();
 			if (removed > 0) {
-// 				System.err.println("[DEBUG] 8: will remove " + removed);
+ 				System.err.println("[DEBUG] 8: will remove " + removed);
 				String s = "\""+newParent+"\",\"" +iNodeToReparent+ "\"";
 				List<String> lines = new LinkedList<String>();
 				lines.addAll(afterRemoval);
 				lines.add(s);
-// 				System.err.println("[DEBUG] 8.5: checking for cycles ");
+ 				System.err.println("[DEBUG] 8.5: checking for cycles ");
 				_checkForCycles : {
 					Map<String, String> childToParent = parseLinesAndReverse(lines);
-// 					System.err.println("[DEBUG] 8.6");
+ 					System.err.println("[DEBUG] 8.6");
 					// if (childToParent.size() < lines.size()) {
 // 						System.err.println("[DEBUG] 8.7");
 // 						// children must be unique, so if the same child appears twice,
 // 						// the keyset only stores the last added one
-// 						System.err.println("[ERROR] Cycle found");
+ 						System.err.println("[ERROR] Cycle found");
 // 						throw new RuntimeException("Cycle found");
 // 					} else {
-// 						System.err.println("[DEBUG] No cycles found");
+ 						System.err.println("[DEBUG] No cycles found");
 // 					}
 				}
 				
-// 				System.err.println("[DEBUG] 9: " + s);
-				FileUtils.writeLines(Paths.get(filepath).toFile(), lines, false);
+ 				System.err.println("[DEBUG] 9: " + s);
+ 				System.err.println("[DEBUG] 9.5: " + s);
+				FileUtils.writeLines(Paths.get(heapFile).toFile(), lines, false);
 				System.err.println("[DEBUG] Successfully removed from file: " + iNodeToReparent);
 			} else {
 				System.err.println("[DEBUG] 10: Couldn't find parent row for " + iNodeToReparent);
@@ -257,7 +258,7 @@ public class HttpCsvGraphReparentMd5 {
 					if (line.endsWith("\"" + iChildNodeToRemove + "\"")) {
 						System.err.println("[DEBUG] 6: " + iChildNodeToRemove);
 						lines.remove(line);
-// 						System.err.println("[DEBUG] 6.5: " + iChildNodeToRemove);
+ 						System.err.println("[DEBUG] 6.5: " + iChildNodeToRemove);
 					}
 				}
 			} catch (Exception e) {
