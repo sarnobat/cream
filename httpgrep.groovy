@@ -62,6 +62,16 @@ public class HttpGrep {
 			// .type("application/json")
 			// .entity(new JSONObject().toString()).build();
 		}
+
+
+    @GET
+    @javax.ws.rs.Path("/health")
+    @Produces("application/json")
+    public Response health() {
+      Response r = Response.ok().header("Access-Control-Allow-Origin", "*").type("application/json").entity(new JSONObject().toString()).build();
+      return r;
+    }
+
 	}
 
 	private static String filepath;

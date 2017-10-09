@@ -58,7 +58,7 @@ public class HttpCatFilesExist {
       // I wish I didn't have to do this in Java but I found that even though
       // the browser was returning success, nothing was getting written to the
       // file.
-      System.err.println("[DEBUG] about to write to file: " + filepath);
+      System.err.println("[DEBUG] about to write to file: " + "/home/sarnobat/www/" + iKey);
       FileUtils.write(Paths.get("/home/sarnobat/www/" + iKey).toFile(), line + "\n", "UTF-8", true);
       System.err.println("[DEBUG] wrote to file");
       System.out.println(line);
@@ -66,9 +66,19 @@ public class HttpCatFilesExist {
       System.err.println("[DEBUG] response constructed");
       return r;
     }
+
+
+    @GET
+    @javax.ws.rs.Path("/health")
+    @Produces("application/json")
+    public Response health() {
+      Response r = Response.ok().header("Access-Control-Allow-Origin", "*").type("application/json").entity(new JSONObject().toString()).build();
+      return r;
+    }
+
   }
 
-  private static String filepath;// = System.getProperty("user.home") +
+//  private static String filepath;// = System.getProperty("user.home") +
                                  // "/sarnobat.git/yurl_queue_httpcat.txt";
 
   public static void main(String[] args)
@@ -92,7 +102,7 @@ public class HttpCatFilesExist {
       try {
         CommandLine cmd = new DefaultParser().parse(options, args);
         port = cmd.getOptionValue("p", "4444");
-        filepath = cmd.getOptionValue("f");
+        String filepath = cmd.getOptionValue("f");
 
         if (cmd.hasOption("h")) {
           new HelpFormatter().printHelp("httpcat_with_write.groovy", options);
@@ -101,7 +111,7 @@ public class HttpCatFilesExist {
           return;
         }
       } catch (ParseException e) {
-    	  System.out.println("HttpCatFilesExist.main() 2");
+    	  System.out.println("HttpCatFilesExist.main() 2"+ e);
         e.printStackTrace();
 	System.exit(-1);
 	return;
