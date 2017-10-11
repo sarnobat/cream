@@ -221,10 +221,10 @@ public class HttpCsvGraphReparentMd5 {
 // 				System.err.println("[DEBUG] child = " + child);
 				if (childToParent.containsKey(child)) {
 					if (!childToParent.get(child).equals(parent)) {
-						System.err.println("[WARNING] duplicate line (ideally it shouldn't have):  " + line);
-						System.err.println("[DEBUG] Child already has a parent:  " + child);
-						System.err.println("[DEBUG] Parent is:  " + childToParent.get(child));
-						System.err.println("[DEBUG] Attempted to change parent to:  " + parent);
+						System.err.println("[ERROR] duplicate line (ideally it shouldn't have):  " + line);
+						System.err.println("[ERROR] Child already has a parent:  " + child);
+						System.err.println("[ERROR] Parent is:  " + childToParent.get(child));
+						System.err.println("[ERROR] Attempted to change parent to:  " + parent);
 						throw new RuntimeException("Child already has a parent " + child);
 					}
 				}

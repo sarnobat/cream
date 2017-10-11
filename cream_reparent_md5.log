@@ -1,3 +1,5 @@
-Caught: groovy.lang.MissingMethodException: No signature of method: static org.apache.commons.cli.Option.builder() is applicable for argument types: (java.lang.String) values: [p]
-groovy.lang.MissingMethodException: No signature of method: static org.apache.commons.cli.Option.builder() is applicable for argument types: (java.lang.String) values: [p]
-	at HttpCsvGraphReparentMd5.main(reparent_md5.groovy:288)
+Oct 10, 2017 5:23:04 AM org.glassfish.jersey.server.ApplicationHandler initialize
+INFO: Initiating Jersey application, version Jersey: 2.0 2013-05-14 20:07:34...
+Oct 10, 2017 5:23:05 AM org.glassfish.jersey.internal.Errors logErrors
+WARNING: The following warnings have been detected: WARNING: The (sub)resource method moveUp in HttpCsvGraphReparentMd5$MyResource contains empty path annotation.
+

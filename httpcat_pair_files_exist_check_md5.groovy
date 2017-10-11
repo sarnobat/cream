@@ -39,7 +39,7 @@ public class HttpCatFilesExist {
       System.err.println("list()");
       String line = StringUtils.newStringUtf8(Base64.decodeBase64(iValue));
       System.err.println("[DEBUG] Writing to stdout: " + line);
-
+if (!line.contains("http")) {
 	  // This too I wish I could do in a separate process in a pipeline
 	  // but for some reason things aren't getting passed down the
 	  // pipeline reliably.
@@ -54,7 +54,7 @@ public class HttpCatFilesExist {
         		  throw new RuntimeException("Does not exist: " + r[1]);
         	  }
       }
-      
+}      
       // I wish I didn't have to do this in Java but I found that even though
       // the browser was returning success, nothing was getting written to the
       // file.
