@@ -52,8 +52,14 @@ public class HttpCsvGraphReparentMd5 {
 					@QueryParam("heapFile") String heapFile)
 				throws JSONException, IOException {
 			
+System.err.println("[DEBUG] iChild1" + iChild1);
+System.err.println("[DEBUG] newParent1 = " + newParent1);
+
       String iChild = StringUtils.newStringUtf8(Base64.decodeBase64(iChild1));
       String newParent = StringUtils.newStringUtf8(Base64.decodeBase64(newParent1));
+
+System.err.println("[DEBUG] iChild" + iChild);
+System.err.println("[DEBUG] newParent = " + newParent);
 
 			reparent(iChild, newParent, "/home/sarnobat/www/" + heapFile);
 			
