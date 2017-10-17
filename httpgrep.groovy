@@ -24,7 +24,7 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.FileUtils;
 import org.glassfish.jersey.jdkhttp.JdkHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
-import org.json.JSONArray;
+import org.json.*;
 import org.json.JSONException;
 
 /**  */

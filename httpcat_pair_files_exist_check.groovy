@@ -25,6 +25,7 @@ import org.json.JSONException;
 import org.apache.commons.csv.CSVParser;
 
 /** Write to disk, but only after checking that both elements of the CSV pair exist on disk */
+@Deprecated // Use the md5 version. This one hardcodes the output file.
 public class HttpCatFilesExist {
 
   @javax.ws.rs.Path("")
@@ -44,14 +45,18 @@ public class HttpCatFilesExist {
 	  // pipeline reliably.
       checkFilesExist : {
           String[] r = new CSVParser(new StringReader(line)).getLine();
+          	if (!r[0].contains("http")) {
         	  if (!Paths.get(r[0]).toFile().exists()) {
         		  System.err.println("[ERROR] Does not exist: " + r[0]);
         		  throw new RuntimeException("Does not exist: " + r[0]);
         	  }
+		}
+          	if (!r[1].contains("http")) {
         	  if (!Paths.get(r[1]).toFile().exists()) {
         		  System.err.println("[ERROR] Does not exist: " + r[1]);
         		  throw new RuntimeException("Does not exist: " + r[1]);
         	  }
+        	}
       }
       
       // I wish I didn't have to do this in Java but I found that even though
@@ -75,13 +80,14 @@ public class HttpCatFilesExist {
     }
   }
 
+  @Deprecated
   private static String filepath;// = System.getProperty("user.home") +
                                  // "/sarnobat.git/yurl_queue_httpcat.txt";
 
   public static void main(String[] args)
       throws URISyntaxException, IOException, KeyManagementException, UnrecoverableKeyException,
       NoSuchAlgorithmException, KeyStoreException, CertificateException, InterruptedException {
-    
+    System.err.println("[DEBUG] 1");
     String port;
     _parseOptions: {
 
@@ -98,7 +104,7 @@ public class HttpCatFilesExist {
 
       try {
         CommandLine cmd = new DefaultParser().parse(options, args);
-        port = cmd.getOptionValue("p", "4444");
+        port = cmd.getOptionValue("p", "4475");
         filepath = cmd.getOptionValue("f");
 
         if (cmd.hasOption("h")) {

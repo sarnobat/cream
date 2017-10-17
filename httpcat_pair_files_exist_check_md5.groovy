@@ -36,9 +36,17 @@ public class HttpCatFilesExist {
     @Produces("application/json")
     public Response list(@QueryParam("value") String iValue, @QueryParam("key") String iKey,
         @QueryParam("categoryId") String iCategoryId) throws JSONException, IOException {
-      System.err.println("list()");
+      System.err.println("[DEBUG] before base 64 decode: " + iValue);
+if (iValue == null) {
+//	return Response.status(404).build();
+throw new RuntimeException("[ERROR] No value before decode: " + iValue);
+}
       String line = StringUtils.newStringUtf8(Base64.decodeBase64(iValue));
       System.err.println("[DEBUG] Writing to stdout: " + line);
+if (line == null) {
+	System.err.println("[ERROR] No value: " + line);
+	throw new RuntimeException("No value: " + line);
+}
 if (!line.contains("http")) {
 	  // This too I wish I could do in a separate process in a pipeline
 	  // but for some reason things aren't getting passed down the

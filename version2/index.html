@@ -72,7 +72,7 @@ function rerender() {
 
 	var dir = window.location.href.replace(/(index.html)?\?.*/,''); 
 	var dir2 = heapFile.replace(/heap.txt/,''); 
-	d3.text("http://netgear.rohidekar.com/"+dir2+"/nodes.txt", function(error, nodes) {
+	d3.text("http://netgear.rohidekar.com/"+dir2+"/nodes.txt?t=" + Math.random(), function(error, nodes) {
 		d3.text("http://netgear.rohidekar.com/" +heapFile+ "?t=" + Math.random(), function(error, data1) {
 			// add a header so we can parse the data
 			createNetwork(
@@ -147,6 +147,9 @@ function createNetwork(iEdges, iNodes) {
 		var u = nodesWithNoParents[i].id;
 		var v = nodesWithNoParents[i+1].id;
 		heads1[u] = v;
+		if (v.match(/61cjzSWt9jL/)) {
+			debugger;
+		}
 	}
 	singleclickhelper(nodesWithNoParents[0].id);
 	var heads = heads1;
@@ -164,9 +167,10 @@ function createNetwork(iEdges, iNodes) {
 		} else {
 			srcRight = "http://netgear.rohidekar.com:4418/" + btoa(heads[key]);
 		}
-	
-		var html = "<span><img src='"+ encodeURI(srcLeft) +"' height=150>" 
-			+ "<img src='"+ encodeURI(srcRight) +"' height=150><br><button onclick='makeRelationship(\""+btoa(key)+"\",\""+btoa(heads[key])+"\");removePair(this)'>left higher</button><button onclick='makeRelationship(\""+btoa(heads[key])+"\",\""+btoa(key)+"\"); removePair(this)'>right higher</button><br>";
+
+		// NOTE: nodes.txt rows must be surrounded by quotes otherwise commas will get interpreted as the end of the field.
+		var html = "<span><img src='"+ srcLeft +"' height=150 class='pairHead'>" 
+			+ "<img src='"+ srcRight +"' height=150><br><button onclick='makeRelationship(\""+btoa(key)+"\",\""+btoa(heads[key])+"\");removePair(this)'>left higher</button><button onclick='makeRelationship(\""+btoa(heads[key])+"\",\""+btoa(key)+"\"); removePair(this)'>right higher</button><br>";
 		if (!isImage(key)) {
 			html += "<table><tr>"
 			+ "<td>" + key + "</td>"
@@ -315,7 +319,7 @@ function getNodesWithNoParent(iEdges, iNodes) {
 	var allNodes = parents.concat(iNodes);
 	// PERFORMANCE. We need a faster check for membership than indexof
 	var heads = allNodes.filter(function(x) { 
-		return children.indexOf(x) < 0 
+		return children.indexOf(x) < 0; 
 	});
 	return heads.removeDuplicates();
 }
@@ -602,7 +606,7 @@ function createForceNetwork(nodes, edges) {
 
 					})
 					.fail(function() {
-						alert( "error 2" );
+						alert( "error 4476" );
 					})
 					.always(function() {
 					});
@@ -712,7 +716,9 @@ function createForceNetwork(nodes, edges) {
 				}
 			
 				var saveToFile = '"'+src.id+'","'+dest.id+'"';
-				var url = "http://netgear.rohidekar.com:44475?value=" + encodeURIComponent(saveToFile);
+				// Drag and drop
+				// TODO: Fix this.
+				var url = "http://netgear.rohidekar.com:44481?value=" + btoa(saveToFile) + "&key=" + heapFile;
 
 				var jqxhr = $.ajax(url)
 					.done(function() {
@@ -724,7 +730,7 @@ function createForceNetwork(nodes, edges) {
 						edges.push(newEdge);
 					})
 					.fail(function() {
-							alert( "error: 4475" );
+							alert( "error: 4481" );
 					})
 					.always(function() {
 					});							
@@ -864,8 +870,22 @@ function singleclick(d) {
 function singleclickhelperParent(imageElement) {
 
 	var did = imageElement.src;
-	var parent = parents[atob(did.replace(CONTENT_URL + '/',''))];
-	var parent1 = atob(did.replace(CONTENT_URL + '/',''));
+	var lookup;
+	if (did.startsWith(CONTENT_URL)) {
+		lookup = did.replace(CONTENT_URL + '/','');
+	} else {
+		lookup = did;
+	}
+	
+	var lookup2 ;
+	if (lookup.startsWith('http')) {
+		lookup2 = lookup;
+	} else {
+		lookup2 = atob(lookup);
+	}
+	
+	var parent = parents[lookup2];
+	var parent1 = lookup2;
 	var parent2 = parents[parent1];
 
 	
@@ -979,7 +999,7 @@ function singleclickhelper(did) {
 					}
 					var url2;
 					if (entry.startsWith('http')) {
-						url2 = entry;
+						url2 = entry2;
 					} else {
 						url2 = contentUrl +"/" + btoa(entry2);
 					}
@@ -1002,16 +1022,16 @@ function singleclickhelper(did) {
 var ports = [
 	{ port : 44475, name : "add pair (httpcat - with exists check)"},
 	{ port : 44477, name : "httpgrep"},
-	{ port : 44480, name : "reparent"},
+	{ port : 44480, name : "reparent"}, 
 	{ port : 44481, name : "add pair (httpcat - with exists check md5)"}, 
-        { port : 44482, name : "reparent_md5"},  
 	{ port : 44485, name : ""},
+	{ port : 44482, name : ""},
 	{ port : 44486, name : ""}
 ];
 ports.forEach(function(obj) {
 	var port = obj.port;
 	$.ajax({
-		url: 'http://netgear.rohidekar.com:' + port + "/health",
+		url: 'http://netgear.rohidekar.com:' + port,
 		timeout:1000,
 	}).done(function(){
 			$("#statuses").append("<img src='http://netgear.rohidekar.com/static/icons/ball_012.png' height=10>" +port+ " ("+  obj.name+")<br>");
@@ -1026,8 +1046,6 @@ ports.forEach(function(obj) {
 
 
 </script>
-	<div id="statuses">
-	</div>
 
 <div id="viz">
 
@@ -1050,15 +1068,9 @@ ports.forEach(function(obj) {
 	</table>
 
 	<br>
-	<button onclick="recharge()" >Recharge</button>
-	<br>
-	<br>
-	<br>
+	<button onclick="recharge()" >Recharge</button> 
 	<button onclick="rerender()" >Rerender</button>
 	<br>
-	<br>
-	<br>
-	<a href="tree.html">HTML Tree (full)</a>
 	<br>
 	<span id="higher"></span>
 	<span id="lower"></span>
@@ -1088,6 +1100,14 @@ ports.forEach(function(obj) {
 <h3>Hints</h3>
 Drag the lesser one to the better one<br>
 Lighter grey means we can't drag it (but we can drag something else onto it).<br>
+<hr>
+	<div id="statuses">
+	</div>
+
+<hr>
+	<br>
+	<a href="tree.html">HTML Tree (full)</a>
+	<br>
 <hr>
 <!--#include virtual="dirs.txt" -->
 
