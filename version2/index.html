@@ -2,12 +2,12 @@
 <html>
 <head>
 	<title>Edge creation</title>
-	<link rel="shortcut icon" href="http://netgear.rohidekar.com/static/icons/skin/ball/ball_009.png" type="image/x-icon" />
+	<link rel="shortcut icon" href="http://172.16.1.33/static/icons/skin/ball/ball_009.png" type="image/x-icon" />
 	<meta charset="utf-8" />
 
 	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
-	<script src="http://netgear.rohidekar.com/cream/jsLouvain.js" type="text/JavaScript"></script>
+	<script src="http://172.16.1.33/cream/jsLouvain.js" type="text/JavaScript"></script>
 	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/purl/2.3.1/purl.js"></script>
 
 </head>
@@ -26,7 +26,7 @@
 
 <script>
 // deprecated
-var CONTENT_URL = "http://netgear.rohidekar.com:44418";
+var CONTENT_URL = "http://172.16.1.33:44418";
 // Need to change this in the CSS too
 var height = 800;
 var force;
@@ -72,8 +72,8 @@ function rerender() {
 
 	var dir = window.location.href.replace(/(index.html)?\?.*/,''); 
 	var dir2 = heapFile.replace(/heap.txt/,''); 
-	d3.text("http://netgear.rohidekar.com/"+dir2+"/nodes.txt?t=" + Math.random(), function(error, nodes) {
-		d3.text("http://netgear.rohidekar.com/" +heapFile+ "?t=" + Math.random(), function(error, data1) {
+	d3.text("http://172.16.1.33/"+dir2+"/nodes.txt?t=" + Math.random(), function(error, nodes) {
+		d3.text("http://172.16.1.33/" +heapFile+ "?t=" + Math.random(), function(error, data1) {
 			// add a header so we can parse the data
 			createNetwork(
 				d3.csv.parse("src,dest\n" + data1)
@@ -159,13 +159,13 @@ function createNetwork(iEdges, iNodes) {
 		if (key.startsWith('http')) {
 			srcLeft  = key;
 		} else {
-			srcLeft = "http://netgear.rohidekar.com:4418/" + btoa(key);//escapeQuotes(key);
+			srcLeft = "http://172.16.1.33:4418/" + btoa(key);//escapeQuotes(key);
 		}
 		var srcRight;
 		if (heads[key].startsWith('http')) {
 			srcRight = heads[key];
 		} else {
-			srcRight = "http://netgear.rohidekar.com:4418/" + btoa(heads[key]);
+			srcRight = "http://172.16.1.33:4418/" + btoa(heads[key]);
 		}
 
 		// NOTE: nodes.txt rows must be surrounded by quotes otherwise commas will get interpreted as the end of the field.
@@ -540,7 +540,7 @@ function createForceNetwork(nodes, edges) {
 
 	function removeLink(sourceid, targetid) {
 		var linkRow = '"' + sourceid + '","' + targetid + '"'; 
-		var url = "http://netgear.rohidekar.com:44476?value=" + encodeURIComponent(linkRow);
+		var url = "http://172.16.1.33:44476?value=" + encodeURIComponent(linkRow);
 
 		var linkId = sourceid + "-" + targetid; 
 		var jqxhr = $.ajax(url)
@@ -565,7 +565,7 @@ function createForceNetwork(nodes, edges) {
 		var url = d.id;		
 		if (d.id.startsWith('http')) {
 		} else {
-			url = "http://netgear.rohidekar.com:44418/" + btoa(d.id) ;
+			url = "http://172.16.1.33:44418/" + btoa(d.id) ;
 		}
 		document.getElementById('preview').innerHTML = "<img height=300 src='" +  url 
 + "'>";
@@ -592,7 +592,7 @@ function createForceNetwork(nodes, edges) {
 	
 		for (var toBeRemovedIter in toBeRemoved) {
 		
-			var url = "http://netgear.rohidekar.com:44476?value=" + encodeURIComponent(toBeRemoved[toBeRemovedIter]);
+			var url = "http://172.16.1.33:44476?value=" + encodeURIComponent(toBeRemoved[toBeRemovedIter]);
 
 			var jqxhr = $.ajax(url)
 					.done(function() {
@@ -665,8 +665,8 @@ function createForceNetwork(nodes, edges) {
 				node.style("fill", "red");
 			} else {		
 				node.style("fill", "lightgreen");
-				document.getElementById('higher').innerHTML = "<img class='candidate' src=\"http://netgear.rohidekar.com:44452" +"/" + encodeURIComponent(src.id) + "\">" + src.id;
-				document.getElementById('lower').innerHTML = "<img class='candidate' src=\"http://netgear.rohidekar.com:44452"  +"/"+ encodeURIComponent(dest.id) + "\">" + dest.id;
+				document.getElementById('higher').innerHTML = "<img class='candidate' src=\"http://172.16.1.33:44452" +"/" + encodeURIComponent(src.id) + "\">" + src.id;
+				document.getElementById('lower').innerHTML = "<img class='candidate' src=\"http://172.16.1.33:44452"  +"/"+ encodeURIComponent(dest.id) + "\">" + dest.id;
 			}
 		} else {
 			d3.select(nodeDom).select("circle.background").style("opacity", 0);
@@ -718,7 +718,7 @@ function createForceNetwork(nodes, edges) {
 				var saveToFile = '"'+src.id+'","'+dest.id+'"';
 				// Drag and drop
 				// TODO: Fix this.
-				var url = "http://netgear.rohidekar.com:44481?value=" + btoa(saveToFile) + "&key=" + heapFile;
+				var url = "http://172.16.1.33:44481?value=" + btoa(saveToFile) + "&key=" + heapFile;
 
 				var jqxhr = $.ajax(url)
 					.done(function() {
@@ -798,7 +798,7 @@ function recharge() {
 
 function promote(toDemote, all) {
 
-	var url = "http://netgear.rohidekar.com:44479?value=" + toDemote ;
+	var url = "http://172.16.1.33:44479?value=" + toDemote ;
 
 	var jqxhr = $.ajax(url)
 		.done(function() {
@@ -812,7 +812,7 @@ function promote(toDemote, all) {
 
 function demote(toDemote, all) {
 
-	var url = "http://netgear.rohidekar.com:44478?value=" + toDemote ;
+	var url = "http://172.16.1.33:44478?value=" + toDemote ;
 
 	var jqxhr = $.ajax(url)
 		.done(function() {
@@ -827,7 +827,7 @@ function demote(toDemote, all) {
 
 function reparent(child, newParent) {
 
-	var url = "http://netgear.rohidekar.com:44482?child=" + child  + "&newParent=" + newParent+ "&heapFile=" + heapFile;
+	var url = "http://172.16.1.33:44482?child=" + child  + "&newParent=" + newParent+ "&heapFile=" + heapFile;
 
 	var jqxhr = $.ajax(url)
 		.done(function() {
@@ -842,7 +842,7 @@ function reparent(child, newParent) {
 function makeRelationship(parent, child) {
 
 	var saveToFile = '"'+ atob(parent) +'","'+ atob(child) +'"';
-	var url = "http://netgear.rohidekar.com:44481?value=" + btoa(saveToFile) + "&key=" + heapFile;
+	var url = "http://172.16.1.33:44481?value=" + btoa(saveToFile) + "&key=" + heapFile;
 
 	var jqxhr = $.ajax(url)
 		.done(function() {
@@ -910,7 +910,7 @@ function singleclickhelper(did) {
 	
 	console.debug('singleclickhelper(): ' + did);
 	// For this simple httpgrep to work, we need to click on the common parent
-	var url = "http://netgear.rohidekar.com:44477?value=" + encodeURIComponent(did.replace(CONTENT_URL,'')) + "&key=" + heapFile;
+	var url = "http://172.16.1.33:44477?value=" + encodeURIComponent(did.replace(CONTENT_URL,'')) + "&key=" + heapFile;
 
 	if (url.endsWith('IMG_0371.JPG')) {
 		debugger;
@@ -1031,15 +1031,15 @@ var ports = [
 ports.forEach(function(obj) {
 	var port = obj.port;
 	$.ajax({
-		url: 'http://netgear.rohidekar.com:' + port,
+		url: 'http://172.16.1.33:' + port,
 		timeout:1000,
 	}).done(function(){
-			$("#statuses").append("<img src='http://netgear.rohidekar.com/static/icons/ball_012.png' height=10>" +port+ " ("+  obj.name+")<br>");
+			$("#statuses").append("<img src='http://172.16.1.33/static/icons/ball_012.png' height=10>" +port+ " ("+  obj.name+")<br>");
 	}).fail(function(jqXHR, textStatus){
 		if(textStatus === 'timeout') {     
-			$("#statuses").append("<img src='http://netgear.rohidekar.com/static/icons/ball_011.png' height=10>"+port+ " ("+  obj.name+")<br>");
+			$("#statuses").append("<img src='http://172.16.1.33/static/icons/ball_011.png' height=10>"+port+ " ("+  obj.name+")<br>");
 		} else {
-			$("#statuses").append("<img src='http://netgear.rohidekar.com/static/icons/ball_011.png' height=10>"+port+ " ("+  obj.name+") "+textStatus+" <br>");
+			$("#statuses").append("<img src='http://172.16.1.33/static/icons/ball_011.png' height=10>"+port+ " ("+  obj.name+") "+textStatus+" <br>");
 		}
 	});	
 });
