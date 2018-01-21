@@ -159,18 +159,18 @@ function createNetwork(iEdges, iNodes) {
 		if (key.startsWith('http')) {
 			srcLeft  = key;
 		} else {
-			srcLeft = "http://netgear.rohidekar.com:4418/" + btoa(unescape(encodeURIComponent(key)));//escapeQuotes(key);
+			srcLeft = "http://netgear.rohidekar.com:4418/" + btoa(key);//escapeQuotes(key);
 		}
 		var srcRight;
 		if (heads[key].startsWith('http')) {
 			srcRight = heads[key];
 		} else {
-			srcRight = "http://netgear.rohidekar.com:4418/" + btoa(unescape(encodeURIComponent(heads[key])));
+			srcRight = "http://netgear.rohidekar.com:4418/" + btoa(heads[key]);
 		}
 
 		// NOTE: nodes.txt rows must be surrounded by quotes otherwise commas will get interpreted as the end of the field.
 		var html = "<span><img src='"+ srcLeft +"' height=150 class='pairHead'>" 
-			+ "<img src='"+ srcRight +"' height=150><br><button onclick='makeRelationship(\""+btoa(unescape(encodeURIComponent(key)))+"\",\""+btoa(unescape(encodeURIComponent(heads[key])))+"\");removePair(this)'>left higher</button><button onclick='makeRelationship(\""+btoa(unescape(encodeURIComponent(heads[key])))+"\",\""+btoa(unescape(encodeURIComponent(key)))+"\"); removePair(this)'>right higher</button><br>";
+			+ "<img src='"+ srcRight +"' height=150><br><button onclick='makeRelationship(\""+btoa(key)+"\",\""+btoa(heads[key])+"\");removePair(this)'>left higher</button><button onclick='makeRelationship(\""+btoa(heads[key])+"\",\""+btoa(key)+"\"); removePair(this)'>right higher</button><br>";
 		if (!isImage(key)) {
 			html += "<table><tr>"
 			+ "<td>" + key + "</td>"
@@ -565,7 +565,7 @@ function createForceNetwork(nodes, edges) {
 		var url = d.id;		
 		if (d.id.startsWith('http')) {
 		} else {
-			url = "http://netgear.rohidekar.com:44418/" + btoa(unescape(encodeURIComponent(d.id))) ;
+			url = "http://netgear.rohidekar.com:44418/" + btoa(d.id) ;
 		}
 		document.getElementById('preview').innerHTML = "<img height=300 src='" +  url 
 + "'>";
@@ -718,7 +718,7 @@ function createForceNetwork(nodes, edges) {
 				var saveToFile = '"'+src.id+'","'+dest.id+'"';
 				// Drag and drop
 				// TODO: Fix this.
-				var url = "http://netgear.rohidekar.com:44481?value=" + btoa(unescape(encodeURIComponent(saveToFile))) + "&key=" + heapFile;
+				var url = "http://netgear.rohidekar.com:44481?value=" + btoa(saveToFile) + "&key=" + heapFile;
 
 				var jqxhr = $.ajax(url)
 					.done(function() {
@@ -842,7 +842,7 @@ function reparent(child, newParent) {
 function makeRelationship(parent, child) {
 
 	var saveToFile = '"'+ atob(parent) +'","'+ atob(child) +'"';
-	var url = "http://netgear.rohidekar.com:44481?value=" + btoa(unescape(encodeURIComponent(saveToFile))) + "&key=" + heapFile;
+	var url = "http://netgear.rohidekar.com:44481?value=" + btoa(saveToFile) + "&key=" + heapFile;
 
 	var jqxhr = $.ajax(url)
 		.done(function() {
@@ -925,7 +925,7 @@ function singleclickhelper(did) {
 				if (did.startsWith('http')) {
 					url = did;
 				} else {
-					url = contentUrl  +"/"+ btoa(unescape(encodeURIComponent(did)));
+					url = contentUrl  +"/"+ btoa(did);
 				}
 				if (url.match(/252B/)) {
 					debugger;
@@ -976,7 +976,7 @@ function singleclickhelper(did) {
 					if (entry.startsWith('http')) {
 						url = entry;
 					} else {
-						url = contentUrl +"/" + btoa(unescape(encodeURIComponent(entry)));
+						url = contentUrl +"/" + btoa(entry);
 					}
 					$("#sort").append("<td><img src='" + url  + "' width=200 onclick='singleclickhelper2(this)'><br>"
 						+ "<button onclick='promote(\""+encodeURIComponent(entry)+"\",\""+encodeURIComponent(JSON.stringify(otherChildren))+"\"); removeElement(this)'>Move Up</button>"
@@ -995,19 +995,19 @@ function singleclickhelper(did) {
 					if (entry.startsWith('http')) {
 						url = entry;
 					} else {
-						url = contentUrl +"/" + btoa(unescape(encodeURIComponent(entry)));
+						url = contentUrl +"/" + btoa(entry);
 					}
 					var url2;
 					if (entry.startsWith('http')) {
 						url2 = entry2;
 					} else {
-						url2 = contentUrl +"/" + btoa(unescape(encodeURIComponent(entry2)));
+						url2 = contentUrl +"/" + btoa(entry2);
 					}
 
 
 					$("#pairs_at_level").append("<tr><td><img src='" + url  + "' width=200 ><img src='" + url2  + "' width=200 ><br>"
-						+ "<button onclick='reparent(\""+btoa(unescape(encodeURIComponent(entry2)))+"\",\""+btoa(unescape(encodeURIComponent(entry)))+"\"); removeElement(this)'>Left higher</button>"
-						+ "<button onclick='reparent(\""+btoa(unescape(encodeURIComponent(entry)))+"\",\""+btoa(unescape(encodeURIComponent(entry2)))+"\"); removeElement(this)'>Right higher</button></td></tr>");
+						+ "<button onclick='reparent(\""+btoa(entry2)+"\",\""+btoa(entry)+"\"); removeElement(this)'>Left higher</button>"
+						+ "<button onclick='reparent(\""+btoa(entry)+"\",\""+btoa(entry2)+"\"); removeElement(this)'>Right higher</button></td></tr>");
 				}
 
 			})
