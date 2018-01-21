@@ -171,6 +171,12 @@ function createNetwork(iEdges, iNodes) {
 		// NOTE: nodes.txt rows must be surrounded by quotes otherwise commas will get interpreted as the end of the field.
 		var html = "<span><img src='"+ srcLeft +"' height=150 class='pairHead'>" 
 			+ "<img src='"+ srcRight +"' height=150><br><button onclick='makeRelationship(\""+btoa(unescape(encodeURIComponent(key)))+"\",\""+btoa(unescape(encodeURIComponent(heads[key])))+"\");removePair(this)'>left higher</button><button onclick='makeRelationship(\""+btoa(unescape(encodeURIComponent(heads[key])))+"\",\""+btoa(unescape(encodeURIComponent(key)))+"\"); removePair(this)'>right higher</button><br>";
+		if ('L21lZGlhL3Nhcm5vYmF0L2UvU3JpZGhhci9BdWRpby9Sb2NrLzA2IC0gR2lybA==' == btoa(unescape(encodeURIComponent(key)))) {
+			debugger;
+		}
+		if ('L21lZGlhL3Nhcm5vYmF0L2UvU3JpZGhhci9BdWRpby9Sb2NrLzA2IC0gR2lybA==' == btoa(unescape(encodeURIComponent(heads[key])))) {
+			debugger;
+		}
 		if (!isImage(key)) {
 			html += "<table><tr>"
 			+ "<td>" + key + "</td>"
@@ -843,7 +849,7 @@ function makeRelationship(parent, child) {
 
 	var saveToFile = '"'+ atob(parent) +'","'+ atob(child) +'"';
 	var url = "http://netgear.rohidekar.com:44481?value=" + btoa(unescape(encodeURIComponent(saveToFile))) + "&key=" + heapFile;
-
+	console.debug('makeRelationship() - url = ' + url);
 	var jqxhr = $.ajax(url)
 		.done(function() {
 			var newEdge = {				
