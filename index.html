@@ -84,9 +84,7 @@ function rerender() {
 						target: heapEntry.dest
 					};
 				}),
-				d3.csv.parseRows(nodes).map(function(node) {
-					return node[0];
-				})
+				nodes.split('\n')
 			);
 		});
 	});
