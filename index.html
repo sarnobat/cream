@@ -149,6 +149,9 @@ function createNetwork(iEdges, iNodes) {
 			debugger;
 		}
 	}
+	var nodesWithNoParentsList = Object.values(nodesWithNoParents).map(function(key, value) {
+		return key.id;
+	});
 	singleclickhelper(nodesWithNoParents[0].id);
 	var heads = heads1;
 	var acc = [];
@@ -187,6 +190,14 @@ function createNetwork(iEdges, iNodes) {
 
 	}).reduce(function (acc, pair) { return acc + "<br>" + pair;}, []);
 	$("#pairs").html(pairsHtml);
+	// TODO - heads list
+	//alert(Object.keys(nodesWithNoParentsList));
+	var headsList = nodesWithNoParentsList.map(function(key, index) {
+			return key.replace('/media/sarnobat','')
+				.replace('/e/Sridhar','');
+		})
+		.reduce(function (acc, pair) { return pair + "\n" + acc;}, []);
+	$("#heads").html(headsList);
 
 }
 
@@ -1050,7 +1061,9 @@ ports.forEach(function(obj) {
 
 
 </script>
-
+TODO:<br>
+* cycle detector script<br>
+* move clickable tree to separate page<br>
 <div id="viz">
 
 	<table>
@@ -1097,6 +1110,8 @@ ports.forEach(function(obj) {
 <hr>
 <h2>Pair comparison (heads)</h2>
 <div id="pairs"></div>
+
+<textarea id="heads" rows=20 cols=120></textarea>
 
 <h3>TODO</h3>
 * if nodes.txt contains commas or double quotes the labels and buttons don't work properly (I think because of the CSV parser in javascript)
