@@ -130,29 +130,22 @@ function createNetwork(iEdges, iNodes) {
 		
 		if (incomingEdgeCounts[edge.target.id] > 1) {
 			console.debug("[error] more than one incoming edge: " + edge.target.id);
-			//debugger;
 		}
 	});
 
 	createForceNetwork(oNodes, oEdges);
 	
 	var nodesWithNoParentsUnshuffled = getNodesWithNoParent(oEdges, oNodes);
-	//console.debug(nodesWithNoParentsUnshuffled);
 	var nodesWithNoParents = shuffle(nodesWithNoParentsUnshuffled);
-	//console.debug(nodesWithNoParents);
 	var heads1 = {};
 	for (var i = 0; i < nodesWithNoParents.length - 1; i += 2) {
 		var u = nodesWithNoParents[i].id;
 		var v = nodesWithNoParents[i+1].id;
 		heads1[u] = v;
-		if (v.match(/61cjzSWt9jL/)) {
-			debugger;
-		}
 	}
 	var nodesWithNoParentsList = Object.values(nodesWithNoParents).map(function(key, value) {
 		return key.id;
 	});
-	singleclickhelper(nodesWithNoParents[0].id);
 	var heads = heads1;
 	var acc = [];
 	var pairsHtml = Object.keys(heads).map(function(key, index) {
@@ -292,33 +285,6 @@ function createNodeHashFromEdges(iEdges) {
 		}
 	});	
 	return oNodeHash;
-}
-
-function getNodesFromEdges(iEdges, nodeHash) {
-	var oNodes = [];
-
-	iEdges.forEach(function(edge) {
-		oNodes.push(edge.source.id);
-		oNodes.push(edge.target.id);
-	});
-	var oNodes2 = oNodes1.removeDuplicates();
-
-	oNodes2.forEach(function(edge) {
-	
-		if (nodeHash.hasOwnProperty(edge.source)) {
-		} else {
-			nodeHash[edge.source] = edge.source;
-		}
-	});
-	oNodes2.forEach(function(edge) {
-	
-		if (nodeHash.hasOwnProperty(edge.target)) {
-		} else {
-			nodeHash[edge.target] = edge.target;
-		}
-	});
-	var oNodes = [];
-	return oNodes;
 }
 
 function getNodesWithNoParent(iEdges, iNodes) {
@@ -471,8 +437,6 @@ function createForceNetwork(nodes, edges) {
 			}).enter().append("g").attr("class", "node")
 			.on("mouseover", mouseover)
 			.on("mouseout", mouseout)
-			.on("dblclick", doubleclick)
-			.on("click", singleclick)
 			.call(force
 				.drag().on("drag", drag)
 				.on("dragend", dragend)
@@ -581,44 +545,6 @@ function createForceNetwork(nodes, edges) {
 	}	
 
 	function mouseout(d) {
-	}
-	
-
-
-	function doubleclick(d) {
-	
-		var toBeRemoved = [];
-		for (var key in parents) {
-			var idToRemove;
-			if (parents[key] === d.id) {
-				toBeRemoved.push("\""+d.id + "\",\""+ key+ "\"");
-			} else if (key === d.id) {
-				toBeRemoved.push("\"" + parents[key]  + "\",\""+  d.id+ "\"");
-			} else {
-			}
-		}
-	
-		for (var toBeRemovedIter in toBeRemoved) {
-		
-			var url = "http://netgear.rohidekar.com:44476?value=" + encodeURIComponent(toBeRemoved[toBeRemovedIter]);
-
-			var jqxhr = $.ajax(url)
-					.done(function() {
-					
-						d3.select("svg.main")
-							.selectAll("g.edge")
-							.filter(function(edge){
-								return edge.id.startsWith(d.id + "-") || edge.id.endsWith("-" + d.id) ;
-							})
-							.remove();					
-
-					})
-					.fail(function() {
-						alert( "error 4476" );
-					})
-					.always(function() {
-					});
-		}
 	}
 
 	function dragstart() {
@@ -864,160 +790,6 @@ function makeRelationship(parent, child) {
 		});	
 }
 
-function singleclickhelper2 (imageElement) {
-	singleclickhelper(imageElement.src);
-}
-function singleclick(d) {
-	singleclickhelper(d.id);
-}
-
-function singleclickhelperParent(imageElement) {
-
-	var did = imageElement.src;
-	var lookup;
-	if (did.startsWith(CONTENT_URL)) {
-		lookup = did.replace(CONTENT_URL + '/','');
-	} else {
-		lookup = did;
-	}
-	
-	var lookup2 ;
-	if (lookup.startsWith('http')) {
-		lookup2 = lookup;
-	} else {
-		lookup2 = atob(lookup);
-	}
-	
-	var parent = parents[lookup2];
-	var parent1 = lookup2;
-	var parent2 = parents[parent1];
-
-	
-	if (parent != null)  {
-		singleclickhelper(parent);
-	} else if (parent2 != null)  {
-		singleclickhelper(parent2);
-	} else {
-		$("#upResponse").text("This is the top level element");
-	}
-}
-
-function singleclickhelper(did) {
-
-//	did = decodeURIComponent(did);
-
-	if (did.startsWith(CONTENT_URL)) {
-		console.debug('Developer warning: we should strip the http prefix from the asset if it is a local resource');
-		did = atob(did.replace(CONTENT_URL + '/',''));
-		//debugger;
-	}
-	
-	console.debug('singleclickhelper(): ' + did);
-	// For this simple httpgrep to work, we need to click on the common parent
-	var url = "http://netgear.rohidekar.com:44477?value=" + encodeURIComponent(did.replace(CONTENT_URL,'')) + "&key=" + heapFile;
-
-	if (url.endsWith('IMG_0371.JPG')) {
-		debugger;
-	}
-	var jqxhr = $.ajax(url)
-			.done(function(response) {
-				$("#sort").text("");
-				$("#up").text("");
-				$("#upResponse").text("");
-				var url;
-				var contentUrl = CONTENT_URL;
-				if (did.startsWith('http')) {
-					url = did;
-				} else {
-					url = contentUrl  +"/"+ btoa(unescape(encodeURIComponent(did)));
-				}
-				if (url.match(/252B/)) {
-					debugger;
-				}
-				$("#up").append("<img src='" + url + "' height=100 onclick='singleclickhelperParent(this)'>");
-				
-				var data = d3.csv.parse("parent,child\n" + response);  //now you have the header
-	
-				var allNodes = {};
-				for (var i = 0; i < data.length; i++) {
-					var entries = data[i];
-					allNodes[entries.child] = entries.child;
-				}
-				
-				var otherChildren = {};
-				for (var i in allNodes) {
-					var entries = allNodes[i];
-					if (entries === did.replace(contentUrl + '/','')) {
-						// don't add the node to the list of candidate new parents
-					} else {
-						otherChildren[entries] = entries;
-					}
-				}
-
-				var allChildren = {};
-				for (var i = 0; i < Object.keys(allNodes).length; i++) {
-					var entries = Object.keys(allNodes)[i];
-					if (entries === did) {
-						// Don't add the common parent
-					} else {
-						allChildren[entries] = entries;
-					}
-				}
-				if (Object.keys(allChildren).length == 0) {
-					console.debug("[error] no children for " + allNodes);
-					//debugger;
-				}
-				var links = [];
-				//
-				// 
-				//
-				for (var i in allChildren) {
-					var entry = allChildren[i];
-					var url;
-					if (entry.startsWith('http')) {
-						url = entry;
-					} else {
-						url = contentUrl +"/" + btoa(unescape(encodeURIComponent(entry)));
-					}
-					$("#sort").append("<td><img src='" + url  + "' width=200 onclick='singleclickhelper2(this)'><br>"
-						+ "<button onclick='promote(\""+encodeURIComponent(entry)+"\",\""+encodeURIComponent(JSON.stringify(otherChildren))+"\"); removeElement(this)'>Move Up</button>"
-						+ "<button onclick='demote(\""+encodeURIComponent(entry)+"\",\""+encodeURIComponent(JSON.stringify(otherChildren))+"\"); removeElement(this)'>Move down</button></td>");
-				}
-				
-				//
-				//
-				//
-				var pairs = shuffle(Object.keys(allChildren));
-				$("#pairs_at_level").text("");
-				for (var i = 0; i < pairs.length - 1; i += 2) {
-					var entry = pairs[i];
-					var entry2 = pairs[i+1];
-					var url;
-					if (entry.startsWith('http')) {
-						url = entry;
-					} else {
-						url = contentUrl +"/" + btoa(unescape(encodeURIComponent(entry)));
-					}
-					var url2;
-					if (entry.startsWith('http')) {
-						url2 = entry2;
-					} else {
-						url2 = contentUrl +"/" + btoa(unescape(encodeURIComponent(entry2)));
-					}
-
-
-					$("#pairs_at_level").append("<tr><td><img src='" + url  + "' width=200 ><img src='" + url2  + "' width=200 ><br>"
-						+ "<button onclick='reparent(\""+btoa(unescape(encodeURIComponent(entry2)))+"\",\""+btoa(unescape(encodeURIComponent(entry)))+"\"); removeElement(this)'>Left higher</button>"
-						+ "<button onclick='reparent(\""+btoa(unescape(encodeURIComponent(entry)))+"\",\""+btoa(unescape(encodeURIComponent(entry2)))+"\"); removeElement(this)'>Right higher</button></td></tr>");
-				}
-
-			})
-			.fail(function() {
-				//alert( "error 44477" );
-			})
-			.always(function() {
-			});
-}
 
 
 var ports = [
