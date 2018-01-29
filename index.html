@@ -172,12 +172,7 @@ function createNetwork(iEdges, iNodes) {
 		// NOTE: nodes.txt rows must be surrounded by quotes otherwise commas will get interpreted as the end of the field.
 		var html = "<span><img src='"+ srcLeft +"' height=150 class='pairHead'>" 
 			+ "<img src='"+ srcRight +"' height=150><br><button onclick='makeRelationship(\""+btoa(unescape(encodeURIComponent(key)))+"\",\""+btoa(unescape(encodeURIComponent(heads[key])))+"\");removePair(this)'>left higher</button><button onclick='makeRelationship(\""+btoa(unescape(encodeURIComponent(heads[key])))+"\",\""+btoa(unescape(encodeURIComponent(key)))+"\"); removePair(this)'>right higher</button><br>";
-		if ('L21lZGlhL3Nhcm5vYmF0L2UvU3JpZGhhci9BdWRpby9Sb2NrLzA2IC0gR2lybA==' == btoa(unescape(encodeURIComponent(key)))) {
-			debugger;
-		}
-		if ('L21lZGlhL3Nhcm5vYmF0L2UvU3JpZGhhci9BdWRpby9Sb2NrLzA2IC0gR2lybA==' == btoa(unescape(encodeURIComponent(heads[key])))) {
-			debugger;
-		}
+
 		if (!isImage(key)) {
 			html += "<table><tr>"
 			+ "<td>" + key + "</td>"
@@ -190,8 +185,6 @@ function createNetwork(iEdges, iNodes) {
 
 	}).reduce(function (acc, pair) { return acc + "<br>" + pair;}, []);
 	$("#pairs").html(pairsHtml);
-	// TODO - heads list
-	//alert(Object.keys(nodesWithNoParentsList));
 	var headsList = nodesWithNoParentsList.map(function(key, index) {
 			return key.replace('/media/sarnobat','')
 				.replace('/e/Sridhar','');
@@ -807,10 +800,6 @@ function createForceNetwork(nodes, edges) {
 	}
 }
 
-function recharge() {
-	force.start();
-}
-
 function promote(toDemote, all) {
 
 	var url = "http://netgear.rohidekar.com:44479?value=" + toDemote ;
@@ -949,9 +938,6 @@ function singleclickhelper(did) {
 				
 				var data = d3.csv.parse("parent,child\n" + response);  //now you have the header
 	
-				if (url.endsWith('IMG_0371.JPG')) {
-					debugger;
-				}
 				var allNodes = {};
 				for (var i = 0; i < data.length; i++) {
 					var entries = data[i];
@@ -1063,7 +1049,6 @@ ports.forEach(function(obj) {
 </script>
 TODO:<br>
 * cycle detector script<br>
-* move clickable tree to separate page<br>
 <div id="viz">
 
 	<table>
@@ -1085,8 +1070,6 @@ TODO:<br>
 	</table>
 
 	<br>
-	<button onclick="recharge()" >Recharge</button> 
-	<button onclick="rerender()" >Rerender</button>
 	<br>
 	<br>
 	<span id="higher"></span>
@@ -1095,6 +1078,12 @@ TODO:<br>
 <br>
 <span id="highertext"></span>
 <span id="lowertext"></span>
+
+<hr>
+<h2>Pair comparison (heads)</h2>
+<div id="pairs"></div>
+
+<textarea id="heads" rows=20 cols=120></textarea>
 <hr>
 <h2>HTML Tree (clickable)</h2>
 Moved to <a href=index_monolith.html">index_monolith.html</a>
@@ -1103,14 +1092,8 @@ Moved to <a href=index_monolith.html">index_monolith.html</a>
 <h2>Pair comparison (at clicked level)</h2>
 Moved to <a href=index_monolith.html">index_monolith.html</a>
 
-<hr>
-<h2>Pair comparison (heads)</h2>
-<div id="pairs"></div>
-
-<textarea id="heads" rows=20 cols=120></textarea>
-
 <h3>TODO</h3>
-* if nodes.txt contains commas or double quotes the labels and buttons don't work properly (I think because of the CSV parser in javascript)
+* if nodes.txt contains commas or double quotes the labels and buttons don't work properly (I think because of the CSV parser in javascript)<br>
 * subtraction to find head nodes is better done in javascript rather than in bash, because rerunning the server side script (diff/comm) each time a change is made will be cumbersome<br>
 <h3>Hints</h3>
 Drag the lesser one to the better one<br>
