@@ -87,8 +87,8 @@ function rerender() {
 	
 	heapFile = $.url().param('heapFile');
 	if (heapFile == null) {
-		heapFile = "cream/db/ketki/heap.txt";
-		history.pushState(null, null, '/?heapFile=' + heapFile);
+		heapFile = "cream/db/buy_these/heap.txt";
+		history.pushState(null, null, '/heap/index_cycle_detector.html?heapFile=' + heapFile);
 		debugger;
 	}
 
@@ -155,6 +155,26 @@ function createNetwork(iEdges, iNodes) {
 		}
 	});
 
+
+	var childToParent = {};	
+	oEdges.forEach(function(edge) {
+		if (edge.target.id in childToParent) {
+			// child already has a parent
+		} else {
+			childToParent[edge.target.id] = edge.source.id;
+		}
+	});
+	var cyclesRemovedTxt =  Object.keys(childToParent).map(function(index, key){ 
+		return '"'+childToParent[index] + '","' + index +'"';
+	}).reduce(function(acc, item){ 
+		return acc + "\n"  + item;
+	}, '');
+//	var cyclesRemovedTxt =  Object.getKeys(childToParent).map();
+//	var cyclesRemovedTxt =  oEdges.map(function (edge){ return '"'+edge.source.id + '","'  + edge.target.id + '"'; }).reduce(function(acc,item){ return acc + "\n" + item;});
+	
+	
+	$("#cycles_removed").text(cyclesRemovedTxt);
+
 	createForceNetwork(oNodes, oEdges);
 	
 	var nodesWithNoParentsUnshuffled = getNodesWithNoParent(oEdges, oNodes);
@@ -170,23 +190,18 @@ function createNetwork(iEdges, iNodes) {
 	});
 	var heads = heads1;
 	var acc = [];
-	
-	
-	debugger;
-	
-	
 	var pairsHtml = Object.keys(heads).map(function(key, index) {
 		var srcLeft;
 		if (key.startsWith('http')) {
 			srcLeft  = key;
 		} else {
-			srcLeft = "http://netgear.rohidekar.com:4418/" + btoa(unescape(encodeURIComponent(key)));//escapeQuotes(key);
+			srcLeft = "http://netgear.rohidekar.com:44418/" + btoa(unescape(encodeURIComponent(key)));//escapeQuotes(key);
 		}
 		var srcRight;
 		if (heads[key].startsWith('http')) {
 			srcRight = heads[key];
 		} else {
-			srcRight = "http://netgear.rohidekar.com:4418/" + btoa(unescape(encodeURIComponent(heads[key])));
+			srcRight = "http://netgear.rohidekar.com:44418/" + btoa(unescape(encodeURIComponent(heads[key])));
 		}
 
 		// NOTE: nodes.txt rows must be surrounded by quotes otherwise commas will get interpreted as the end of the field.
@@ -204,13 +219,13 @@ function createNetwork(iEdges, iNodes) {
 		return html;
 
 	}).reduce(function (acc, pair) { return acc + "<br>" + pair;}, []);
-	$("#pairs").html(pairsHtml);
+//	$("#pairs").html(pairsHtml);
 	var headsList = nodesWithNoParentsList.map(function(key, index) {
 			return key.replace('/media/sarnobat','')
 				.replace('/e/Sridhar','');
 		})
 		.reduce(function (acc, pair) { return pair + "\n" + acc;}, []);
-	$("#heads").html(headsList);
+//	$("#heads").html(headsList);
 
 }
 
@@ -552,7 +567,7 @@ function createForceNetwork(nodes, edges) {
 		var url = d.id;		
 		if (d.id.startsWith('http')) {
 		} else {
-			url = "http://netgear.rohidekar.com:4418/" + btoa(unescape(encodeURIComponent(d.id))) ;
+			url = "http://netgear.rohidekar.com:44418/" + btoa(unescape(encodeURIComponent(d.id))) ;
 		}
 		document.getElementById('preview').innerHTML = "<img height=300 src='" +  url 
 + "'>";
@@ -834,7 +849,8 @@ ports.forEach(function(obj) {
 
 
 </script>
-
+TODO:<br>
+* cycle detector script<br>
 <div id="viz">
 
 	<table>
@@ -866,10 +882,11 @@ ports.forEach(function(obj) {
 <span id="lowertext"></span>
 
 <hr>
+<textarea id="cycles_removed" rows=20 cols=120></textarea>
+
 <h2>Pair comparison (heads)</h2>
 <div id="pairs"></div>
 
-<textarea id="heads" rows=20 cols=120></textarea>
 <hr>
 <h2>HTML Tree (clickable)</h2>
 Moved to <a href=index_clickable_tree.html>index_clickable_tree.html</a>
@@ -877,10 +894,6 @@ Moved to <a href=index_clickable_tree.html>index_clickable_tree.html</a>
 
 <h2>Pair comparison (at clicked level)</h2>
 Moved to <a href=index_monolith.html">index_monolith.html</a>
-
-<h2>Cycle detector</h2>
-Moved to <a href=index_cycle_detector.html>index_cycle_detector.html</a>
-<hr>
 
 <h3>TODO</h3>
 * if nodes.txt contains commas or double quotes the labels and buttons don't work properly (I think because of the CSV parser in javascript)<br>

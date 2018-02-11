@@ -25,30 +25,8 @@
 <body>
 
 <script>
-/*
-                              +-------------------------++------------+
-                              |    makeRelationship     || removePair |
-                              +-------------------------++------------+
-                                ^                          ^
-                                |                          |
-                                |                          |
-+-----------------------+     +----------------------------------------------------------------+     +-------------------------+
-|       rerender        | --> |                                                                | --> |  getNodesWithNoParent   |
-+-----------------------+     |                                                                |     +-------------------------+
-+-----------------------+     |                                                                |     +-------------------------+
-| getOutgoingEdgeCounts | <-- |                         createNetwork                          | --> |   createForceNetwork    |
-+-----------------------+     |                                                                |     +-------------------------+
-+-----------------------+     |                                                                |     +-------------------------+
-|      getParents       | <-- |                                                                | --> | createNodeHashFromEdges |
-+-----------------------+     +----------------------------------------------------------------+     +-------------------------+
-                                |                          |             |
-                                |                          |             |
-                                v                          v             v
-                              +-------------------------++------------++-----------------------+
-                              | createNodeHashFromNodes ||  getEdges  || getIncomingEdgeCounts |
-                              +-------------------------++------------++-----------------------+
-*/
-
+// deprecated
+var CONTENT_URL = "http://netgear.rohidekar.com:44418";
 // Need to change this in the CSS too
 var height = 800;
 var force;
@@ -87,8 +65,8 @@ function rerender() {
 	
 	heapFile = $.url().param('heapFile');
 	if (heapFile == null) {
-		heapFile = "cream/db/ketki/heap.txt";
-		history.pushState(null, null, '/?heapFile=' + heapFile);
+		heapFile = "cream/db/buy_these/heap.txt";
+		history.pushState(null, null, 'index_clickable_tree.html?heapFile=' + heapFile);
 		debugger;
 	}
 
@@ -152,65 +130,31 @@ function createNetwork(iEdges, iNodes) {
 		
 		if (incomingEdgeCounts[edge.target.id] > 1) {
 			console.debug("[error] more than one incoming edge: " + edge.target.id);
+			//debugger;
 		}
 	});
 
 	createForceNetwork(oNodes, oEdges);
 	
 	var nodesWithNoParentsUnshuffled = getNodesWithNoParent(oEdges, oNodes);
+	//console.debug(nodesWithNoParentsUnshuffled);
 	var nodesWithNoParents = shuffle(nodesWithNoParentsUnshuffled);
+	//console.debug(nodesWithNoParents);
 	var heads1 = {};
 	for (var i = 0; i < nodesWithNoParents.length - 1; i += 2) {
 		var u = nodesWithNoParents[i].id;
 		var v = nodesWithNoParents[i+1].id;
 		heads1[u] = v;
+		if (v.match(/61cjzSWt9jL/)) {
+			debugger;
+		}
 	}
 	var nodesWithNoParentsList = Object.values(nodesWithNoParents).map(function(key, value) {
 		return key.id;
 	});
+	singleclickhelper(nodesWithNoParents[0].id);
 	var heads = heads1;
 	var acc = [];
-	
-	
-	debugger;
-	
-	
-	var pairsHtml = Object.keys(heads).map(function(key, index) {
-		var srcLeft;
-		if (key.startsWith('http')) {
-			srcLeft  = key;
-		} else {
-			srcLeft = "http://netgear.rohidekar.com:4418/" + btoa(unescape(encodeURIComponent(key)));//escapeQuotes(key);
-		}
-		var srcRight;
-		if (heads[key].startsWith('http')) {
-			srcRight = heads[key];
-		} else {
-			srcRight = "http://netgear.rohidekar.com:4418/" + btoa(unescape(encodeURIComponent(heads[key])));
-		}
-
-		// NOTE: nodes.txt rows must be surrounded by quotes otherwise commas will get interpreted as the end of the field.
-		var html = "<span><img src='"+ srcLeft +"' height=150 class='pairHead'>" 
-			+ "<img src='"+ srcRight +"' height=150><br><button onclick='makeRelationship(\""+btoa(unescape(encodeURIComponent(key)))+"\",\""+btoa(unescape(encodeURIComponent(heads[key])))+"\");removePair(this)'>left higher</button><button onclick='makeRelationship(\""+btoa(unescape(encodeURIComponent(heads[key])))+"\",\""+btoa(unescape(encodeURIComponent(key)))+"\"); removePair(this)'>right higher</button><br>";
-
-		if (!isImage(key)) {
-			html += "<table><tr>"
-			+ "<td>" + key + "</td>"
-+ "<td><button text='Hello'>-------</button></td>"			+ "<td>" + heads[key] + "</td>"
-			+ "</tr></table>"
-			;
-		}
-		html += "</span>";
-		return html;
-
-	}).reduce(function (acc, pair) { return acc + "<br>" + pair;}, []);
-	$("#pairs").html(pairsHtml);
-	var headsList = nodesWithNoParentsList.map(function(key, index) {
-			return key.replace('/media/sarnobat','')
-				.replace('/e/Sridhar','');
-		})
-		.reduce(function (acc, pair) { return pair + "\n" + acc;}, []);
-	$("#heads").html(headsList);
 
 }
 
@@ -270,6 +214,9 @@ function shuffle(a) {
     return a;
 }
 
+function removeElement(buttonElement) {
+	buttonElement.parentElement.parentElement.removeChild(buttonElement.parentElement);
+}
 
 function removePair(buttonElement) {
 	buttonElement.parentElement.parentElement.removeChild(buttonElement.parentElement);
@@ -311,6 +258,33 @@ function createNodeHashFromEdges(iEdges) {
 	return oNodeHash;
 }
 
+function getNodesFromEdges(iEdges, nodeHash) {
+	var oNodes = [];
+
+	iEdges.forEach(function(edge) {
+		oNodes.push(edge.source.id);
+		oNodes.push(edge.target.id);
+	});
+	var oNodes2 = oNodes1.removeDuplicates();
+
+	oNodes2.forEach(function(edge) {
+	
+		if (nodeHash.hasOwnProperty(edge.source)) {
+		} else {
+			nodeHash[edge.source] = edge.source;
+		}
+	});
+	oNodes2.forEach(function(edge) {
+	
+		if (nodeHash.hasOwnProperty(edge.target)) {
+		} else {
+			nodeHash[edge.target] = edge.target;
+		}
+	});
+	var oNodes = [];
+	return oNodes;
+}
+
 function getNodesWithNoParent(iEdges, iNodes) {
 	var parents = 	Object.keys(iEdges).map(function(k){return iEdges[k].source});
 	var children = 	Object.keys(iEdges).map(function(k){return iEdges[k].target});
@@ -339,6 +313,15 @@ function buildNodes(iNodes) {
 		});
 	});
 	return oNodes1;
+}
+
+function buildNodesMap(iNodes) {
+	var allNodesById = {};
+
+	iNodes.forEach(function (obj) {
+		allNodesById[obj.id] = obj;
+	});
+	return allNodesById;
 }
 
 function getEdges(iEdges, nodeHash) {
@@ -452,6 +435,8 @@ function createForceNetwork(nodes, edges) {
 			}).enter().append("g").attr("class", "node")
 			.on("mouseover", mouseover)
 			.on("mouseout", mouseout)
+			.on("dblclick", doubleclick)
+			.on("click", singleclick)
 			.call(force
 				.drag().on("drag", drag)
 				.on("dragend", dragend)
@@ -552,7 +537,7 @@ function createForceNetwork(nodes, edges) {
 		var url = d.id;		
 		if (d.id.startsWith('http')) {
 		} else {
-			url = "http://netgear.rohidekar.com:4418/" + btoa(unescape(encodeURIComponent(d.id))) ;
+			url = "http://netgear.rohidekar.com:44418/" + btoa(unescape(encodeURIComponent(d.id))) ;
 		}
 		document.getElementById('preview').innerHTML = "<img height=300 src='" +  url 
 + "'>";
@@ -560,6 +545,44 @@ function createForceNetwork(nodes, edges) {
 	}	
 
 	function mouseout(d) {
+	}
+	
+
+
+	function doubleclick(d) {
+	
+		var toBeRemoved = [];
+		for (var key in parents) {
+			var idToRemove;
+			if (parents[key] === d.id) {
+				toBeRemoved.push("\""+d.id + "\",\""+ key+ "\"");
+			} else if (key === d.id) {
+				toBeRemoved.push("\"" + parents[key]  + "\",\""+  d.id+ "\"");
+			} else {
+			}
+		}
+	
+		for (var toBeRemovedIter in toBeRemoved) {
+		
+			var url = "http://netgear.rohidekar.com:44476?value=" + encodeURIComponent(toBeRemoved[toBeRemovedIter]);
+
+			var jqxhr = $.ajax(url)
+					.done(function() {
+					
+						d3.select("svg.main")
+							.selectAll("g.edge")
+							.filter(function(edge){
+								return edge.id.startsWith(d.id + "-") || edge.id.endsWith("-" + d.id) ;
+							})
+							.remove();					
+
+					})
+					.fail(function() {
+						alert( "error 4476" );
+					})
+					.always(function() {
+					});
+		}
 	}
 
 	function dragstart() {
@@ -741,6 +764,10 @@ function createForceNetwork(nodes, edges) {
 	}
 }
 
+function recharge() {
+	force.start();
+}
+
 function promote(toDemote, all) {
 
 	var url = "http://netgear.rohidekar.com:44479?value=" + toDemote ;
@@ -805,6 +832,163 @@ function makeRelationship(parent, child) {
 		});	
 }
 
+function singleclickhelper2 (imageElement) {
+	singleclickhelper(imageElement.src);
+}
+function singleclick(d) {
+	singleclickhelper(d.id);
+}
+
+function singleclickhelperParent(imageElement) {
+
+	var did = imageElement.src;
+	var lookup;
+	if (did.startsWith(CONTENT_URL)) {
+		lookup = did.replace(CONTENT_URL + '/','');
+	} else {
+		lookup = did;
+	}
+	
+	var lookup2 ;
+	if (lookup.startsWith('http')) {
+		lookup2 = lookup;
+	} else {
+		lookup2 = atob(lookup);
+	}
+	
+	var parent = parents[lookup2];
+	var parent1 = lookup2;
+	var parent2 = parents[parent1];
+
+	
+	if (parent != null)  {
+		singleclickhelper(parent);
+	} else if (parent2 != null)  {
+		singleclickhelper(parent2);
+	} else {
+		$("#upResponse").text("This is the top level element");
+	}
+}
+
+function singleclickhelper(did) {
+
+//	did = decodeURIComponent(did);
+
+	if (did.startsWith(CONTENT_URL)) {
+		console.debug('Developer warning: we should strip the http prefix from the asset if it is a local resource');
+		did = atob(did.replace(CONTENT_URL + '/',''));
+		//debugger;
+	}
+	
+	console.debug('singleclickhelper(): ' + did);
+	// For this simple httpgrep to work, we need to click on the common parent
+	var url = "http://netgear.rohidekar.com:44477?value=" + encodeURIComponent(did.replace(CONTENT_URL,'')) + "&key=" + heapFile;
+
+	if (url.endsWith('IMG_0371.JPG')) {
+		debugger;
+	}
+	var jqxhr = $.ajax(url)
+			.done(function(response) {
+				$("#sort").text("");
+				$("#up").text("");
+				$("#upResponse").text("");
+				var url;
+				var contentUrl = CONTENT_URL;
+				if (did.startsWith('http')) {
+					url = did;
+				} else {
+					url = contentUrl  +"/"+ btoa(unescape(encodeURIComponent(did)));
+				}
+				if (url.match(/252B/)) {
+					debugger;
+				}
+				$("#up").append("<img src='" + url + "' height=100 onclick='singleclickhelperParent(this)'>");
+				
+				var data = d3.csv.parse("parent,child\n" + response);  //now you have the header
+	
+				if (url.endsWith('IMG_0371.JPG')) {
+					debugger;
+				}
+				var allNodes = {};
+				for (var i = 0; i < data.length; i++) {
+					var entries = data[i];
+					allNodes[entries.child] = entries.child;
+				}
+				
+				var otherChildren = {};
+				for (var i in allNodes) {
+					var entries = allNodes[i];
+					if (entries === did.replace(contentUrl + '/','')) {
+						// don't add the node to the list of candidate new parents
+					} else {
+						otherChildren[entries] = entries;
+					}
+				}
+
+				var allChildren = {};
+				for (var i = 0; i < Object.keys(allNodes).length; i++) {
+					var entries = Object.keys(allNodes)[i];
+					if (entries === did) {
+						// Don't add the common parent
+					} else {
+						allChildren[entries] = entries;
+					}
+				}
+				if (Object.keys(allChildren).length == 0) {
+					console.debug("[error] no children for " + allNodes);
+					//debugger;
+				}
+				var links = [];
+				//
+				// 
+				//
+				for (var i in allChildren) {
+					var entry = allChildren[i];
+					var url;
+					if (entry.startsWith('http')) {
+						url = entry;
+					} else {
+						url = contentUrl +"/" + btoa(unescape(encodeURIComponent(entry)));
+					}
+					$("#sort").append("<td><img src='" + url  + "' width=200 onclick='singleclickhelper2(this)'><br>"
+						+ "<button onclick='promote(\""+encodeURIComponent(entry)+"\",\""+encodeURIComponent(JSON.stringify(otherChildren))+"\"); removeElement(this)'>Move Up</button>"
+						+ "<button onclick='demote(\""+encodeURIComponent(entry)+"\",\""+encodeURIComponent(JSON.stringify(otherChildren))+"\"); removeElement(this)'>Move down</button></td>");
+				}
+				
+				//
+				//
+				//
+				var pairs = shuffle(Object.keys(allChildren));
+				$("#pairs_at_level").text("");
+				for (var i = 0; i < pairs.length - 1; i += 2) {
+					var entry = pairs[i];
+					var entry2 = pairs[i+1];
+					var url;
+					if (entry.startsWith('http')) {
+						url = entry;
+					} else {
+						url = contentUrl +"/" + btoa(unescape(encodeURIComponent(entry)));
+					}
+					var url2;
+					if (entry.startsWith('http')) {
+						url2 = entry2;
+					} else {
+						url2 = contentUrl +"/" + btoa(unescape(encodeURIComponent(entry2)));
+					}
+
+
+					$("#pairs_at_level").append("<tr><td><img src='" + url  + "' width=200 ><img src='" + url2  + "' width=200 ><br>"
+						+ "<button onclick='reparent(\""+btoa(unescape(encodeURIComponent(entry2)))+"\",\""+btoa(unescape(encodeURIComponent(entry)))+"\"); removeElement(this)'>Left higher</button>"
+						+ "<button onclick='reparent(\""+btoa(unescape(encodeURIComponent(entry)))+"\",\""+btoa(unescape(encodeURIComponent(entry2)))+"\"); removeElement(this)'>Right higher</button></td></tr>");
+				}
+
+			})
+			.fail(function() {
+				//alert( "error 44477" );
+			})
+			.always(function() {
+			});
+}
 
 
 var ports = [
@@ -834,7 +1018,9 @@ ports.forEach(function(obj) {
 
 
 </script>
-
+TODO:<br>
+* cycle detector script<br>
+* move clickable tree to separate page<br>
 <div id="viz">
 
 	<table>
@@ -856,6 +1042,8 @@ ports.forEach(function(obj) {
 	</table>
 
 	<br>
+	<button onclick="recharge()" >Recharge</button> 
+	<button onclick="rerender()" >Rerender</button>
 	<br>
 	<br>
 	<span id="higher"></span>
@@ -864,26 +1052,26 @@ ports.forEach(function(obj) {
 <br>
 <span id="highertext"></span>
 <span id="lowertext"></span>
-
-<hr>
-<h2>Pair comparison (heads)</h2>
-<div id="pairs"></div>
-
-<textarea id="heads" rows=20 cols=120></textarea>
 <hr>
 <h2>HTML Tree (clickable)</h2>
-Moved to <a href=index_clickable_tree.html>index_clickable_tree.html</a>
+<table>
+<tr><td id="up"></td></tr>
+<tr><td id="upResponse"></td></tr>
+
+<tr id="sort"></tr>
+</table>
 <hr>
 
 <h2>Pair comparison (at clicked level)</h2>
-Moved to <a href=index_monolith.html">index_monolith.html</a>
-
-<h2>Cycle detector</h2>
-Moved to <a href=index_cycle_detector.html>index_cycle_detector.html</a>
+<div id="pairs_at_level"></div>
 <hr>
+<h2>Pair comparison (heads)</h2>
+Moved to <a href=index.html>index.html</a>
+
+
 
 <h3>TODO</h3>
-* if nodes.txt contains commas or double quotes the labels and buttons don't work properly (I think because of the CSV parser in javascript)<br>
+* if nodes.txt contains commas or double quotes the labels and buttons don't work properly (I think because of the CSV parser in javascript)
 * subtraction to find head nodes is better done in javascript rather than in bash, because rerunning the server side script (diff/comm) each time a change is made will be cumbersome<br>
 <h3>Hints</h3>
 Drag the lesser one to the better one<br>
