@@ -984,7 +984,7 @@ function singleclickhelper(did) {
 
 			})
 			.fail(function() {
-				//alert( "error 44477" );
+				alert( "error 44477" );
 			})
 			.always(function() {
 			});
@@ -1002,7 +1002,7 @@ var ports = [
 ];
 ports.forEach(function(obj) {
 	var port = obj.port;
-	$.ajax({
+/*	$.ajax({
 		url: 'http://netgear.rohidekar.com:' + port,
 		timeout:1000,
 	}).done(function(){
@@ -1013,7 +1013,7 @@ ports.forEach(function(obj) {
 		} else {
 			$("#statuses").append("<img src='http://netgear.rohidekar.com/static/icons/ball_011.png' height=10>"+port+ " ("+  obj.name+") "+textStatus+" <br>");
 		}
-	});	
+	});	*/
 });
 
 
