@@ -1,1 +1,0 @@
-diff_left_only.sh

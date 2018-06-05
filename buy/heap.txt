@@ -1,1 +1,0 @@
-../db/buy_these/heap.txt
