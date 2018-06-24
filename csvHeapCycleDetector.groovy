@@ -28,6 +28,7 @@ public class CsvHeapCycleRemover {
 			String line;
 			while ((line = br.readLine()) != null) {
 				//System.err.println("main(): line = " + line);
+				try {
 				CSVParser p = new CSVParser(new StringReader(line));
 				String[] line2 = p.getLine();
 				String parent = line2[0];
@@ -40,6 +41,10 @@ public class CsvHeapCycleRemover {
 					System.out.println(line);
 				}
 				nonRootNodesSet.add(child);
+				} catch (Exception e) {
+					System.err.println("[ERROR] Invaline line: " + line);
+					continue;
+				}
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
